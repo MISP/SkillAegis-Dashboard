@@ -79,7 +79,7 @@ def get_request_post_body(data: dict) -> dict:
     request_content = data['request']
     content_type, post_body = request_content.split('\n\n')
     if content_type == 'application/json':
-        post_body_parsed = json.loads(post_body)
+        post_body_parsed = json.loads(post_body) if len(post_body) > 0 else {}
         return post_body_parsed
     elif content_type == 'application/x-www-form-urlencoded':
         post_body_parsed = parse_qs(post_body)
