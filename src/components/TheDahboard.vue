@@ -118,7 +118,10 @@ onMounted(() => {
         <template v-else>
           <tr v-for="(progress, user_id) in progresses" :key="user_id">
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
-              <pre class="text-sm" :title="user_id">{{ progress.email }}</pre>
+              <span :title="user_id">
+                <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>
+                <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
+              </span>
             </td>
             <td
               v-for="(task, task_index) in exercise.tasks"
@@ -211,7 +214,8 @@ onMounted(() => {
               class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-1 pl-2"
               :title="notification.user_id"
             >
-              <pre class="text-sm">{{ notification.user }}</pre>
+              <span class="text-lg font-bold font-mono">{{ notification.user.split('@')[0] }}</span>
+              <span class="text-xs font-mono">@{{ notification.user.split('@')[1] }}</span>
             </td>
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-1">{{ notification.time }}</td>
             <td class="border-b border-slate-100 dark:border-slate-700 text-sky-600 dark:text-sky-400 p-1">
