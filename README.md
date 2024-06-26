@@ -1,6 +1,30 @@
 # misp-exercise-dashboard
 
-This template should help get you started developing with Vue 3 in Vite.
+## Installation
+```bash
+# Setup venv
+python3 -m venv venv
+source venv/bin/activate
+
+# Install deps
+pip3 install -r REQUIREMENTS
+```
+
+## Running the PROD setup
+```bash
+python3 server.py
+# Access the page http://localhost:3000 with your browser
+```
+
+
+## Running the DEV setup
+```bash
+python3 server.py
+```
+```bash
+npm run dev
+# Access the page provided by the output of the above command
+```
 
 ## Recommended IDE Setup
 

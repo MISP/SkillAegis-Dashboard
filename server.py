@@ -10,7 +10,6 @@ from eventlet.green import zmq as gzmq
 
 import exercise as exercise_model
 import notification as notification_model
-import config
 import db
 
 
@@ -24,7 +23,10 @@ zsocket.setsockopt_string(gzmq.SUBSCRIBE, '')
 
 # Initialize Socket.IO server
 sio = socketio.Server(cors_allowed_origins='*', async_mode='eventlet')
-app = socketio.WSGIApp(sio)
+app = socketio.WSGIApp(sio, static_files={
+    '/': {'content_type': 'text/html', 'filename': 'dist/index.html'},
+    '/assets': './dist/assets',
+})
 
 @sio.event
 def connect(sid, environ):
