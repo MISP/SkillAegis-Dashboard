@@ -138,7 +138,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -168,7 +168,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -177,7 +177,7 @@
               }
             },
             {
-              "Event.Attribute": {
+              ".Event.Attribute": {
                 "comparison": "contains",
                 "values": [
                   {
@@ -217,7 +217,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -226,7 +226,7 @@
               }
             },
             {
-              "Event.Object": {
+              ".Event.Object": {
                 "comparison": "contains",
                 "values": [
                   {
@@ -250,7 +250,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -259,7 +259,7 @@
               }
             },
             {
-              "Event.Object[name=\"domain-ip\"].Attribute": {
+              ".Event.Object[name=\"domain-ip\"].Attribute": {
                 "comparison": "contains",
                 "values": [
                   {
@@ -299,7 +299,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -308,7 +308,7 @@
               }
             },
             {
-              "Event.Attribute": {
+              ".Event.Attribute": {
                 "comparison": "contains",
                 "values": [
                   {
@@ -341,7 +341,7 @@
         {
           "parameters": [
             {
-              "Event.info": {
+              ".Event.info": {
                 "comparison": "contains",
                 "values": [
                   "event",
@@ -350,7 +350,7 @@
               }
             },
             {
-              "Event.Attribute": {
+              ".Event.Attribute": {
                 "comparison": "contains",
                 "values": [
                   {
@@ -362,7 +362,7 @@
               }
             },
             {
-              "Event.Attribute[value=\"1.2.3.4\"].Tag": {
+              ".Event.Attribute[value=\"1.2.3.4\"].Tag": {
                 "JQ": "jq '.Event.Attribute[] | select(.value == \"1.2.3.4\") | .Tag'",
                 "comparison": "contains",
                 "values": [

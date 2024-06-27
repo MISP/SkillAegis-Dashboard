@@ -5,8 +5,8 @@ import re
 import operator
 
 
+# .Event.Attribute[] | select(.value == "evil.exe") | .Tag
 def jq_extract(path: str, data: dict):
-    path = '.' + path if not path.startswith('.') else path
     return jq.compile(path).input_value(data).first()
 
 
