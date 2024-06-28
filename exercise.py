@@ -134,9 +134,10 @@ def get_model_action(data: dict):
 def is_accepted_query(data: dict) -> bool:
     model, action = get_model_action(data)
     if model in ['Event', 'Attribute', 'Object', 'Tag',]:
-        if action in ['add', 'edit', 'delete',]:
-            if data['Log']['change'].startswith('attribute_count'):
-                return False
+        if action in ['add', 'edit', 'delete', 'publish']:
+            # # improved condition below. It blocks some queries
+            # if data['Log']['change'].startswith('attribute_count'):
+            #     return False
             if data['Log']['change'].startswith('Validation errors:'):
                 return False
             return True
@@ -218,7 +219,7 @@ def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
 
 
 def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
-    if 'evaluation_context' not in inject_evaluation:
+    if 'evaluation_context' not in inject_evaluation or len(inject_evaluation['evaluation_context']) == 0:
         return True
     if 'request_is_rest' in inject_evaluation['evaluation_context']:
         if 'request_is_rest' in context:
@@ -266,14 +267,21 @@ def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict) -> U
 
 def parse_event_id_from_log(data: dict) -> Union[int, None]:
     event_id_from_change_field_regex = r".*event_id \(.*\) => \((\d+)\).*"
+    event_id_from_title_field_regex = r".*from Event \((\d+)\).*"
     if 'Log' in data:
         log = data['Log']
+        if 'model' in log and 'model_id' in log and log['model'] == 'Event':
+            return int(log['model_id'])
         if 'change' in log:
             event_id_search = re.search(event_id_from_change_field_regex, log['change'], re.IGNORECASE)
-            if event_id_search is None:
-                return None
-            event_id = event_id_search.group(1)
-            return event_id
+            if event_id_search is not None:
+                event_id = event_id_search.group(1)
+                return event_id
+        if 'title' in log:
+            event_id_search = re.search(event_id_from_title_field_regex, log['title'], re.IGNORECASE)
+            if event_id_search is not None:
+                event_id = event_id_search.group(1)
+                return event_id
     return None
 
 

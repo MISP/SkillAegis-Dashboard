@@ -101,7 +101,7 @@ def get_notification_message(data: dict) -> dict:
     response_code = data.get('response_code', '?')
     user_agent = data.get('user_agent', '?')
     _, action = get_scope_action_from_url(url)
-    http_method = 'DELETE' if http_method == 'POST' and action == 'delete' else http_method  # small override for UI
+    http_method = 'DELETE' if (http_method == 'POST' or http_method == 'PUT') and action == 'delete' else http_method  # small override for UI
     payload = get_request_post_body(data)
     return {
         'user': user,
@@ -115,13 +115,18 @@ def get_notification_message(data: dict) -> dict:
     }
 
 
-def get_scope_action_from_url(url) -> str:
+def get_scope_action_from_url(url) -> Union[str, None]:
     split = url.split('/')
-    return (split[1], split[2],)
+    if len(split) > 2:
+        return (split[1], split[2],)
+    else:
+        return (None, None,)
 
 
 def is_accepted_notification(notification) -> bool:
-    if notification['user_agent'] == 'misp-exercise-dashboard':
+    if notification['user_agent'] == 'misp-exercise-dashboard': # Ignore message generated from this app
+        return False
+    if '@' not in notification['user']: # Ignore message from system
         return False
 
     scope, action = get_scope_action_from_url(notification['url'])

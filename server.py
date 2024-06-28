@@ -65,7 +65,7 @@ def handleMessage(topic, s, message):
 
     if topic == 'misp_json_audit':
         user_id, email = notification_model.get_user_email_id_pair(data)
-        if user_id is not None:
+        if user_id is not None and '@' in email:
             if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
                 db.USER_ID_TO_EMAIL_MAPPING[user_id] = email
                 sio.emit('new_user', email)
@@ -107,8 +107,10 @@ def forward_zmq_to_socketio():
     while True:
         message = zsocket.recv_string()
         topic, s, m = message.partition(" ")
+        handleMessage(topic, s, m)
         try:
-            handleMessage(topic, s, m)
+            pass
+            # handleMessage(topic, s, m)
         except Exception as e:
             print(e)
 

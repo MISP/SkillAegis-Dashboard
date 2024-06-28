@@ -20,7 +20,7 @@ def get(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     response = requests.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
-    return response.json() if response.headers['content-type'] == 'application/json' else response.text
+    return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 
 
 def post(url, data={}, api_key=misp_apikey):
@@ -32,7 +32,7 @@ def post(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     response = requests.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
-    return response.json() if response.headers['content-type'] == 'application/json' else response.text
+    return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 
 
 def getEvent(event_id: int) -> Union[None, dict]:
