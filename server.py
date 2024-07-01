@@ -152,4 +152,4 @@ if __name__ == "__main__":
     eventlet.spawn_n(forward_zmq_to_socketio)
 
     # Run the Socket.IO server
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 4000)), app)
