@@ -91,6 +91,13 @@ export function changeExerciseSelection(exec_uuid, state_enabled) {
   })
 }
 
+export function toggleVerboseMode(enabled) {
+  const payload = {
+    verbose: enabled
+  }
+  socket.emit("toggle_verbose_mode", payload, () => {})
+}
+
 
 const socket = io(URL, {
   autoConnect: true

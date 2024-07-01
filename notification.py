@@ -8,6 +8,14 @@ import config
 from urllib.parse import parse_qs
 
 
+VERBOSE_MODE = False
+
+
+def set_verbose_mode(enabled: bool):
+    global VERBOSE_MODE
+    VERBOSE_MODE = enabled
+
+
 def get_notifications() -> list[dict]:
     return list(db.NOTIFICATION_MESSAGES)
 
@@ -125,8 +133,12 @@ def get_scope_action_from_url(url) -> Union[str, None]:
 
 
 def is_accepted_notification(notification) -> bool:
+    global VERBOSE_MODE
+
     if notification['user_agent'] == 'misp-exercise-dashboard': # Ignore message generated from this app
         return False
+    if VERBOSE_MODE:
+        return True
     if '@' not in notification['user']: # Ignore message from system
         return False
 

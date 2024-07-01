@@ -73,6 +73,10 @@ def reset_all_exercise_progress(sid):
 def get_diagnostic(sid):
     return getDiagnostic()
 
+@sio.event
+def toggle_verbose_mode(sid, payload):
+    return notification_model.set_verbose_mode(payload['verbose'])
+
 @sio.on('*')
 def any_event(event, sid, data={}):
     print('>> Unhandled event', event)

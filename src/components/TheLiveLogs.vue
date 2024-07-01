@@ -1,8 +1,15 @@
 <script setup>
-  import { notifications, userCount, notificationCounter, notificationAPICounter } from "@/socket";
+  import { ref, watch } from "vue"
+  import { notifications, userCount, notificationCounter, notificationAPICounter, toggleVerboseMode } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
 
+
+  const verbose = ref(false)
+
+  watch(verbose, (newValue) => {
+    toggleVerboseMode(newValue == true)
+  })
 
   function getClassFromResponseCode(response_code) {
     if (String(response_code).startsWith('2')) {
@@ -43,6 +50,12 @@
         Total API Queries:
       </span>
       <span class="font-bold">{{ notificationAPICounter }}</span>
+    </span>
+    <span class="flex items-center">
+      <label class="mr-1 flex items-center cursor-pointer">
+        <input type="checkbox" class="toggle toggle-success [--fallback-su:#22c55e] mr-1" :checked="verbose" @change="verbose = !verbose"/>
+        Verbose
+      </label>
     </span>
   </div>
 
