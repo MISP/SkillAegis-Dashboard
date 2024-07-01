@@ -1,8 +1,8 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, changeExerciseSelection, fetchDiagnostic } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLoggs, changeExerciseSelection, fetchDiagnostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
+  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan } from '@fortawesome/free-solid-svg-icons'
 
   const admin_modal = ref(null)
 
@@ -33,7 +33,7 @@
   <dialog ref="admin_modal" class="modal">
     <div class="modal-box w-11/12 max-w-6xl top-24 absolute bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200">
         <h2 class="text-2xl font-bold">
-          <FontAwesomeIcon :icon="faScrewdriverWrench" class="mr-1"></FontAwesomeIcon>
+          <FontAwesomeIcon :icon="faScrewdriverWrench" class=""></FontAwesomeIcon>
           Admin panel
         </h2>
         <div class="modal-action">
@@ -43,12 +43,19 @@
         </div>
         <div>
 
-          <div class="flex mb-5">
+          <div class="flex mb-5 gap-1">
             <button
               @click="resetAllExerciseProgress()"
               class="h-10 min-h-10 px-2 py-1 font-semibold bg-red-600 text-slate-200 hover:bg-red-700 btn btn-sm"
             >
               <FontAwesomeIcon :icon="faTrash" class="mr-1"></FontAwesomeIcon>
+              Reset All Exercises
+            </button>
+            <button
+              @click="resetLiveLoggs()"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-amber-600 text-slate-200 hover:bg-amber-700 btn btn-sm"
+            >
+              <FontAwesomeIcon :icon="faBan" class=""></FontAwesomeIcon>
               Reset All Exercises
             </button>
           </div>

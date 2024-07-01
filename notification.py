@@ -20,6 +20,10 @@ def get_notifications() -> list[dict]:
     return list(db.NOTIFICATION_MESSAGES)
 
 
+def reset_notifications():
+    db.NOTIFICATION_MESSAGES = []
+
+
 def record_notification(notification: dict):
     db.NOTIFICATION_MESSAGES.appendleft(notification)
 

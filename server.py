@@ -74,6 +74,10 @@ def reset_all_exercise_progress(sid):
     return exercise_model.resetAllExerciseProgress()
 
 @sio.event
+def reset_notifications(sid):
+    return notification_model.reset_notifications()
+
+@sio.event
 def get_diagnostic(sid):
     return getDiagnostic()
 

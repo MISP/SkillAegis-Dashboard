@@ -79,6 +79,14 @@ export function resetAllExerciseProgress() {
   })
 }
 
+export function resetLiveLoggs() {
+  socket.emit("reset_notifications", () => {
+    socket.emit("get_notifications", (all_notifications) => {
+      state.notificationEvents = all_notifications
+    })
+  })
+}
+
 export function changeExerciseSelection(exec_uuid, state_enabled) {
   const payload = {
     exercise_uuid: exec_uuid,
