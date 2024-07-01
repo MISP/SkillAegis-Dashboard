@@ -21,7 +21,7 @@ def get_notifications() -> list[dict]:
 
 
 def reset_notifications():
-    db.NOTIFICATION_MESSAGES = []
+    db.resetNotificationMessage()
 
 
 def record_notification(notification: dict):
