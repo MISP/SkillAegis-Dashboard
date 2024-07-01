@@ -1,12 +1,22 @@
 <script setup>
-  import { computed } from "vue";
+  import { ref, computed } from "vue";
   import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 
+  const collapsed_panels = ref([])
 
   function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
     setCompletedState(completed, user_id, exec_uuid, task_uuid)
+  }
+
+  function collapse(exercise_index) {
+    const index = collapsed_panels.value.indexOf(exercise_index)
+    if (index >= 0) {
+      collapsed_panels.value.splice(index, 1)
+    } else {
+      collapsed_panels.value.push(exercise_index)
+    }
   }
 
   const hasExercises = computed(() => exercises.value.length > 0)
@@ -32,7 +42,7 @@
     class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full mb-4"
   >
       <thead>
-        <tr>
+        <tr @click="collapse(exercise_index)" class="cursor-pointer">
           <th :colspan="2 + exercise.tasks.length" class="rounded-t-lg border-b border-slate-100 dark:border-slate-700 text-md p-3 pl-6 text-center dark:bg-blue-800 bg-blue-500 dark:text-slate-300 text-slate-100">
             <div class="flex justify-between items-center">
               <span class="dark:text-blue-200 text-slate-200 "># {{ exercise_index + 1 }}</span>
@@ -48,7 +58,7 @@
             </div>
           </th>
         </tr>
-        <tr class="font-medium text-slate-600 dark:text-slate-200">
+        <tr :class="`font-medium text-slate-600 dark:text-slate-200 ${collapsed_panels.includes(exercise_index) ? 'hidden' : ''}`">
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left">User</th>
           <th
             v-for="(task, task_index) in exercise.tasks"
@@ -63,7 +73,7 @@
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Progress</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody :class="`${collapsed_panels.includes(exercise_index) ? 'hidden' : ''}`">
         <tr v-if="!hasProgress">
           <td
             :colspan="2 + exercise.tasks.length"
