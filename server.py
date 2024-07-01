@@ -11,6 +11,7 @@ from eventlet.green import zmq as gzmq
 import exercise as exercise_model
 import notification as notification_model
 import db
+import config
 import misp_api
 
 
@@ -20,7 +21,7 @@ ZMQ_MESSAGE_COUNT = 0
 # Initialize ZeroMQ context and subscriber socket
 context = gzmq.Context()
 zsocket = context.socket(gzmq.SUB)
-zmq_url = "tcp://localhost:50000"  # Update this with your zmq publisher address
+zmq_url = config.zmq_url
 zsocket.connect(zmq_url)
 zsocket.setsockopt_string(gzmq.SUBSCRIBE, '')
 
@@ -166,4 +167,4 @@ if __name__ == "__main__":
     eventlet.spawn_n(forward_zmq_to_socketio)
 
     # Run the Socket.IO server
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)
+    eventlet.wsgi.server(eventlet.listen((config.server_host, config.server_port)), app)
