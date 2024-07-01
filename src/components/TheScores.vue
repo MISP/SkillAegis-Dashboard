@@ -97,10 +97,10 @@
             </span>
             </td>
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3">
-              <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="progress.exercises[exercise.uuid].percentage" :aria-valuemin="0" aria-valuemax="100">
+              <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="progress.exercises[exercise.uuid].score" :aria-valuemin="0" aria-valuemax="100">
                 <div
                   class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"
-                  :style="`width: ${progress.exercises[exercise.uuid].score}%`"
+                  :style="`width: ${100 * (progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score)}%`"
                 ></div>
               </div>
             </td>

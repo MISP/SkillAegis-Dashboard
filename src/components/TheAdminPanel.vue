@@ -37,7 +37,7 @@
           <div class="flex mb-5">
             <button
               @click="resetAllExerciseProgress()"
-              class="px-2 py-1 rounded-md focus-outline font-semibold bg-red-600 text-slate-200 hover:bg-red-700"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-red-600 text-slate-200 hover:bg-red-700 btn btn-sm"
             >
               <FontAwesomeIcon :icon="faTrash" class="mr-1"></FontAwesomeIcon>
               Reset All Exercises

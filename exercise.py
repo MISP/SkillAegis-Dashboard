@@ -48,17 +48,27 @@ def init_inject_flow():
 
 def init_exercises_tasks():
     for exercise in db.ALL_EXERCISES:
+        max_score = 0
         tasks = {}
         for inject in exercise['injects']:
+            score = 0
+            try:
+                for inject_eval in inject['inject_evaluation']:
+                    score += inject_eval['score_range'][1]
+            except KeyError:
+                pass
+            max_score += score
             tasks[inject['uuid']] = {
                 "name": inject['name'],
                 "uuid": inject['uuid'],
                 "completed_by_user": [],
+                "score": score,
             }
         db.EXERCISES_STATUS[exercise['exercise']['uuid']] = {
             'uuid': exercise['exercise']['uuid'],
             'name': exercise['exercise']['name'],
-            'tasks': tasks
+            'tasks': tasks,
+            'max_score': max_score,
         }
 
 
@@ -67,12 +77,7 @@ def get_exercises():
     for exercise in db.ALL_EXERCISES:
         tasks = []
         for inject in exercise['injects']:
-            score = 0
-            try:
-                for inject_eval in inject['inject_evaluation']:
-                    score += inject_eval['score_range'][1]
-            except KeyError:
-                pass
+            score = db.EXERCISES_STATUS[exercise['exercise']['uuid']]['tasks'][inject['uuid']]['score']
             tasks.append(
                 {
                     "name": inject['name'],
@@ -222,6 +227,7 @@ def get_progress():
             progress[user_id]['exercises'][exec_uuid] = {
                 'tasks_completion': tasks_completion,
                 'score': get_score_for_task_completion(tasks_completion),
+                'max_score': db.EXERCISES_STATUS[exec_uuid]['max_score'],
             }
     return progress
 
