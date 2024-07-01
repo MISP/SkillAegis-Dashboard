@@ -8,6 +8,8 @@
 
   const diagnosticLoading = computed(() => Object.keys(diagnostic.value).length == 0)
   const isMISPOnline = computed(() => diagnostic.value.version?.version !== undefined)
+  const isZMQActive = computed(() => diagnostic.value.zmq_message_count > 0)
+  const ZMQMessageCount = computed(() => diagnostic.value.zmq_message_count)
 
   function changeSelectionState(state_enabled, exec_uuid) {
     changeExerciseSelection(exec_uuid, state_enabled);
@@ -76,7 +78,7 @@
             <FontAwesomeIcon :icon="faSuitcaseMedical" class="mr-1"></FontAwesomeIcon>
             Diagnostic
           </h3>
-          <h4 class="font-semibold ml-1 my-2">
+          <h4 class="font-semibold ml-1 my-3">
             <strong>MISP Status:</strong>
             <span class="ml-2">
               <span :class="{
@@ -88,6 +90,22 @@
                 <span v-if="diagnosticLoading" class="loading loading-dots loading-sm h-4 inline-block align-middle"></span>
                 <span v-else class="font-bold">
                   {{ !isMISPOnline ? 'Unreachable' : `Online (${diagnostic['version']['version']})` }}
+                </span>
+              </span>
+            </span>
+          </h4>
+          <h4 class="font-semibold ml-1 my-3">
+            <strong>ZMQ Status:</strong>
+            <span class="ml-2">
+              <span :class="{
+                'rounded-lg py-1 px-2': true,
+                'dark:bg-neutral-800 bg-neutral-400 text-slate-800 dark:text-slate-200': diagnosticLoading,
+                'dark:bg-green-700 bg-green-500 text-slate-800 dark:text-slate-200': !diagnosticLoading && isZMQActive,
+                'dark:bg-red-700 bg-red-700 text-slate-200 dark:text-slate-200': !diagnosticLoading && !isZMQActive,
+              }">
+                <span v-if="diagnosticLoading" class="loading loading-dots loading-sm h-4 inline-block align-middle"></span>
+                <span v-else class="font-bold">
+                  {{ !isZMQActive ? 'No message received yet' : `ZMQ Active (${ZMQMessageCount} messages)` }}
                 </span>
               </span>
             </span>

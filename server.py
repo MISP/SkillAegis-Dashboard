@@ -14,6 +14,9 @@ import db
 import misp_api
 
 
+ZMQ_MESSAGE_COUNT = 0
+
+
 # Initialize ZeroMQ context and subscriber socket
 context = gzmq.Context()
 zsocket = context.socket(gzmq.SUB)
@@ -124,6 +127,8 @@ def get_context(data: dict) -> dict:
 
 
 def getDiagnostic() -> dict:
+    global ZMQ_MESSAGE_COUNT
+
     diagnostic = {}
     misp_version = misp_api.getVersion()
     if misp_version is None:
@@ -132,15 +137,19 @@ def getDiagnostic() -> dict:
     diagnostic['version'] = misp_version
     misp_settings = misp_api.getSettings()
     diagnostic['settings'] = misp_settings
+    diagnostic['zmq_message_count'] = ZMQ_MESSAGE_COUNT
     return diagnostic
 
 
 # Function to forward zmq messages to Socket.IO
 def forward_zmq_to_socketio():
+    global ZMQ_MESSAGE_COUNT
+
     while True:
         message = zsocket.recv_string()
         topic, s, m = message.partition(" ")
         try:
+            ZMQ_MESSAGE_COUNT += 1
             handleMessage(topic, s, m)
         except Exception as e:
             print(e)
@@ -157,4 +166,4 @@ if __name__ == "__main__":
     eventlet.spawn_n(forward_zmq_to_socketio)
 
     # Run the Socket.IO server
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 4000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)
