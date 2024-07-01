@@ -1,5 +1,4 @@
 <script setup>
-  import { ref, computed, onMounted, watch } from 'vue'
   import { exercises, progresses } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faGraduationCap } from '@fortawesome/free-solid-svg-icons'

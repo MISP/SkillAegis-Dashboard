@@ -1,5 +1,4 @@
 <script setup>
-  import { ref, computed, onMounted, watch } from 'vue'
   import { notifications, userCount, notificationCounter, notificationAPICounter } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
