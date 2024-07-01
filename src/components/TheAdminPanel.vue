@@ -93,29 +93,31 @@
             </span>
           </h4>
 
-          <h4 class="font-semibold ml-1"><strong>MISP Settings:</strong></h4>
-          <div class="ml-3">
-            <div v-if="diagnosticLoading" class="flex justify-center">
-              <span class="loading loading-dots loading-lg"></span>
-            </div>
-            <div
-              v-for="(value, setting) in diagnostic['settings']"
-              :key="setting"
-            >
-              <div>
-                <label class="label cursor-pointer justify-start p-0 pt-1">
-                  <input
-                    type="checkbox"
-                    :checked="value"
-                    :value="setting"
-                    :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'} [--fallback-bc:#cbd5e1]`"
-                    disabled
-                  />
-                  <span class="font-mono font-semibold text-base ml-3">{{ setting }}</span>
-                </label>
+          <template  v-if="diagnosticLoading || isMISPOnline">
+            <h4 class="font-semibold ml-1"><strong>MISP Settings:</strong></h4>
+            <div class="ml-3">
+              <div v-if="diagnosticLoading" class="flex justify-center">
+                <span class="loading loading-dots loading-lg"></span>
+              </div>
+              <div
+                v-for="(value, setting) in diagnostic['settings']"
+                :key="setting"
+              >
+                <div>
+                  <label class="label cursor-pointer justify-start p-0 pt-1">
+                    <input
+                      type="checkbox"
+                      :checked="value"
+                      :value="setting"
+                      :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'} [--fallback-bc:#cbd5e1]`"
+                      disabled
+                    />
+                    <span class="font-mono font-semibold text-base ml-3">{{ setting }}</span>
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
 
         </div>
       </div>
