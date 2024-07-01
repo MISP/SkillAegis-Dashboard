@@ -41,6 +41,14 @@ def get_exercises(sid):
     return exercise_model.get_exercises()
 
 @sio.event
+def get_selected_exercises(sid):
+    return exercise_model.get_selected_exercises()
+
+@sio.event
+def change_exercise_selection(sid, payload):
+    return exercise_model.change_exercise_selection(payload['exercise_uuid'], payload['selected'])
+
+@sio.event
 def get_progress(sid):
     return exercise_model.get_progress()
 
@@ -50,11 +58,15 @@ def get_notifications(sid):
 
 @sio.event
 def mark_task_completed(sid, payload):
-    return exercise_model.mark_task_completed(payload['user_id'], payload['exercise_uuid'], payload['task_uuid'])
+    return exercise_model.mark_task_completed(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
 
 @sio.event
 def mark_task_incomplete(sid, payload):
-    return exercise_model.mark_task_incomplete(payload['user_id'], payload['exercise_uuid'], payload['task_uuid'])
+    return exercise_model.mark_task_incomplete(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
+
+@sio.event
+def reset_all_exercise_progress(sid):
+    return exercise_model.resetAllExerciseProgress()
 
 @sio.on('*')
 def any_event(event, sid, data={}):

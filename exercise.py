@@ -14,11 +14,9 @@ ACTIVE_EXERCISES_DIR = "active_exercises"
 
 
 def load_exercises() -> bool:
-    db.ALL_EXERCICES = read_exercise_dir()
+    db.ALL_EXERCISES = read_exercise_dir()
     init_inject_flow()
     init_exercises_tasks()
-    # mark_task_completed(10, "4703a4b2-0ae4-47f3-9dc3-91250be60156", "e2216993-6192-4e7c-ae30-97cfe9de61b4") # filtering - past 48h
-    # mark_task_completed(10, "29324587-db6c-4a73-a209-cf8c79871629", "a6b5cf88-ba93-4c3f-8265-04e00d53778e") # Data - Event creation
     return True
 
 
@@ -35,12 +33,12 @@ def read_exercise_dir():
 
 
 def init_inject_flow():
-    for exercise in db.ALL_EXERCICES:
+    for exercise in db.ALL_EXERCISES:
         for inject in exercise['injects']:
             inject['exercise_uuid'] = exercise['exercise']['uuid']
             db.INJECT_BY_UUID[inject['uuid']] = inject
 
-    for exercise in db.ALL_EXERCICES:
+    for exercise in db.ALL_EXERCISES:
         for inject_flow in exercise['inject_flow']:
             db.INJECT_REQUIREMENTS_BY_INJECT_UUID[inject_flow['inject_uuid']] = inject_flow['requirements']
             db.INJECT_SEQUENCE_BY_INJECT_UUID[inject_flow['inject_uuid']] = []
@@ -49,7 +47,7 @@ def init_inject_flow():
 
 
 def init_exercises_tasks():
-    for exercise in db.ALL_EXERCICES:
+    for exercise in db.ALL_EXERCISES:
         tasks = {}
         for inject in exercise['injects']:
             tasks[inject['uuid']] = {
@@ -65,8 +63,8 @@ def init_exercises_tasks():
 
 
 def get_exercises():
-    exercices = []
-    for exercise in db.ALL_EXERCICES:
+    exercises = []
+    for exercise in db.ALL_EXERCISES:
         tasks = []
         for inject in exercise['injects']:
             score = 0
@@ -82,7 +80,7 @@ def get_exercises():
                     "score": score,
                 }
             )
-        exercices.append(
+        exercises.append(
             {
                 "name": exercise['exercise']['name'],
                 "uuid": exercise['exercise']['uuid'],
@@ -92,8 +90,28 @@ def get_exercises():
                 "tasks": tasks,
             }
         )
-    exercices = sorted(exercices, key=lambda d: d['priority'])
-    return exercices
+    exercises = sorted(exercises, key=lambda d: d['priority'])
+    return exercises
+
+
+def get_selected_exercises():
+    return db.SELECTED_EXERCISES
+
+
+def change_exercise_selection(exercise_uuid: str, selected: bool):
+    if selected:
+        if exercise_uuid not in db.SELECTED_EXERCISES:
+            db.SELECTED_EXERCISES.append(exercise_uuid)
+    else:
+        if exercise_uuid in db.SELECTED_EXERCISES:
+            db.SELECTED_EXERCISES.remove(exercise_uuid)
+
+
+def resetAllExerciseProgress():
+    for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys():
+        for exercise_status in db.EXERCISES_STATUS.values():
+            for task in exercise_status['tasks'].values():
+                mark_task_incomplete(user_id, exercise_status['uuid'], task['uuid'])
 
 
 def get_completed_tasks_for_user(user_id: int):
@@ -338,6 +356,9 @@ def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
     available_tasks = get_available_tasks_for_user(user_id)
     for task_uuid in available_tasks:
         inject = db.INJECT_BY_UUID[task_uuid]
+        if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
+            print(f'exercise not active for this inject {inject['name']}')
+            continue
         print(f'checking: {inject['name']}')
         completed = check_inject(user_id, inject, data, context)
         if completed:

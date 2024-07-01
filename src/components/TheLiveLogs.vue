@@ -57,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="Object.keys(notifications).length == 0">
+        <tr v-if="notifications.length == 0">
           <td
             colspan="5"
             class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6"
@@ -89,6 +89,10 @@
                   class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center 
                          dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
                 >POST</span>
+                <span v-else-if="notification.http_method == 'PUT'"
+                  class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center 
+                         dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
+                >PUT</span>
                 <span v-else-if="notification.http_method == 'DELETE'"
                   class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center 
                          dark:bg-red-600 dark:text-neutral-100 bg-red-600 text-neutral-100"

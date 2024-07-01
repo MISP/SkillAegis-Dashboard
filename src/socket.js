@@ -10,6 +10,7 @@ const initial_state = {
   notificationCounter: 0,
   notificationAPICounter: 0,
   exercises: [],
+  selected_exercises: [],
   progresses: {},
 }
 
@@ -19,6 +20,8 @@ const connectionState = reactive({
  })
 
 export const exercises = computed(() => state.exercises)
+export const selected_exercises = computed(() => state.selected_exercises)
+export const active_exercises = computed(() => state.exercises.filter((exercise) => state.selected_exercises.includes(exercise.uuid)))
 export const progresses = computed(() => state.progresses)
 export const notifications = computed(() => state.notificationEvents)
 export const notificationCounter = computed(() => state.notificationCounter)
@@ -34,11 +37,48 @@ export function fullReload() {
   socket.emit("get_exercises", (all_exercises) => {
     state.exercises = all_exercises
   })
+  socket.emit("get_selected_exercises", (all_selected_exercises) => {
+    state.selected_exercises = all_selected_exercises
+  })
   socket.emit("get_notifications", (all_notifications) => {
     state.notificationEvents = all_notifications
   })
   socket.emit("get_progress", (all_progress) => {
     state.progresses = all_progress
+  })
+}
+
+export function setCompletedState(completed, user_id, exec_uuid, task_uuid) {
+  const payload = {
+    user_id: user_id,
+    exercise_uuid: exec_uuid,
+    task_uuid: task_uuid,
+  }
+  const event_name = !completed ? "mark_task_completed": "mark_task_incomplete"
+  socket.emit(event_name, payload, () => {
+    socket.emit("get_progress", (all_progress) => {
+      state.progresses = all_progress
+    })
+  })
+}
+
+export function resetAllExerciseProgress() {
+  socket.emit("reset_all_exercise_progress", () => {
+    socket.emit("get_progress", (all_progress) => {
+      state.progresses = all_progress
+    })
+  })
+}
+
+export function changeExerciseSelection(exec_uuid, state_enabled) {
+  const payload = {
+    exercise_uuid: exec_uuid,
+    selected: state_enabled,
+  }
+  socket.emit("change_exercise_selection", payload, () => {
+    socket.emit("get_selected_exercises", (all_selected_exercises) => {
+      state.selected_exercises = all_selected_exercises
+    })
   })
 }
 

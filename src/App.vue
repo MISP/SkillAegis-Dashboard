@@ -1,8 +1,9 @@
 <script setup>
 import { onMounted } from 'vue'
-import TheDahboard from './TheDahboard.vue'
 import TheThemeButton from './components/TheThemeButton.vue'
+import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
+import TheDahboard from './TheDahboard.vue'
 import { socketConnected } from "@/socket";
 
 
@@ -16,8 +17,11 @@ onMounted(() => {
 <template>
   <main>
     <div class="absolute top-1 right-1">
-      <TheThemeButton></TheThemeButton>
-      <TheSocketConnectionState></TheSocketConnectionState>
+      <div class="flex gap-2">
+        <TheThemeButton></TheThemeButton>
+        <TheAdminPanel></TheAdminPanel>
+        <TheSocketConnectionState></TheSocketConnectionState>
+      </div>
     </div>
     <TheDahboard></TheDahboard>
   </main>

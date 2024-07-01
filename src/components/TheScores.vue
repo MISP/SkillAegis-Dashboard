@@ -1,22 +1,16 @@
 <script setup>
-  import { exercises, progresses } from "@/socket";
+  import { computed } from "vue";
+  import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 
 
-  function toggle_completed(completed, user_id, exec_uuid, task_uuid) {
-    const payload = {
-      user_id: user_id,
-      exercise_uuid: exec_uuid,
-      task_uuid: task_uuid,
-    }
-    const event_name = !completed ? "mark_task_completed": "mark_task_incomplete"
-    socket.emit(event_name, payload, () => {
-      socket.emit("get_progress", (all_progress) => {
-        socketState.progresses = all_progress
-      })
-    })
+  function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
+    setCompletedState(completed, user_id, exec_uuid, task_uuid)
   }
+
+  const hasExercises = computed(() => exercises.value.length > 0)
+  const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
 
 </script>
 
@@ -25,6 +19,13 @@
     <FontAwesomeIcon :icon="faGraduationCap"></FontAwesomeIcon>
     Active Exercises
   </h3>
+
+  <div
+    v-if="!hasExercises"
+    class="text-center text-slate-600 dark:text-slate-400 p-3 pl-6"
+  >
+    <i>- No Exercise available -</i>
+  </div>
   <table
     v-for="(exercise, exercise_index) in exercises"
     :key="exercise.name"
@@ -63,7 +64,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="Object.keys(progresses).length == 0">
+        <tr v-if="!hasProgress">
           <td
             :colspan="2 + exercise.tasks.length"
             class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6"
@@ -85,8 +86,8 @@
               class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3"
             >
             <span
-              class="select-none cursor-pointer"
-              @click="toggle_completed(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
+              class="select-none cursor-pointer text-nowrap"
+              @click="toggleCompleted(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
             >
               <FontAwesomeIcon
                 :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? faCheck : faTimes"
