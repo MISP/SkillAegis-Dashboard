@@ -43,14 +43,14 @@ def is_validate_exercises(exercises: list) -> bool:
     for exercise in exercises:
         e_uuid = exercise['exercise']['uuid']
         if e_uuid in exercises_uuid:
-            print(f'Duplicated UUID {e_uuid}. ({exercise['exercise']['name']}, {exercise_by_uuid[e_uuid]['exercise']['name']})')
+            print(f"Duplicated UUID {e_uuid}. ({exercise['exercise']['name']}, {exercise_by_uuid[e_uuid]['exercise']['name']})")
             return False
         exercises_uuid.add(e_uuid)
         exercise_by_uuid[e_uuid] = exercise
         for inject in exercise['injects']:
             t_uuid = inject['uuid']
             if t_uuid in tasks_uuid:
-                print(f'Duplicated UUID {t_uuid}. ({inject['name']}, {task_by_uuid[t_uuid]['name']})')
+                print(f"Duplicated UUID {t_uuid}. ({inject['name']}, {task_by_uuid[t_uuid]['name']})")
                 return False
             tasks_uuid.add(t_uuid)
             task_by_uuid[t_uuid] = inject
@@ -263,7 +263,7 @@ def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
         if not success:
             return False
     mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
-    print(f'Task success: {inject['uuid']}')
+    print(f"Task success: {inject['uuid']}")
     return True
 
 
@@ -388,9 +388,9 @@ def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
     for task_uuid in available_tasks:
         inject = db.INJECT_BY_UUID[task_uuid]
         if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
-            print(f'exercise not active for this inject {inject['name']}')
+            print(f"exercise not active for this inject {inject['name']}")
             continue
-        print(f'checking: {inject['name']}')
+        print(f"checking: {inject['name']}")
         completed = check_inject(user_id, inject, data, context)
         if completed:
             succeeded_once = True
