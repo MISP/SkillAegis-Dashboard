@@ -124,10 +124,15 @@ def get_context(data: dict) -> dict:
 
 
 def getDiagnostic() -> dict:
+    diagnostic = {}
+    misp_version = misp_api.getVersion()
+    if misp_version is None:
+        diagnostic['online'] = False
+        return diagnostic
+    diagnostic['version'] = misp_version
     misp_settings = misp_api.getSettings()
-    return {
-        'settings': misp_settings,
-    }
+    diagnostic['settings'] = misp_settings
+    return diagnostic
 
 
 # Function to forward zmq messages to Socket.IO
@@ -152,4 +157,4 @@ if __name__ == "__main__":
     eventlet.spawn_n(forward_zmq_to_socketio)
 
     # Run the Socket.IO server
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 4000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)

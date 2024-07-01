@@ -46,6 +46,10 @@ def doRestQuery(authkey: str, request_method: str, url: str, payload: dict = {})
         return get(url, payload, api_key=authkey)
 
 
+def getVersion() -> Union[None, dict]:
+    return get(f'/servers/getVersion.json')
+
+
 def getSettings() -> Union[None, dict]:
     SETTING_TO_QUERY = [
         'Plugin.ZeroMQ_enable',

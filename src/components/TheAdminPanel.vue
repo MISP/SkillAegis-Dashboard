@@ -1,10 +1,13 @@
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, changeExerciseSelection, fetchDiagnostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 
   const admin_modal = ref(null)
+
+  const diagnosticLoading = computed(() => Object.keys(diagnostic.value).length == 0)
+  const isMISPOnline = computed(() => diagnostic.value.version?.version !== undefined)
 
   function changeSelectionState(state_enabled, exec_uuid) {
     changeExerciseSelection(exec_uuid, state_enabled);
@@ -63,7 +66,7 @@
                 type="checkbox"
                 :checked="selected_exercises.includes(exercise.uuid)"
                 :value="exercise.uuid"
-                :class="`checkbox ${selected_exercises.includes(exercise.uuid) ? 'checkbox-success' : ''}`"
+                :class="`checkbox ${selected_exercises.includes(exercise.uuid) ? 'checkbox-success' : ''} [--fallback-bc:#94a3b8]`"
               />
               <span class="font-mono font-semibold text-base ml-3">{{ exercise.name }}</span>
             </label>
@@ -73,8 +76,26 @@
             <FontAwesomeIcon :icon="faSuitcaseMedical" class="mr-1"></FontAwesomeIcon>
             Diagnostic
           </h3>
+          <h4 class="font-semibold ml-1 my-2">
+            <strong>MISP Status:</strong>
+            <span class="ml-2">
+              <span :class="{
+                'rounded-lg py-1 px-2': true,
+                'dark:bg-neutral-800 bg-neutral-400 text-slate-800 dark:text-slate-200': diagnosticLoading,
+                'dark:bg-green-700 bg-green-500 text-slate-800 dark:text-slate-200': !diagnosticLoading && isMISPOnline,
+                'dark:bg-red-700 bg-red-700 text-slate-200 dark:text-slate-200': !diagnosticLoading && !isMISPOnline,
+              }">
+                <span v-if="diagnosticLoading" class="loading loading-dots loading-sm h-4 inline-block align-middle"></span>
+                <span v-else class="font-bold">
+                  {{ !isMISPOnline ? 'Unreachable' : `Online (${diagnostic['version']['version']})` }}
+                </span>
+              </span>
+            </span>
+          </h4>
+
+          <h4 class="font-semibold ml-1"><strong>MISP Settings:</strong></h4>
           <div class="ml-3">
-            <div v-if="Object.keys(diagnostic).length == 0" class="flex justify-center">
+            <div v-if="diagnosticLoading" class="flex justify-center">
               <span class="loading loading-dots loading-lg"></span>
             </div>
             <div
@@ -87,7 +108,7 @@
                     type="checkbox"
                     :checked="value"
                     :value="setting"
-                    :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'}`"
+                    :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'} [--fallback-bc:#cbd5e1]`"
                     disabled
                   />
                   <span class="font-mono font-semibold text-base ml-3">{{ setting }}</span>
