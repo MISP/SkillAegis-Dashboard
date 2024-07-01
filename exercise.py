@@ -15,6 +15,9 @@ ACTIVE_EXERCISES_DIR = "active_exercises"
 
 def load_exercises() -> bool:
     db.ALL_EXERCISES = read_exercise_dir()
+    if not is_validate_exercises(db.ALL_EXERCISES):
+        print('Issue while validating exercises')
+        return False
     init_inject_flow()
     init_exercises_tasks()
     return True
@@ -30,6 +33,28 @@ def read_exercise_dir():
             parsed_exercise = json.load(f)
             exercises.append(parsed_exercise)
     return exercises
+
+
+def is_validate_exercises(exercises: list) -> bool:
+    exercises_uuid = set()
+    tasks_uuid = set()
+    exercise_by_uuid = {}
+    task_by_uuid = {}
+    for exercise in exercises:
+        e_uuid = exercise['exercise']['uuid']
+        if e_uuid in exercises_uuid:
+            print(f'Duplicated UUID {e_uuid}. ({exercise['exercise']['name']}, {exercise_by_uuid[e_uuid]['exercise']['name']})')
+            return False
+        exercises_uuid.add(e_uuid)
+        exercise_by_uuid[e_uuid] = exercise
+        for inject in exercise['injects']:
+            t_uuid = inject['uuid']
+            if t_uuid in tasks_uuid:
+                print(f'Duplicated UUID {t_uuid}. ({inject['name']}, {task_by_uuid[t_uuid]['name']})')
+                return False
+            tasks_uuid.add(t_uuid)
+            task_by_uuid[t_uuid] = inject
+    return True
 
 
 def init_inject_flow():

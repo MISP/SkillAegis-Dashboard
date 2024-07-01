@@ -12,6 +12,7 @@ const initial_state = {
   exercises: [],
   selected_exercises: [],
   progresses: {},
+  diagnostic: {},
 }
 
 const state = reactive({ ...initial_state });
@@ -27,6 +28,7 @@ export const notifications = computed(() => state.notificationEvents)
 export const notificationCounter = computed(() => state.notificationCounter)
 export const notificationAPICounter = computed(() => state.notificationAPICounter)
 export const userCount = computed(() => Object.keys(state.progresses).length)
+export const diagnostic = computed(() => state.diagnostic)
 export const socketConnected = computed(() => connectionState.connected)
 
 export function resetState() {
@@ -45,6 +47,13 @@ export function fullReload() {
   })
   socket.emit("get_progress", (all_progress) => {
     state.progresses = all_progress
+  })
+}
+
+export function fetchDiagnostic() {
+  state.diagnostic = {}
+  socket.emit("get_diagnostic", (diagnostic) => {
+    state.diagnostic = diagnostic
   })
 }
 

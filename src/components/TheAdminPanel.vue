@@ -1,8 +1,8 @@
 <script setup>
-  import { ref } from 'vue'
-  import { exercises, selected_exercises, resetAllExerciseProgress, changeExerciseSelection } from "@/socket";
+  import { ref, onMounted } from 'vue'
+  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, changeExerciseSelection, fetchDiagnostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faScrewdriverWrench, faTrash } from '@fortawesome/free-solid-svg-icons'
+  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
 
   const admin_modal = ref(null)
 
@@ -10,11 +10,15 @@
     changeExerciseSelection(exec_uuid, state_enabled);
   }
 
+  function showTheModal() {
+    admin_modal.value.showModal()
+    fetchDiagnostic()
+  }
 </script>
 
 <template>
   <button
-    @click="admin_modal.showModal()"
+    @click="showTheModal()"
     class="px-2 py-1 rounded-md focus-outline font-semibold bg-blue-600 text-slate-200 hover:bg-blue-700"
   >
     <FontAwesomeIcon :icon="faScrewdriverWrench" class="mr-1"></FontAwesomeIcon>
@@ -44,7 +48,10 @@
             </button>
           </div>
 
-          <h3 class="text-lg font-semibold">Selected Exercises</h3>
+          <h3 class="text-lg font-semibold">
+            <FontAwesomeIcon :icon="faGraduationCap" class="mr-1"></FontAwesomeIcon>
+            Selected Exercises
+          </h3>
           <div
             v-for="(exercise) in exercises"
             :key="exercise.name"
@@ -60,6 +67,33 @@
               />
               <span class="font-mono font-semibold text-base ml-3">{{ exercise.name }}</span>
             </label>
+          </div>
+
+          <h3 class="text-lg font-semibold mt-4">
+            <FontAwesomeIcon :icon="faSuitcaseMedical" class="mr-1"></FontAwesomeIcon>
+            Diagnostic
+          </h3>
+          <div class="ml-3">
+            <div v-if="Object.keys(diagnostic).length == 0" class="flex justify-center">
+              <span class="loading loading-dots loading-lg"></span>
+            </div>
+            <div
+              v-for="(value, setting) in diagnostic['settings']"
+              :key="setting"
+            >
+              <div>
+                <label class="label cursor-pointer justify-start p-0 pt-1">
+                  <input
+                    type="checkbox"
+                    :checked="value"
+                    :value="setting"
+                    :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'}`"
+                    disabled
+                  />
+                  <span class="font-mono font-semibold text-base ml-3">{{ setting }}</span>
+                </label>
+              </div>
+            </div>
           </div>
 
         </div>

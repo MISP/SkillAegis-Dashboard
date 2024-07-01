@@ -41,8 +41,9 @@ def get_user_authkey_id_pair(data: dict):
         if 'user_id' in data and 'title' in data :
             if data['title'].startswith('Successful authentication using API key'):
                 authkey_search = re.search(authkey_title_regex, data['title'], re.IGNORECASE)
-                authkey = authkey_search.group(1)
-                return (int(data['user_id']), authkey,)
+                if authkey_search is not None:
+                    authkey = authkey_search.group(1)
+                    return (int(data['user_id']), authkey,)
     return (None, None,)
 
 

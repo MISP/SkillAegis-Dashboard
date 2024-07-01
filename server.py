@@ -11,6 +11,7 @@ from eventlet.green import zmq as gzmq
 import exercise as exercise_model
 import notification as notification_model
 import db
+import misp_api
 
 
 # Initialize ZeroMQ context and subscriber socket
@@ -68,6 +69,10 @@ def mark_task_incomplete(sid, payload):
 def reset_all_exercise_progress(sid):
     return exercise_model.resetAllExerciseProgress()
 
+@sio.event
+def get_diagnostic(sid):
+    return getDiagnostic()
+
 @sio.on('*')
 def any_event(event, sid, data={}):
     print('>> Unhandled event', event)
@@ -114,15 +119,20 @@ def get_context(data: dict) -> dict:
     return context
 
 
+def getDiagnostic() -> dict:
+    misp_settings = misp_api.getSettings()
+    return {
+        'settings': misp_settings,
+    }
+
+
 # Function to forward zmq messages to Socket.IO
 def forward_zmq_to_socketio():
     while True:
         message = zsocket.recv_string()
         topic, s, m = message.partition(" ")
-        handleMessage(topic, s, m)
         try:
-            pass
-            # handleMessage(topic, s, m)
+            handleMessage(topic, s, m)
         except Exception as e:
             print(e)
 

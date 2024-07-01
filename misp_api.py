@@ -44,3 +44,23 @@ def doRestQuery(authkey: str, request_method: str, url: str, payload: dict = {})
         return post(url, payload, api_key=authkey)
     else:
         return get(url, payload, api_key=authkey)
+
+
+def getSettings() -> Union[None, dict]:
+    SETTING_TO_QUERY = [
+        'Plugin.ZeroMQ_enable',
+        'Plugin.ZeroMQ_audit_notifications_enable',
+        'Plugin.ZeroMQ_event_notifications_enable',
+        'Plugin.ZeroMQ_attribute_notifications_enable',
+        'MISP.log_paranoid',
+        'MISP.log_paranoid_skip_db',
+        'MISP.log_paranoid_include_post_body',
+        'MISP.log_auth',
+        'Security.allow_unsafe_cleartext_apikey_logging',
+    ]
+    settings = get(f'/servers/serverSettings.json')
+    if not settings:
+        return None
+    return {
+        setting['setting']: setting['value'] for setting in settings.get('finalSettings', []) if setting['setting'] in SETTING_TO_QUERY
+    }
