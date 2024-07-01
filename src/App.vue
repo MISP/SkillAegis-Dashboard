@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import TheDahboard from './components/TheDahboard.vue'
-import { connectionState } from "@/socket";
+import TheDahboard from './TheDahboard.vue'
+import { socketConnected } from "@/socket";
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
 
@@ -11,8 +11,6 @@ onMounted(() => {
   document.getElementsByTagName('body')[0].classList.add('dark')
   document.getElementById('app').classList.add('w-5/6')
 })
-
-const socketConnected = computed(() => connectionState.connected)
 
 watch(darkMode, (newValue) => {
   if (newValue) {

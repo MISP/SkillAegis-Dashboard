@@ -1,0 +1,111 @@
+<script setup>
+  import { ref, computed, onMounted, watch } from 'vue'
+  import { exercises, progresses } from "@/socket";
+  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+  import { faCheck, faTimes, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
+
+
+  function toggle_completed(completed, user_id, exec_uuid, task_uuid) {
+    const payload = {
+      user_id: user_id,
+      exercise_uuid: exec_uuid,
+      task_uuid: task_uuid,
+    }
+    const event_name = !completed ? "mark_task_completed": "mark_task_incomplete"
+    socket.emit(event_name, payload, () => {
+      socket.emit("get_progress", (all_progress) => {
+        socketState.progresses = all_progress
+      })
+    })
+  }
+
+</script>
+
+<template>
+  <h3 class="text-2xl mt-6 mb-2 font-bold text-blue-500 dark:text-blue-400">
+    <FontAwesomeIcon :icon="faGraduationCap"></FontAwesomeIcon>
+    Active Exercises
+  </h3>
+  <table
+    v-for="(exercise, exercise_index) in exercises"
+    :key="exercise.name"
+    class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full mb-4"
+  >
+      <thead>
+        <tr>
+          <th :colspan="2 + exercise.tasks.length" class="rounded-t-lg border-b border-slate-100 dark:border-slate-700 text-md p-3 pl-6 text-center dark:bg-blue-800 bg-blue-500 dark:text-slate-300 text-slate-100">
+            <div class="flex justify-between items-center">
+              <span class="dark:text-blue-200 text-slate-200 "># {{ exercise_index + 1 }}</span>
+              <span class="text-lg">{{ exercise.name }}</span>
+              <span class="">
+                Level: <span :class="{
+                  'rounded-lg px-1 ml-2': true,
+                  'dark:bg-sky-400 bg-sky-400 text-neutral-950': exercise.level == 'beginner',
+                  'dark:bg-orange-400 bg-orange-400 text-neutral-950': exercise.level == 'advanced',
+                  'dark:bg-red-600 bg-red-600 text-neutral-950': exercise.level == 'expert',
+                }">{{ exercise.level }}</span>
+              </span>
+            </div>
+          </th>
+        </tr>
+        <tr class="font-medium text-slate-600 dark:text-slate-200">
+          <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left">User</th>
+          <th
+            v-for="(task, task_index) in exercise.tasks"
+            :key="task.name"
+            class="border-b border-slate-100 dark:border-slate-700 p-3"
+          >
+            <div class="flex flex-col">
+              <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500">Task {{ task_index + 1 }}</span>
+              <i class="text-center">{{ task.name }}</i>
+            </div>
+          </th>
+          <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="Object.keys(progresses).length == 0">
+          <td
+            :colspan="2 + exercise.tasks.length"
+            class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6"
+          >
+            <i>- No user yet -</i>
+          </td>
+        </tr>
+        <template v-else>
+          <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-200 dark:bg-slate-900">
+            <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
+              <span :title="user_id">
+                <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>
+                <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
+              </span>
+            </td>
+            <td
+              v-for="(task, task_index) in exercise.tasks"
+              :key="task_index"
+              class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3"
+            >
+            <span
+              class="select-none cursor-pointer"
+              @click="toggle_completed(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
+            >
+              <FontAwesomeIcon
+                :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? faCheck : faTimes"
+                :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
+              />
+              <small :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'"> (+{{ task.score }})</small>
+            </span>
+            </td>
+            <td class="border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3">
+              <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="progress.exercises[exercise.uuid].percentage" :aria-valuemin="0" aria-valuemax="100">
+                <div
+                  class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"
+                  :style="`width: ${progress.exercises[exercise.uuid].score}%`"
+                ></div>
+              </div>
+            </td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+</template>
