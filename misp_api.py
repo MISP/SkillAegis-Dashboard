@@ -21,7 +21,8 @@ def get(url, data={}, api_key=misp_apikey):
     full_url = urljoin(misp_url, url)
     try:
         response = requests.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.ConnectionError as e:
+        print(e)
         return None
     return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 
@@ -36,7 +37,8 @@ def post(url, data={}, api_key=misp_apikey):
     full_url = urljoin(misp_url, url)
     try:
         response = requests.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.ConnectionError as e:
+        print(e)
         return None
     return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 
