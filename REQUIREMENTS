@@ -2,3 +2,4 @@ pyzmq
 python-socketio
 eventlet
 requests
+jq
