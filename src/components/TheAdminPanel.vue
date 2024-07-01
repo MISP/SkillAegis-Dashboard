@@ -56,7 +56,7 @@
               class="h-10 min-h-10 px-2 py-1 font-semibold bg-amber-600 text-slate-200 hover:bg-amber-700 btn btn-sm"
             >
               <FontAwesomeIcon :icon="faBan" class=""></FontAwesomeIcon>
-              Reset All Exercises
+              Clear Live Logs
             </button>
           </div>
 
