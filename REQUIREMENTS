@@ -1,6 +1,6 @@
 pyzmq
 python-socketio
-eventlet
+aiohttp
 requests
 requests-cache
 jq
