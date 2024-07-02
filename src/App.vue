@@ -16,6 +16,7 @@ onMounted(() => {
 
 <template>
   <main>
+    <h1 class="text-2xl text-center text-slate-500 dark:text-slate-400 absolute top-1 left-1">MISP Exercise Dashboard</h1>
     <div class="absolute top-1 right-1">
       <div class="flex gap-2">
         <TheThemeButton></TheThemeButton>

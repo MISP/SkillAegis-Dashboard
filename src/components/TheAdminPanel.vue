@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, throttledGetDiangostic } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,7 +17,7 @@
 
   function showTheModal() {
     admin_modal.value.showModal()
-    throttledGetDiangostic()
+    debouncedGetDiangostic()
   }
 </script>
 

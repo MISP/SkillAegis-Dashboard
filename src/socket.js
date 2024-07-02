@@ -1,6 +1,6 @@
 import { reactive, computed } from "vue";
 import { io } from "socket.io-client";
-import throttle from 'lodash.throttle'
+import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
 const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:3000";
@@ -81,13 +81,8 @@ export function toggleVerboseMode(enabled) {
   sendToggleVerboseMode(enabled)
 }
 
-export function throttledGetProgress() {
-  return throttle(getProgress, 200)
-}
-
-export function throttledGetDiangostic() {
-  return throttle(getDiangostic, 1000)
-}
+export const debouncedGetProgress = debounce(getProgress, 200, {leading: true})
+export const debouncedGetDiangostic = debounce(getDiangostic, 1000, {leading: true})
 
 
 /* Private */
@@ -175,11 +170,11 @@ socket.on("notification", (message) => {
 });
 
 socket.on("new_user", (new_user) => {
-  throttledGetProgress()
+  debouncedGetProgress()
 });
 
 socket.on("refresh_score", (new_user) => {
-  throttledGetProgress()
+  debouncedGetProgress()
 });
 
 function addLimited(target, message, maxCount) {
