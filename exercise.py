@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import functools
 import time
 from collections import defaultdict
@@ -9,10 +8,13 @@ import json
 import re
 from typing import Union
 import jq
+
 import db
 from inject_evaluator import eval_data_filtering, eval_query_comparison
 import misp_api
 import config
+from config import logger
+
 
 ACTIVE_EXERCISES_DIR = "active_exercises"
 
@@ -31,7 +33,7 @@ def debounce_check_active_tasks(debounce_seconds: int = 1):
                 func_last_execution_time[key] = now
                 return func(*args, **kwargs)
             else:
-                print(f">> Debounced for `{user_id}`")
+                logger.debug(f">> Debounced for `{user_id}`")
                 return None
         return wrapper
     return decorator
@@ -40,7 +42,7 @@ def debounce_check_active_tasks(debounce_seconds: int = 1):
 def load_exercises() -> bool:
     db.ALL_EXERCISES = read_exercise_dir()
     if not is_validate_exercises(db.ALL_EXERCISES):
-        print('Issue while validating exercises')
+        logger.error('Issue while validating exercises')
         return False
     init_inject_flow()
     init_exercises_tasks()
@@ -67,14 +69,14 @@ def is_validate_exercises(exercises: list) -> bool:
     for exercise in exercises:
         e_uuid = exercise['exercise']['uuid']
         if e_uuid in exercises_uuid:
-            print(f"Duplicated UUID {e_uuid}. ({exercise['exercise']['name']}, {exercise_by_uuid[e_uuid]['exercise']['name']})")
+            logger.error(f"Duplicated UUID {e_uuid}. ({exercise['exercise']['name']}, {exercise_by_uuid[e_uuid]['exercise']['name']})")
             return False
         exercises_uuid.add(e_uuid)
         exercise_by_uuid[e_uuid] = exercise
         for inject in exercise['injects']:
             t_uuid = inject['uuid']
             if t_uuid in tasks_uuid:
-                print(f"Duplicated UUID {t_uuid}. ({inject['name']}, {task_by_uuid[t_uuid]['name']})")
+                logger.error(f"Duplicated UUID {t_uuid}. ({inject['name']}, {task_by_uuid[t_uuid]['name']})")
                 return False
             tasks_uuid.add(t_uuid)
             task_by_uuid[t_uuid] = inject
@@ -86,7 +88,7 @@ def is_validate_exercises(exercises: list) -> bool:
                         try:
                             jq.compile(jq_path)
                         except ValueError as e:
-                            print(f"[{t_uuid} :: {inject['name']}] Could not compile jq path `{jq_path}`\n", e)
+                            logger.error(f"[{t_uuid} :: {inject['name']}] Could not compile jq path `{jq_path}`\n", e)
                             return False
 
     return True
@@ -298,7 +300,7 @@ def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
         if not success:
             return False
     mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
-    print(f"Task success: {inject['uuid']}")
+    logger.info(f"Task success: {inject['uuid']}")
     return True
 
 
@@ -310,10 +312,10 @@ def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dic
             if inject_evaluation['evaluation_context']['request_is_rest'] == context['request_is_rest']:
                 return True
             else:
-                print('Request type does not match state of `request_is_rest`')
+                logger.debug('Request type does not match state of `request_is_rest`')
                 return False
         else:
-            print('Unknown request type')
+            logger.debug('Unknown request type')
             return False
     return False
 
@@ -326,7 +328,7 @@ def inject_checker_router(user_id: int, inject_evaluation: dict, data: dict, con
 
     data_to_validate = get_data_to_validate(user_id, inject_evaluation, data)
     if data_to_validate is None:
-        print('Could not fetch data to validate')
+        logger.debug('Could not fetch data to validate')
         return False
 
     if inject_evaluation['evaluation_strategy'] == 'data_filtering':
@@ -425,7 +427,7 @@ def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
         inject = db.INJECT_BY_UUID[task_uuid]
         if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
             continue
-        print(f"[{task_uuid}] :: checking: {inject['name']}")
+        logger.debug(f"[{task_uuid}] :: checking: {inject['name']}")
         completed = check_inject(user_id, inject, data, context)
         if completed:
             succeeded_once = True

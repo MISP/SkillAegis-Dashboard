@@ -10,7 +10,7 @@ from requests_cache import CachedSession
 from requests.packages.urllib3.exceptions import InsecureRequestWarning # type: ignore
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-from config import misp_url, misp_apikey, misp_skipssl
+from config import misp_url, misp_apikey, misp_skipssl, logger
 
 requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
 adapterCache = requests.adapters.HTTPAdapter(pool_connections=50, pool_maxsize=50)
@@ -29,7 +29,7 @@ def get(url, data={}, api_key=misp_apikey):
     try:
         response = requestSession.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
     except requests.exceptions.ConnectionError as e:
-        print('Could not perform request on MISP.', e)
+        logger.info('Could not perform request on MISP.', e)
         return None
     return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 
@@ -45,7 +45,7 @@ def post(url, data={}, api_key=misp_apikey):
     try:
         response = requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
     except requests.exceptions.ConnectionError as e:
-        print('Could not perform request on MISP.', e)
+        logger.info('Could not perform request on MISP.', e)
         return None
     return response.json() if response.headers['content-type'].startswith('application/json') else response.text
 

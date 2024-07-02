@@ -14,6 +14,7 @@ import exercise as exercise_model
 import notification as notification_model
 import db
 import config
+from config import logger
 import misp_api
 
 
@@ -57,11 +58,11 @@ app = socketio.WSGIApp(sio, static_files={
 
 @sio.event
 def connect(sid, environ):
-    print("Client connected: ", sid)
+    logger.debug("Client connected: " + sid)
 
 @sio.event
 def disconnect(sid):
-    print("Client disconnected: ", sid)
+    logger.debug("Client disconnected: " + sid)
 
 @sio.event
 def get_exercises(sid):
@@ -109,7 +110,7 @@ def toggle_verbose_mode(sid, payload):
 
 @sio.on('*')
 def any_event(event, sid, data={}):
-    print('>> Unhandled event', event)
+    logger.info('>> Unhandled event', event)
 
 def handleMessage(topic, s, message):
     data = json.loads(message)
@@ -180,19 +181,18 @@ def forward_zmq_to_socketio():
     while True:
         message = zsocket.recv_string()
         topic, s, m = message.partition(" ")
-        handleMessage(topic, s, m)
         try:
             ZMQ_MESSAGE_COUNT += 1
-            # handleMessage(topic, s, m)
+            handleMessage(topic, s, m)
         except Exception as e:
-            print('Error handling message', e)
+            logger.error('Error handling message', e)
 
 
 if __name__ == "__main__":
 
     exercises_loaded = exercise_model.load_exercises()
     if not exercises_loaded:
-        print('Could not load exercises')
+        logger.critical('Could not load exercises')
         sys.exit(1)
 
     # Start the forwarding in a separate thread

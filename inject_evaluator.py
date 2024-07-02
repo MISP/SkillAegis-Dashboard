@@ -3,6 +3,7 @@ from typing import Union
 import jq
 import re
 import operator
+from config import logger
 
 
 # .Event.Attribute[] | select(.value == "evil.exe") | .Tag
@@ -133,7 +134,7 @@ def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict) -> bo
         for evaluation_path, evaluation_config in evaluation_params.items():
             data_to_validate = jq_extract(evaluation_path, data, evaluation_config.get('extract_type', 'first'))
             if data_to_validate is None:
-                print('Could not extract data')
+                logger.debug('Could not extract data')
                 return False
             if not condition_satisfied(evaluation_config, data_to_validate):
                 return False
