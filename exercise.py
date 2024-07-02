@@ -1,16 +1,40 @@
 #!/usr/bin/env python3
 
+
+import functools
+import time
 from collections import defaultdict
 from pathlib import Path
 import json
 import re
 from typing import Union
+import jq
 import db
 from inject_evaluator import eval_data_filtering, eval_query_comparison
 import misp_api
 import config
 
 ACTIVE_EXERCISES_DIR = "active_exercises"
+
+def debounce_check_active_tasks(debounce_seconds: int = 1):
+    func_last_execution_time = {}
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            user_id = args[0]
+            now = time.time()
+            key = f"{user_id}_{func.__name__}"
+            if key not in func_last_execution_time:
+                func_last_execution_time[key] = now
+                return func(*args, **kwargs)
+            elif now >= func_last_execution_time[key] + debounce_seconds:
+                func_last_execution_time[key] = now
+                return func(*args, **kwargs)
+            else:
+                print(f">> Debounced for `{user_id}`")
+                return None
+        return wrapper
+    return decorator
 
 
 def load_exercises() -> bool:
@@ -54,6 +78,17 @@ def is_validate_exercises(exercises: list) -> bool:
                 return False
             tasks_uuid.add(t_uuid)
             task_by_uuid[t_uuid] = inject
+
+            for inject_evaluation in inject.get('inject_evaluation', []):
+                if inject_evaluation.get('evaluation_strategy', None) == 'data_filtering':
+                    for evaluation in inject_evaluation.get('parameters', []):
+                        jq_path = list(evaluation.keys())[0]
+                        try:
+                            jq.compile(jq_path)
+                        except ValueError as e:
+                            print(f"[{t_uuid} :: {inject['name']}] Could not compile jq path `{jq_path}`\n", e)
+                            return False
+
     return True
 
 
@@ -382,15 +417,15 @@ def fetch_data_for_query_comparison(user_id: int, inject_evaluation: dict, perfo
     return data
 
 
+@debounce_check_active_tasks(debounce_seconds=5)
 def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
     succeeded_once = False
     available_tasks = get_available_tasks_for_user(user_id)
     for task_uuid in available_tasks:
         inject = db.INJECT_BY_UUID[task_uuid]
         if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
-            print(f"exercise not active for this inject {inject['name']}")
             continue
-        print(f"checking: {inject['name']}")
+        print(f"[{task_uuid}] :: checking: {inject['name']}")
         completed = check_inject(user_id, inject, data, context)
         if completed:
             succeeded_once = True

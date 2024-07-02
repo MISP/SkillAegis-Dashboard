@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import functools
 import json
 import sys
+import time
 import zmq
 import socketio
 import eventlet
@@ -16,6 +18,26 @@ import misp_api
 
 
 ZMQ_MESSAGE_COUNT = 0
+
+
+def debounce(debounce_seconds: int = 1):
+    func_last_execution_time = {}
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            now = time.time()
+            key = func.__name__
+            if key not in func_last_execution_time:
+                func_last_execution_time[key] = now
+                return func(*args, **kwargs)
+            elif now >= func_last_execution_time[key] + debounce_seconds:
+                func_last_execution_time[key] = now
+                return func(*args, **kwargs)
+            else:
+                return None
+        return wrapper
+    return decorator
+
 
 
 # Initialize ZeroMQ context and subscriber socket
@@ -117,7 +139,12 @@ def handleMessage(topic, s, message):
                 context = get_context(data)
                 succeeded_once = exercise_model.check_active_tasks(user_id, data, context)
                 if succeeded_once:
-                    sio.emit('refresh_score')
+                    sendRefreshScore()
+
+
+@debounce(debounce_seconds=1)
+def sendRefreshScore():
+    sio.emit('refresh_score')
 
 
 def get_context(data: dict) -> dict:
@@ -153,11 +180,12 @@ def forward_zmq_to_socketio():
     while True:
         message = zsocket.recv_string()
         topic, s, m = message.partition(" ")
+        handleMessage(topic, s, m)
         try:
             ZMQ_MESSAGE_COUNT += 1
-            handleMessage(topic, s, m)
+            # handleMessage(topic, s, m)
         except Exception as e:
-            print(e)
+            print('Error handling message', e)
 
 
 if __name__ == "__main__":
