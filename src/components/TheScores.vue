@@ -83,7 +83,7 @@
           </td>
         </tr>
         <template v-else>
-          <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-200 dark:bg-slate-900">
+          <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
               <span :title="user_id">
                 <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>

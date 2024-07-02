@@ -1,5 +1,6 @@
 __pycache__
 venv
+misp_cache.sqlite
 
 # Logs
 logs
