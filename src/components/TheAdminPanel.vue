@@ -1,8 +1,8 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan } from '@fortawesome/free-solid-svg-icons'
+  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan, faRotate } from '@fortawesome/free-solid-svg-icons'
 
   const admin_modal = ref(null)
 
@@ -45,17 +45,24 @@
 
           <div class="flex mb-5 gap-1">
             <button
-              @click="resetAllExerciseProgress()"
-              class="h-10 min-h-10 px-2 py-1 font-semibold bg-red-600 text-slate-200 hover:bg-red-700 btn btn-sm"
+              @click="fullReload()"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-blue-600 text-slate-200 hover:bg-blue-700 btn btn-sm gap-1"
             >
-              <FontAwesomeIcon :icon="faTrash" class="mr-1"></FontAwesomeIcon>
+              <FontAwesomeIcon :icon="faRotate" size="lg" fixed-width></FontAwesomeIcon>
+              Full refresh
+            </button>
+            <button
+              @click="resetAllExerciseProgress()"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-red-600 text-slate-200 hover:bg-red-700 btn btn-sm gap-1"
+            >
+              <FontAwesomeIcon :icon="faTrash" size="lg" fixed-width></FontAwesomeIcon>
               Reset All Exercises
             </button>
             <button
               @click="resetLiveLogs()"
-              class="h-10 min-h-10 px-2 py-1 font-semibold bg-amber-600 text-slate-200 hover:bg-amber-700 btn btn-sm"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-amber-600 text-slate-200 hover:bg-amber-700 btn btn-sm gap-1"
             >
-              <FontAwesomeIcon :icon="faBan" class=""></FontAwesomeIcon>
+              <FontAwesomeIcon :icon="faBan" size="lg"> fixed-width</FontAwesomeIcon>
               Clear Live Logs
             </button>
           </div>
