@@ -58,11 +58,11 @@ app = socketio.WSGIApp(sio, static_files={
 
 @sio.event
 def connect(sid, environ):
-    logger.debug("Client connected: " + sid)
+    logger.debug("Client connected: %s", sid)
 
 @sio.event
 def disconnect(sid):
-    logger.debug("Client disconnected: " + sid)
+    logger.debug("Client disconnected: %s", sid)
 
 @sio.event
 def get_exercises(sid):
@@ -110,7 +110,7 @@ def toggle_verbose_mode(sid, payload):
 
 @sio.on('*')
 def any_event(event, sid, data={}):
-    logger.info('>> Unhandled event', event)
+    logger.info('>> Unhandled event %s', event)
 
 def handleMessage(topic, s, message):
     data = json.loads(message)
@@ -185,7 +185,7 @@ def forward_zmq_to_socketio():
             ZMQ_MESSAGE_COUNT += 1
             handleMessage(topic, s, m)
         except Exception as e:
-            logger.error('Error handling message', e)
+            logger.error('Error handling message %s', e)
 
 
 if __name__ == "__main__":
