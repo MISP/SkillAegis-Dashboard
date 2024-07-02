@@ -43,7 +43,7 @@
         </div>
         <div>
 
-          <div class="flex mb-5 gap-1">
+          <div class="flex mb-5 gap-2">
             <button
               @click="fullReload()"
               class="h-10 min-h-10 px-2 py-1 font-semibold bg-blue-600 text-slate-200 hover:bg-blue-700 btn btn-sm gap-1"
