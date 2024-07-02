@@ -7,7 +7,7 @@
       "level": "beginner",
       "priority": 1
     },
-    "name": "Simple Data Creation Via the API",
+    "name": "API: Simple Data Creation",
     "namespace": "data-model",
     "tags": [
       "exercise:software-scope=\"misp\"",

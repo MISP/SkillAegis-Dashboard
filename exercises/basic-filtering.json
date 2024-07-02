@@ -7,7 +7,7 @@
       "level": "beginner",
       "priority": 2
     },
-    "name": "Basic Filtering - Usage of the API to filter data",
+    "name": "API: Basic Filtering",
     "namespace": "data-model",
     "tags": [
       "exercise:software-scope=\"misp\"",
