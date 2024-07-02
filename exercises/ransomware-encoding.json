@@ -4,8 +4,8 @@
     "expanded": "MISP Encoding Exercise : Ransomware infection via e-mail",
     "meta": {
       "author": "MISP Project",
-      "level": "beginner",
-      "priority": 0
+      "level": "advanced",
+      "priority": 10
     },
     "name": "MISP Encoding Exercise : Ransomware infection via e-mail",
     "namespace": "data-model",

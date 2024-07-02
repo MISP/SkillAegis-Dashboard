@@ -177,21 +177,26 @@
               }
             },
             {
-              ".Event.Attribute": {
+              "[.Event.Object[].Attribute[], .Event.Attribute[]] | .[] | select((.type == \"ip-dst\")).value": {
                 "comparison": "contains",
                 "values": [
-                  {
-                    "type": "ip-dst",
-                    "value": "1.2.3.4"
-                  },
-                  {
-                    "type": "domain",
-                    "value": "evil.com"
-                  },
-                  {
-                    "type": "filename",
-                    "value": "evil.exe"
-                  }
+                  "4.3.2.1"
+                ]
+              }
+            },
+            {
+              "[.Event.Object[].Attribute[], .Event.Attribute[]] | .[] | select((.type == \"domain\")).value": {
+                "comparison": "contains",
+                "values": [
+                  "evil.com"
+                ]
+              }
+            },
+            {
+              "[.Event.Object[].Attribute[], .Event.Attribute[]] | .[] | select((.type == \"filename\")).value": {
+                "comparison": "contains",
+                "values": [
+                  "evil.exe"
                 ]
               }
             }
@@ -226,13 +231,10 @@
               }
             },
             {
-              ".Event.Object": {
-                "comparison": "contains",
+              ".Event.Object[] | select(.name == \"domain-ip\")": {
+                "comparison": "count",
                 "values": [
-                  {
-                    "name": "domain-ip",
-                    "template_uuid": "43b3b146-77eb-4931-b4cc-b66c60f28734"
-                  }
+                  ">0"
                 ]
               }
             }
@@ -259,21 +261,26 @@
               }
             },
             {
-              ".Event.Object[name=\"domain-ip\"].Attribute": {
+              ".Event.Object[] | select(.name == \"domain-ip\") | .Attribute[] | select((.type == \"ip\")).value": {
                 "comparison": "contains",
                 "values": [
-                  {
-                    "object_relation": "ip",
-                    "value": "4.3.2.1"
-                  },
-                  {
-                    "object_relation": "domain",
-                    "value": "foobar.baz"
-                  },
-                  {
-                    "object_relation": "text",
-                    "value": "Classified information"
-                  }
+                  "4.3.2.1"
+                ]
+              }
+            },
+            {
+              ".Event.Object[] | select(.name == \"domain-ip\") | .Attribute[] | select((.type == \"domain\")).value": {
+                "comparison": "contains",
+                "values": [
+                  "foobar.baz"
+                ]
+              }
+            },
+            {
+              ".Event.Object[] | select(.name == \"domain-ip\") | .Attribute[] | select((.type == \"text\")).value": {
+                "comparison": "contains",
+                "values": [
+                  "Classified information"
                 ]
               }
             }
@@ -308,14 +315,10 @@
               }
             },
             {
-              ".Event.Attribute": {
+              ".Event.Attribute[] | select((.type == \"ip-dst\") and (.value == \"1.2.3.4\")).distribution": {
                 "comparison": "contains",
                 "values": [
-                  {
-                    "type": "ip-dst",
-                    "value": "1.2.3.4",
-                    "distribution": 0
-                  }
+                  0
                 ]
               }
             }
@@ -350,25 +353,18 @@
               }
             },
             {
-              ".Event.Attribute": {
+              ".Event.Attribute[] | select((.type == \"ip-dst\") and (.value == \"1.2.3.4\")).distribution": {
                 "comparison": "contains",
                 "values": [
-                  {
-                    "type": "ip-dst",
-                    "value": "1.2.3.4",
-                    "distribution": 0
-                  }
+                  0
                 ]
               }
             },
             {
-              ".Event.Attribute[value=\"1.2.3.4\"].Tag": {
-                "JQ": "jq '.Event.Attribute[] | select(.value == \"1.2.3.4\") | .Tag'",
+              ".Event.Attribute[] | select((.type == \"ip-dst\") and (.value == \"1.2.3.4\")).Tag[].name": {
                 "comparison": "contains",
                 "values": [
-                  {
-                    "name": "tlp:green"
-                  }
+                  "tlp:green"
                 ]
               }
             }
