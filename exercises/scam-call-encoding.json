@@ -169,7 +169,7 @@
         "inject_uuid": "4c242d49-fcf7-4c76-974b-6d5983c0eff9",
         "reporting_callback": [],
         "requirements": {
-          "inject_uuid": ""
+          "inject_uuid": "de9f4c9b-dc97-4e84-85f3-859f30d3a3cd"
         },
         "sequence": {
           "completion_trigger": [
@@ -340,7 +340,7 @@
                 }
               },
               {
-                ".Event.Object[].Attribute[] | select((.type == \"domain\")).value": {
+                ".Event.Object[].Attribute[] | select((.type == \"domain\") or (.type == \"hostname\")).value": {
                   "extract_type": "all",
                   "comparison": "equals",
                   "values": [
@@ -454,8 +454,8 @@
                 }
               },
               {
-                ".Event.Object[] | select((.name == \"domain-ip\")).distribution": {
-                  "comparison": "contains",
+                ".Event.Object[] | select((.name == \"person\")).distribution": {
+                  "comparison": "equals_any",
                   "values": [
                     "0",
                     "1",

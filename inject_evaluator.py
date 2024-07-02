@@ -46,6 +46,8 @@ def eval_condition_str(evaluation_config: dict, data_to_validate: str) -> bool:
         return len(intersection) == len(values_set)
     elif comparison_type == 'equals':
         return data_to_validate == values[0]
+    elif comparison_type == 'equals_any':
+        return data_to_validate in values
     elif comparison_type == 'regex':
         return re.fullmatch(values[0], data_to_validate)
     elif comparison_type == 'count':

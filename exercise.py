@@ -217,7 +217,7 @@ def get_model_action(data: dict):
 def is_accepted_query(data: dict) -> bool:
     model, action = get_model_action(data)
     if model in ['Event', 'Attribute', 'Object', 'Tag',]:
-        if action in ['add', 'edit', 'delete', 'publish']:
+        if action in ['add', 'edit', 'delete', 'publish', 'tag']:
             # # improved condition below. It blocks some queries
             # if data['Log']['change'].startswith('attribute_count'):
             #     return False
