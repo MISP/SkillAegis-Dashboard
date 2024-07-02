@@ -31,7 +31,10 @@ def get(url, data={}, api_key=misp_apikey):
     except requests.exceptions.ConnectionError as e:
         logger.info('Could not perform request on MISP. %s', e)
         return None
-    return response.json() if response.headers['content-type'].startswith('application/json') else response.text
+    try:
+        return response.json() if response.headers['content-type'].startswith('application/json') else response.text
+    except requests.exceptions.JSONDecodeError:
+        return response.text
 
 
 def post(url, data={}, api_key=misp_apikey):
@@ -47,7 +50,10 @@ def post(url, data={}, api_key=misp_apikey):
     except requests.exceptions.ConnectionError as e:
         logger.info('Could not perform request on MISP. %s', e)
         return None
-    return response.json() if response.headers['content-type'].startswith('application/json') else response.text
+    try:
+        return response.json() if response.headers['content-type'].startswith('application/json') else response.text
+    except requests.exceptions.JSONDecodeError:
+        return response.text
 
 
 def getEvent(event_id: int) -> Union[None, dict]:

@@ -298,6 +298,7 @@ def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
     for inject_evaluation in inject['inject_evaluation']:
         success = inject_checker_router(user_id, inject_evaluation, data, context)
         if not success:
+            logger.info(f"Task not completed: {inject['uuid']}")
             return False
     mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
     logger.info(f"Task success: {inject['uuid']}")
@@ -419,7 +420,7 @@ def fetch_data_for_query_comparison(user_id: int, inject_evaluation: dict, perfo
     return data
 
 
-@debounce_check_active_tasks(debounce_seconds=5)
+@debounce_check_active_tasks(debounce_seconds=2)
 def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
     succeeded_once = False
     available_tasks = get_available_tasks_for_user(user_id)

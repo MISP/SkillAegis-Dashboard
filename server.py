@@ -7,7 +7,6 @@ import time
 import zmq
 import socketio
 import eventlet
-from pprint import pprint
 from eventlet.green import zmq as gzmq
 
 import exercise as exercise_model

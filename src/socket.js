@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:3000";
+const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
 const MAX_LIVE_LOG = 30
 
 const initial_state = {
