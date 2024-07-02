@@ -2,4 +2,5 @@ pyzmq
 python-socketio
 eventlet
 requests
+requests-cache
 jq

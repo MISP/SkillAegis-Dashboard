@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 
 import json
+from datetime import timedelta
 from typing import Union
 from urllib.parse import urljoin
 import requests # type: ignore
 import requests.adapters # type: ignore
+from requests_cache import CachedSession
 from requests.packages.urllib3.exceptions import InsecureRequestWarning # type: ignore
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from config import misp_url, misp_apikey, misp_skipssl
+
+requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
+adapterCache = requests.adapters.HTTPAdapter(pool_connections=50, pool_maxsize=50)
+requestSession.mount('https://', adapterCache)
+requestSession.mount('http://', adapterCache)
 
 
 def get(url, data={}, api_key=misp_apikey):
@@ -20,7 +27,7 @@ def get(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     try:
-        response = requests.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
+        response = requestSession.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
     except requests.exceptions.ConnectionError as e:
         print('Could not perform request on MISP.', e)
         return None
@@ -36,7 +43,7 @@ def post(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     try:
-        response = requests.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
+        response = requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
     except requests.exceptions.ConnectionError as e:
         print('Could not perform request on MISP.', e)
         return None
