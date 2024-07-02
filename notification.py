@@ -9,6 +9,7 @@ from urllib.parse import parse_qs
 
 
 VERBOSE_MODE = False
+NOTIFICATION_COUNT = 1
 
 
 def set_verbose_mode(enabled: bool):
@@ -107,6 +108,9 @@ def is_api_request(data: dict) -> bool:
 
 
 def get_notification_message(data: dict) -> dict:
+    global NOTIFICATION_COUNT
+    id = NOTIFICATION_COUNT
+    NOTIFICATION_COUNT += 1
     user = db.USER_ID_TO_EMAIL_MAPPING.get(int(data['user_id']), '?')
     time = data['created'].split(' ')[1].split('.')[0]
     url = data['url']
@@ -117,6 +121,7 @@ def get_notification_message(data: dict) -> dict:
     http_method = 'DELETE' if (http_method == 'POST' or http_method == 'PUT') and action == 'delete' else http_method  # small override for UI
     payload = get_request_post_body(data)
     return {
+        'id': id,
         'user': user,
         'time': time,
         'url': url,

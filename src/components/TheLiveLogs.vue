@@ -79,7 +79,7 @@
           </td>
         </tr>
         <template v-else>
-          <tr v-for="(notification, index) in notifications" :key="index">
+          <tr v-for="notification in notifications" :key="notification.id">
             <td
               class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-1 pl-2 w-12 whitespace-nowrap"
             >

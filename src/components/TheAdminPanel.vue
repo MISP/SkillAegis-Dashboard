@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLoggs, changeExerciseSelection, fetchDiagnostic } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, throttledGetDiangostic } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,7 +17,7 @@
 
   function showTheModal() {
     admin_modal.value.showModal()
-    fetchDiagnostic()
+    throttledGetDiangostic()
   }
 </script>
 
@@ -52,7 +52,7 @@
               Reset All Exercises
             </button>
             <button
-              @click="resetLiveLoggs()"
+              @click="resetLiveLogs()"
               class="h-10 min-h-10 px-2 py-1 font-semibold bg-amber-600 text-slate-200 hover:bg-amber-700 btn btn-sm"
             >
               <FontAwesomeIcon :icon="faBan" class=""></FontAwesomeIcon>
