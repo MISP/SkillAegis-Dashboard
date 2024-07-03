@@ -38,7 +38,7 @@
     <span class="rounded-lg py-1 px-2 dark:bg-sky-700 bg-sky-400 text-slate-800 dark:text-slate-200">
       <span class="mr-1">
         <FontAwesomeIcon :icon="faUser" size="sm"></FontAwesomeIcon>
-        User online:
+        Players:
       </span>
       <span class="font-bold">{{ userCount }}</span>
     </span>
