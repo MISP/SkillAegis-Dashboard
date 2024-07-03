@@ -4,6 +4,7 @@ import json
 from datetime import timedelta
 from typing import Union
 from urllib.parse import urljoin
+import asyncio
 import requests # type: ignore
 import requests.adapters # type: ignore
 from requests_cache import CachedSession
@@ -18,7 +19,7 @@ requestSession.mount('https://', adapterCache)
 requestSession.mount('http://', adapterCache)
 
 
-def get(url, data={}, api_key=misp_apikey):
+async def get(url, data={}, api_key=misp_apikey):
     headers = {
         'User-Agent': 'misp-exercise-dashboard',
         "Authorization": api_key,
@@ -27,17 +28,22 @@ def get(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     try:
-        response = requestSession.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
+        loop = asyncio.get_event_loop()
+        job = lambda: requestSession.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
+        runningJob = loop.run_in_executor(None, job)
+        response = await runningJob
     except requests.exceptions.ConnectionError as e:
         logger.info('Could not perform request on MISP. %s', e)
         return None
+    except Exception as e:
+        logger.warning('Could not perform request on MISP. %s', e)
     try:
         return response.json() if response.headers['content-type'].startswith('application/json') else response.text
     except requests.exceptions.JSONDecodeError:
         return response.text
 
 
-def post(url, data={}, api_key=misp_apikey):
+async def post(url, data={}, api_key=misp_apikey):
     headers = {
         'User-Agent': 'misp-exercise-dashboard',
         "Authorization": api_key,
@@ -46,32 +52,37 @@ def post(url, data={}, api_key=misp_apikey):
     }
     full_url = urljoin(misp_url, url)
     try:
-        response = requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
+        loop = asyncio.get_event_loop()
+        job = lambda: requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
+        runningJob = loop.run_in_executor(None, job)
+        response = await runningJob
     except requests.exceptions.ConnectionError as e:
         logger.info('Could not perform request on MISP. %s', e)
         return None
+    except Exception as e:
+        logger.warning('Could not perform request on MISP. %s', e)
     try:
         return response.json() if response.headers['content-type'].startswith('application/json') else response.text
     except requests.exceptions.JSONDecodeError:
         return response.text
 
 
-def getEvent(event_id: int) -> Union[None, dict]:
-    return get(f'/events/view/{event_id}')
+async def getEvent(event_id: int) -> Union[None, dict]:
+    return await get(f'/events/view/{event_id}')
 
 
-def doRestQuery(authkey: str, request_method: str, url: str, payload: dict = {}) -> Union[None, dict]:
+async def doRestQuery(authkey: str, request_method: str, url: str, payload: dict = {}) -> Union[None, dict]:
     if request_method == 'POST':
-        return post(url, payload, api_key=authkey)
+        return await post(url, payload, api_key=authkey)
     else:
-        return get(url, payload, api_key=authkey)
+        return await get(url, payload, api_key=authkey)
 
 
-def getVersion() -> Union[None, dict]:
-    return get(f'/servers/getVersion.json')
+async def getVersion() -> Union[None, dict]:
+    return await get(f'/servers/getVersion.json')
 
 
-def getSettings() -> Union[None, dict]:
+async def getSettings() -> Union[None, dict]:
     SETTING_TO_QUERY = [
         'Plugin.ZeroMQ_enable',
         'Plugin.ZeroMQ_audit_notifications_enable',
@@ -83,7 +94,7 @@ def getSettings() -> Union[None, dict]:
         'MISP.log_auth',
         'Security.allow_unsafe_cleartext_apikey_logging',
     ]
-    settings = get(f'/servers/serverSettings.json')
+    settings = await get(f'/servers/serverSettings.json')
     if not settings:
         return None
     return {

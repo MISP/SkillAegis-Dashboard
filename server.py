@@ -106,7 +106,7 @@ async def reset_notifications(sid):
 
 @sio.event
 async def get_diagnostic(sid):
-    return getDiagnostic()
+    return await getDiagnostic()
 
 @sio.event
 async def toggle_verbose_mode(sid, payload):
@@ -144,7 +144,7 @@ async def handleMessage(topic, s, message):
                 context = get_context(data)
                 succeeded_once = exercise_model.check_active_tasks(user_id, data, context)
                 if succeeded_once:
-                    sendRefreshScore()
+                    await sendRefreshScore()
 
 
 @debounce(debounce_seconds=1)
@@ -163,16 +163,16 @@ def get_context(data: dict) -> dict:
     return context
 
 
-def getDiagnostic() -> dict:
+async def getDiagnostic() -> dict:
     global ZMQ_MESSAGE_COUNT
 
     diagnostic = {}
-    misp_version = misp_api.getVersion()
+    misp_version = await misp_api.getVersion()
     if misp_version is None:
         diagnostic['online'] = False
         return diagnostic
     diagnostic['version'] = misp_version
-    misp_settings = misp_api.getSettings()
+    misp_settings = await misp_api.getSettings()
     diagnostic['settings'] = misp_settings
     diagnostic['zmq_message_count'] = ZMQ_MESSAGE_COUNT
     return diagnostic
