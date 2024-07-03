@@ -9,12 +9,18 @@ from urllib.parse import parse_qs
 
 
 VERBOSE_MODE = False
+APIQUERY_MODE = False
 NOTIFICATION_COUNT = 1
 
 
 def set_verbose_mode(enabled: bool):
     global VERBOSE_MODE
     VERBOSE_MODE = enabled
+
+
+def set_apiquery_mode(enabled: bool):
+    global APIQUERY_MODE
+    APIQUERY_MODE = enabled
 
 
 def get_notifications() -> list[dict]:
@@ -148,6 +154,8 @@ def is_accepted_notification(notification) -> bool:
         return False
     if VERBOSE_MODE:
         return True
+    if APIQUERY_MODE and not notification['is_api_request']:
+        return False
     if '@' not in notification['user']: # Ignore message from system
         return False
 

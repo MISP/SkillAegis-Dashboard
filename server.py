@@ -112,6 +112,10 @@ async def get_diagnostic(sid):
 async def toggle_verbose_mode(sid, payload):
     return notification_model.set_verbose_mode(payload['verbose'])
 
+@sio.event
+async def toggle_apiquery_mode(sid, payload):
+    return notification_model.set_apiquery_mode(payload['apiquery'])
+
 @sio.on('*')
 async def any_event(event, sid, data={}):
     logger.info('>> Unhandled event %s', event)

@@ -1,14 +1,19 @@
 <script setup>
   import { ref, watch } from "vue"
-  import { notifications, userCount, notificationCounter, notificationAPICounter, toggleVerboseMode } from "@/socket";
+  import { notifications, userCount, notificationCounter, notificationAPICounter, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
 
 
   const verbose = ref(false)
+  const api_query = ref(false)
 
   watch(verbose, (newValue) => {
     toggleVerboseMode(newValue == true)
+  })
+
+  watch(api_query, (newValue) => {
+    toggleApiQueryMode(newValue == true)
   })
 
   function getClassFromResponseCode(response_code) {
@@ -53,8 +58,15 @@
     </span>
     <span class="flex items-center">
       <label class="mr-1 flex items-center cursor-pointer">
-        <input type="checkbox" class="toggle toggle-success [--fallback-su:#22c55e] mr-1" :checked="verbose" @change="verbose = !verbose"/>
+        <input type="checkbox" class="toggle toggle-warning [--fallback-su:#22c55e] mr-1" :checked="verbose" @change="verbose = !verbose"/>
         Verbose
+      </label>
+    </span>
+    <span class="flex items-center">
+      <label class="mr-1 flex items-center cursor-pointer">
+        <input type="checkbox" class="toggle toggle-success [--fallback-su:#22c55e] mr-1" :checked="api_query" @change="api_query = !api_query"/>
+        <FontAwesomeIcon :icon="faCog" size="sm" :mask="faCloud" transform="shrink-7 left-1" class="mr-1"></FontAwesomeIcon>
+        API Queries
       </label>
     </span>
   </div>

@@ -81,6 +81,10 @@ export function toggleVerboseMode(enabled) {
   sendToggleVerboseMode(enabled)
 }
 
+export function toggleApiQueryMode(enabled) {
+  sendToggleApiQueryMode(enabled)
+}
+
 export const debouncedGetProgress = debounce(getProgress, 200, {leading: true})
 export const debouncedGetDiangostic = debounce(getDiangostic, 1000, {leading: true})
 
@@ -149,6 +153,13 @@ function sendToggleVerboseMode(enabled) {
     verbose: enabled
   }
   socket.emit("toggle_verbose_mode", payload, () => {})
+}
+
+function sendToggleApiQueryMode(enabled) {
+  const payload = {
+    apiquery: enabled
+  }
+  socket.emit("toggle_apiquery_mode", payload, () => {})
 }
 
 /* Event listener */
