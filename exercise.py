@@ -273,8 +273,18 @@ def mark_task_completed(user_id: int, exercise_uuid: str , task_uuid: str):
     if not is_completed:
         db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'].append({
             'user_id': user_id,
-            'time': time.time(),
+            'timestamp': time.time(),
+            'first_completion': False,
         })
+    # Update who was the first to complete the task
+    first_completion_index = None
+    first_completion_time = time.time()
+    for i, entry in enumerate(db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user']):
+        db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'][i]['first_completion'] = False
+        if entry['timestamp'] < first_completion_time:
+            first_completion_time = entry['timestamp']
+            first_completion_index = i
+    db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'][first_completion_index]['first_completion'] = True
 
 
 def mark_task_incomplete(user_id: int, exercise_uuid: str , task_uuid: str):

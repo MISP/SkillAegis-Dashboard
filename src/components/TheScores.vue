@@ -108,8 +108,11 @@
                   <small :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'"> (+{{ task.score }})</small>
                 </span>
                 <span class="text-sm leading-3">
-                  <span v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid].time">
-                    {{ (new Date(progress.exercises[exercise.uuid].tasks_completion[task.uuid].time * 1000)).toTimeString().split(' ', 1)[0] }}
+                  <span
+                    v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid].timestamp"
+                    :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid].first_completion ? 'font-bold' : 'font-extralight'"
+                  >
+                    {{ (new Date(progress.exercises[exercise.uuid].tasks_completion[task.uuid].timestamp * 1000)).toTimeString().split(' ', 1)[0] }}
                   </span>
                   <span v-else></span>
                 </span>
