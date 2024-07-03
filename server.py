@@ -18,6 +18,7 @@ import misp_api
 
 
 ZMQ_MESSAGE_COUNT = 0
+ZMQ_LAST_TIME = None
 
 
 def debounce(debounce_seconds: int = 1):
@@ -182,15 +183,26 @@ async def getDiagnostic() -> dict:
     return diagnostic
 
 
+async def keepalive():
+    global ZMQ_LAST_TIME
+    while True:
+        await sio.sleep(5)
+        payload = {
+            'zmq_last_time': ZMQ_LAST_TIME,
+        }
+        await sio.emit('keep_alive', payload)
+
+
 # Function to forward zmq messages to Socket.IO
 async def forward_zmq_to_socketio():
-    global ZMQ_MESSAGE_COUNT
+    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME
 
     while True:
         message = await zsocket.recv_string()
         topic, s, m = message.partition(" ")
         try:
             ZMQ_MESSAGE_COUNT += 1
+            ZMQ_LAST_TIME = time.time()
             await handleMessage(topic, s, m)
         except Exception as e:
             logger.error('Error handling message %s', e)
@@ -198,6 +210,7 @@ async def forward_zmq_to_socketio():
 
 async def init_app():
     sio.start_background_task(forward_zmq_to_socketio)
+    sio.start_background_task(keepalive)
     return app
 
 

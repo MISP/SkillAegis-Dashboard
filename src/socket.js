@@ -18,7 +18,8 @@ const initial_state = {
 
 const state = reactive({ ...initial_state });
 const connectionState = reactive({ 
-  connected: false
+  connected: false,
+  zmq_last_time: false,
 })
 
 
@@ -40,6 +41,7 @@ export const notificationAPICounter = computed(() => state.notificationAPICounte
 export const userCount = computed(() => Object.keys(state.progresses).length)
 export const diagnostic = computed(() => state.diagnostic)
 export const socketConnected = computed(() => connectionState.connected)
+export const zmqLastTime = computed(() => connectionState.zmq_last_time)
 
 export function resetState() {
   Object.assign(state, initial_state);
@@ -186,6 +188,10 @@ socket.on("new_user", (new_user) => {
 
 socket.on("refresh_score", (new_user) => {
   debouncedGetProgress()
+});
+
+socket.on("keep_alive", (keep_alive) => {
+  connectionState.zmq_last_time = keep_alive['zmq_last_time']
 });
 
 function addLimited(target, message, maxCount) {
