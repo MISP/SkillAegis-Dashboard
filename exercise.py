@@ -247,8 +247,9 @@ def get_completion_for_users():
         for task in exercise_status['tasks'].values():
             for user_id in completion_per_user.keys():
                 completion_per_user[int(user_id)][exercise_status['uuid']][task['uuid']] = False
-            for user_id in task['completed_by_user']:
-                completion_per_user[int(user_id)][exercise_status['uuid']][task['uuid']] = True
+            for entry in task['completed_by_user']:
+                user_id = entry['user_id']
+                completion_per_user[int(user_id)][exercise_status['uuid']][task['uuid']] = entry
 
     return completion_per_user
 
@@ -268,13 +269,17 @@ def get_score_for_task_completion(tasks_completion: dict) -> int:
 
 
 def mark_task_completed(user_id: int, exercise_uuid: str , task_uuid: str):
-    if user_id not in db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user']:
-        db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'].append(user_id)
+    is_completed  = any(filter(lambda x: x['user_id'] == user_id, db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user']))
+    if not is_completed:
+        db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'].append({
+            'user_id': user_id,
+            'time': time.time(),
+        })
 
 
 def mark_task_incomplete(user_id: int, exercise_uuid: str , task_uuid: str):
-    if user_id in db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user']:
-        db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'].remove(user_id)
+    completed_without_user = list(filter(lambda x: x['user_id'] != user_id, db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user']))
+    db.EXERCISES_STATUS[exercise_uuid]['tasks'][task_uuid]['completed_by_user'] = completed_without_user
 
 
 def get_progress():

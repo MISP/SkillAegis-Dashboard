@@ -99,11 +99,21 @@
               class="select-none cursor-pointer text-nowrap"
               @click="toggleCompleted(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
             >
-              <FontAwesomeIcon
-                :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? faCheck : faTimes"
-                :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
-              />
-              <small :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'"> (+{{ task.score }})</small>
+              <span class="flex flex-col">
+                <span>
+                  <FontAwesomeIcon
+                    :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? faCheck : faTimes"
+                    :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
+                  />
+                  <small :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'"> (+{{ task.score }})</small>
+                </span>
+                <span class="text-sm leading-3">
+                  <span v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid].time">
+                    {{ (new Date(progress.exercises[exercise.uuid].tasks_completion[task.uuid].time * 1000)).toTimeString().split(' ', 1)[0] }}
+                  </span>
+                  <span v-else></span>
+                </span>
+              </span>
             </span>
             </td>
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3">
