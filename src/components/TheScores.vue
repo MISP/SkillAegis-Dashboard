@@ -2,7 +2,7 @@
   import { ref, computed } from "vue";
   import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faCheck, faTimes, faGraduationCap } from '@fortawesome/free-solid-svg-icons'
+  import { faCheck, faTimes, faGraduationCap, faMedal } from '@fortawesome/free-solid-svg-icons'
 
   const collapsed_panels = ref([])
 
@@ -64,6 +64,7 @@
             v-for="(task, task_index) in exercise.tasks"
             :key="task.name"
             class="border-b border-slate-100 dark:border-slate-700 p-3"
+            :title="task.description"
           >
             <div class="flex flex-col">
               <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500">Task {{ task_index + 1 }}</span>
@@ -85,7 +86,8 @@
         <template v-else>
           <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
             <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
-              <span :title="user_id">
+              <span :title="user_id" class="text-nowrap">
+                <FontAwesomeIcon v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1" :icon="faMedal" class="mr-1 text-amber-300"></FontAwesomeIcon>
                 <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>
                 <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
               </span>
