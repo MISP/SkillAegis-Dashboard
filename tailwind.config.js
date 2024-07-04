@@ -8,7 +8,10 @@ export default {
     extend: {
       transitionProperty: {
         'width': 'width'
-    } ,
+      } ,
+      screens: {
+        '3xl': '1800px',
+      }
     },
   },
   plugins: [

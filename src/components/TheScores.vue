@@ -85,7 +85,7 @@
         </tr>
         <template v-else>
           <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
-            <td class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
+            <td class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
               <span :title="user_id" class="text-nowrap">
                 <FontAwesomeIcon v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1" :icon="faMedal" class="mr-1 text-amber-300"></FontAwesomeIcon>
                 <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>
@@ -95,14 +95,14 @@
             <td
               v-for="(task, task_index) in exercise.tasks"
               :key="task_index"
-              class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-2"
+              class="text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-2"
             >
             <span
               class="select-none cursor-pointer flex justify-center content-center flex-wrap h-9"
               @click="toggleCompleted(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
             >
               <span class="flex flex-col">
-                <span>
+                <span class="text-nowrap">
                   <FontAwesomeIcon
                     v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid]"
                     :icon="faCheck"
@@ -133,7 +133,7 @@
               </span>
             </span>
             </td>
-            <td class="border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3">
+            <td class="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3">
               <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="progress.exercises[exercise.uuid].score" :aria-valuemin="0" aria-valuemax="100">
                 <div
                   class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"

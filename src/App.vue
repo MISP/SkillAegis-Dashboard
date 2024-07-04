@@ -9,7 +9,6 @@ import { socketConnected } from "@/socket";
 
 onMounted(() => {
   document.getElementsByTagName('body')[0].classList.add('dark')
-  document.getElementById('app').classList.add('w-5/6')
 })
 
 </script>
@@ -35,6 +34,14 @@ body {
   @apply dark:bg-gray-700;
   @apply text-slate-400;
   @apply dark:text-slate-300;
+}
+
+#app {
+  @apply 3xl:container mx-auto;
+  @apply mx-auto;
+  @apply mt-4;
+  @apply 3xl:w-11/12;
+  @apply lg:w-5/6;
 }
 
 </style>
