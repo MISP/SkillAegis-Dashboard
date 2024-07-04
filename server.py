@@ -51,7 +51,7 @@ zsocket.setsockopt_string(zmq.SUBSCRIBE, '')
 
 # Initialize Socket.IO server
 # sio = socketio.Server(cors_allowed_origins='*', async_mode='eventlet')
-sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True, engineio_logger=True)
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
 app = web.Application()
 sio.attach(app)
 
@@ -146,8 +146,8 @@ async def handleMessage(topic, s, message):
         user_id = notification_model.get_user_id(data)
         if user_id is not None:
             if exercise_model.is_accepted_query(data):
-                context = get_context(user_id, data)
-                succeeded_once = exercise_model.check_active_tasks(user_id, data, context)
+                context = get_context(topic, user_id, data)
+                succeeded_once = await exercise_model.check_active_tasks(user_id, data, context)
                 if succeeded_once:
                     await sendRefreshScore()
 
@@ -157,9 +157,12 @@ async def sendRefreshScore():
     await sio.emit('refresh_score')
 
 
-def get_context(user_id: int, data: dict) -> dict:
+def get_context(topic: str, user_id: int, data: dict) -> dict:
     context = {
+        'zmq_topic': topic,
         'user_id': user_id,
+        'user_email': db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None),
+        'user_authkey': db.USER_ID_TO_AUTHKEY_MAPPING.get(user_id, None),
     }
     if 'Log' in data:
         if 'request_is_rest' in data['Log']:
@@ -208,7 +211,6 @@ async def forward_zmq_to_socketio():
             ZMQ_LAST_TIME = time.time()
             # await handleMessage(topic, s, m)
         except Exception as e:
-            print(e)
             logger.error('Error handling message %s', e)
 
 

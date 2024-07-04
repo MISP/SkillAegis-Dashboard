@@ -2,10 +2,14 @@
   import { ref, onMounted } from "vue"
   import { socketConnected, zmqLastTime } from "@/socket";
 
-  const zmqLastTimeSecond = ref(0)
+  const zmqLastTimeSecond = ref('?')
 
   function refreshLastTime() {
-    zmqLastTimeSecond.value = parseInt(((new Date()).getTime() - zmqLastTime.value * 1000) / 1000)
+    if (zmqLastTime.value !== false) {
+      zmqLastTimeSecond.value = parseInt(((new Date()).getTime() - zmqLastTime.value * 1000) / 1000)
+    } else {
+      zmqLastTimeSecond.value = '?'
+    }
   }
 
   onMounted(() => {

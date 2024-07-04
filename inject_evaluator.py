@@ -17,6 +17,8 @@ def jq_extract(path: str, data: dict, extract_type='first'):
 # Replace the substring `{{variable}}` by context[variable] in the provided string
 def apply_replacement_from_context(string: str, context: dict) -> str:
     replacement_regex = r"{{(\w+)}}"
+    if r'{{' not in string and r'}}' not in string:
+        return string
     matches = re.fullmatch(replacement_regex, string, re.MULTILINE)
     if not matches:
         return string
