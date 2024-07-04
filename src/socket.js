@@ -10,6 +10,7 @@ const initial_state = {
   notificationEvents: [],
   notificationCounter: 0,
   notificationAPICounter: 0,
+  notificationHistory: [],
   exercises: [],
   selected_exercises: [],
   progresses: {},
@@ -40,6 +41,7 @@ export const notificationCounter = computed(() => state.notificationCounter)
 export const notificationAPICounter = computed(() => state.notificationAPICounter)
 export const userCount = computed(() => Object.keys(state.progresses).length)
 export const diagnostic = computed(() => state.diagnostic)
+export const notificationHistory = computed(() => state.notificationHistory)
 export const socketConnected = computed(() => connectionState.connected)
 export const zmqLastTime = computed(() => connectionState.zmq_last_time)
 
@@ -192,6 +194,10 @@ socket.on("refresh_score", (new_user) => {
 
 socket.on("keep_alive", (keep_alive) => {
   connectionState.zmq_last_time = keep_alive['zmq_last_time']
+});
+
+socket.on("update_notification_history", (notification_history) => {
+  state.notificationHistory = notification_history
 });
 
 function addLimited(target, message, maxCount) {

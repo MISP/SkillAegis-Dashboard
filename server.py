@@ -17,6 +17,7 @@ from config import logger
 import misp_api
 
 
+ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
 
@@ -122,6 +123,8 @@ async def any_event(event, sid, data={}):
     logger.info('>> Unhandled event %s', event)
 
 async def handleMessage(topic, s, message):
+    global ZMQ_MESSAGE_COUNT_LAST_TIMESPAN
+
     data = json.loads(message)
 
     if topic == 'misp_json_audit':
@@ -141,6 +144,7 @@ async def handleMessage(topic, s, message):
             notification = notification_model.get_notification_message(data)
             if notification_model.is_accepted_notification(notification):
                 notification_model.record_notification(notification)
+                ZMQ_MESSAGE_COUNT_LAST_TIMESPAN += 1
                 await sio.emit('notification', notification)
 
         user_id = notification_model.get_user_id(data)
@@ -188,6 +192,16 @@ async def getDiagnostic() -> dict:
     return diagnostic
 
 
+async def notification_history():
+    global ZMQ_MESSAGE_COUNT_LAST_TIMESPAN
+    while True:
+        await sio.sleep(db.NOTIFICATION_HISTORY_FREQUENCY)
+        notification_model.record_notification_history(ZMQ_MESSAGE_COUNT_LAST_TIMESPAN)
+        ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
+        payload = notification_model.get_notifications_history()
+        await sio.emit('update_notification_history', payload)
+
+
 async def keepalive():
     global ZMQ_LAST_TIME
     while True:
@@ -205,10 +219,11 @@ async def forward_zmq_to_socketio():
     while True:
         message = await zsocket.recv_string()
         topic, s, m = message.partition(" ")
+        await handleMessage(topic, s, m)
         try:
             ZMQ_MESSAGE_COUNT += 1
             ZMQ_LAST_TIME = time.time()
-            await handleMessage(topic, s, m)
+            # await handleMessage(topic, s, m)
         except Exception as e:
             logger.error('Error handling message %s', e)
 
@@ -216,6 +231,7 @@ async def forward_zmq_to_socketio():
 async def init_app():
     sio.start_background_task(forward_zmq_to_socketio)
     sio.start_background_task(keepalive)
+    sio.start_background_task(notification_history)
     return app
 
 

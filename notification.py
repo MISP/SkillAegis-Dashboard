@@ -27,12 +27,20 @@ def get_notifications() -> list[dict]:
     return list(db.NOTIFICATION_MESSAGES)
 
 
+def get_notifications_history() -> list[dict]:
+    return list(db.NOTIFICATION_HISTORY)
+
+
 def reset_notifications():
     db.resetNotificationMessage()
 
 
 def record_notification(notification: dict):
     db.NOTIFICATION_MESSAGES.appendleft(notification)
+
+
+def record_notification_history(message_count: int):
+    db.NOTIFICATION_HISTORY.append(message_count)
 
 
 def get_user_id(data: dict):

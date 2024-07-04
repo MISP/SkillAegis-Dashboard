@@ -1,12 +1,54 @@
 <script setup>
-  import { ref, watch } from "vue"
-  import { notifications, userCount, notificationCounter, notificationAPICounter, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
+  import { ref, watch, computed } from "vue"
+  import { notifications, userCount, notificationCounter, notificationAPICounter, notificationHistory, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
 
 
+  const theChart = ref(null)
   const verbose = ref(false)
   const api_query = ref(false)
+  const chartInitSeries = [
+    {data: Array.apply(null, {length: 180}).map(Function.call, Math.random)}
+    // {data: Array.from(Array(120)).map(()=> 0)}
+  ]
+
+  const notificationHistorySeries = computed(() => {
+    return [{data: Array.from(notificationHistory.value)}]
+  })
+
+  const chartOptions = {
+    chart: {
+      type: 'bar',
+      width: '100%',
+      height: 32,
+      sparkline: {
+        enabled: true
+      },
+      dropShadow: {
+        enabled: true,
+        enabledOnSeries: undefined,
+        top: 2,
+        left: 1,
+        blur: 3,
+        color: '#000',
+        opacity: 0.45
+      }
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: '80%'
+      }
+    },
+    xaxis: {
+    },
+    yaxis: {
+      min: 0,
+    },
+    tooltip: {
+      enabled: false,
+    }
+  }
 
   watch(verbose, (newValue) => {
     toggleVerboseMode(newValue == true)
@@ -14,6 +56,10 @@
 
   watch(api_query, (newValue) => {
     toggleApiQueryMode(newValue == true)
+  })
+
+  watch(notificationHistorySeries, (newValue) => {
+    theChart.value.updateSeries(newValue)
   })
 
   function getClassFromResponseCode(response_code) {
@@ -69,6 +115,10 @@
         API Queries
       </label>
     </span>
+  </div>
+
+  <div class="my-2 -ml-1">
+    <apexchart ref="theChart" height="32" width="100%" :options="chartOptions" :series="chartInitSeries"></apexchart>
   </div>
 
   <table class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full">

@@ -16,8 +16,10 @@
     "@fortawesome/free-regular-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
+    "apexcharts": "^3.49.2",
     "lodash.debounce": "^4.0.8",
-    "vue": "^3.4.29"
+    "vue": "^3.4.29",
+    "vue3-apexcharts": "^1.5.3"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
