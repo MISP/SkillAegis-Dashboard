@@ -140,11 +140,14 @@ def get_exercises():
         tasks = []
         for inject in exercise['injects']:
             score = db.EXERCISES_STATUS[exercise['exercise']['uuid']]['tasks'][inject['uuid']]['score']
+            requirements = db.INJECT_REQUIREMENTS_BY_INJECT_UUID[inject['uuid']]
             tasks.append(
                 {
                     "name": inject['name'],
                     "uuid": inject['uuid'],
+                    "description": inject.get('description', ''),
                     "score": score,
+                    "requirements": requirements,
                 }
             )
         exercises.append(

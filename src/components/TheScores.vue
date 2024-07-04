@@ -2,7 +2,7 @@
   import { ref, computed } from "vue";
   import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faCheck, faTimes, faGraduationCap, faMedal } from '@fortawesome/free-solid-svg-icons'
+  import { faCheck, faTimes, faGraduationCap, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
 
   const collapsed_panels = ref([])
 
@@ -95,7 +95,7 @@
             <td
               v-for="(task, task_index) in exercise.tasks"
               :key="task_index"
-              class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3"
+              class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-2"
             >
             <span
               class="select-none cursor-pointer text-nowrap"
@@ -104,7 +104,19 @@
               <span class="flex flex-col">
                 <span>
                   <FontAwesomeIcon
-                    :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? faCheck : faTimes"
+                    v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid]"
+                    :icon="faCheck"
+                    :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
+                  />
+                  <FontAwesomeIcon
+                    v-else-if="task.requirements?.inject_uuid !== undefined && !progress.exercises[exercise.uuid].tasks_completion[task.requirements.inject_uuid]"
+                    title="All requirements for that task haven't been fullfilled yet"
+                    :icon="faHourglassHalf"
+                    :class="`text-lg ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
+                  />
+                  <FontAwesomeIcon
+                    v-else
+                    :icon="faTimes"
                     :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
                   />
                   <small :class="progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'"> (+{{ task.score }})</small>
