@@ -1,9 +1,17 @@
 <script setup>
-  import { computed } from "vue"
+  import { ref, onMounted } from "vue"
   import { socketConnected, zmqLastTime } from "@/socket";
 
-  const zmqLastTimeSecond = computed(() => {
-    return parseInt(((new Date()).getTime() - zmqLastTime.value * 1000) / 1000)
+  const zmqLastTimeSecond = ref(0)
+
+  function refreshLastTime() {
+    zmqLastTimeSecond.value = parseInt(((new Date()).getTime() - zmqLastTime.value * 1000) / 1000)
+  }
+
+  onMounted(() => {
+    setInterval(() => {
+      refreshLastTime()
+    }, 1000)
   })
 
 </script>
@@ -27,7 +35,7 @@
         online
       </template>
       <template v-else>
-        {{ zmqLastTimeSecond }}s
+        Last keep-alive: {{ zmqLastTimeSecond }}s ago
       </template>
     </span>
   </span>
