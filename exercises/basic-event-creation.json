@@ -138,6 +138,14 @@
         {
           "parameters": [
             {
+              ".Event.user_id": {
+                "comparison": "equals",
+                "values": [
+                  "{{user_id}}"
+                ]
+              }
+            },
+            {
               ".Event.info": {
                 "comparison": "contains",
                 "values": [
@@ -148,9 +156,17 @@
             }
           ],
           "result": "MISP Event created",
-          "evaluation_strategy": "data_filtering",
+          "evaluation_strategy": "query_search",
           "evaluation_context": {
-            "request_is_rest": true
+            "request_is_rest": true,
+            "query_context": {
+              "url": "/events/restSearch",
+              "request_method": "POST",
+              "payload": {
+                "timestamp": "10d",
+                "eventinfo": "%API%"
+              }
+            }
           },
           "score_range": [
             0,

@@ -51,7 +51,7 @@ zsocket.setsockopt_string(zmq.SUBSCRIBE, '')
 
 # Initialize Socket.IO server
 # sio = socketio.Server(cors_allowed_origins='*', async_mode='eventlet')
-sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True, engineio_logger=True)
 app = web.Application()
 sio.attach(app)
 
@@ -146,7 +146,7 @@ async def handleMessage(topic, s, message):
         user_id = notification_model.get_user_id(data)
         if user_id is not None:
             if exercise_model.is_accepted_query(data):
-                context = get_context(data)
+                context = get_context(user_id, data)
                 succeeded_once = exercise_model.check_active_tasks(user_id, data, context)
                 if succeeded_once:
                     await sendRefreshScore()
@@ -157,8 +157,10 @@ async def sendRefreshScore():
     await sio.emit('refresh_score')
 
 
-def get_context(data: dict) -> dict:
-    context = {}
+def get_context(user_id: int, data: dict) -> dict:
+    context = {
+        'user_id': user_id,
+    }
     if 'Log' in data:
         if 'request_is_rest' in data['Log']:
             context['request_is_rest'] = data['Log']['request_is_rest']
@@ -200,11 +202,13 @@ async def forward_zmq_to_socketio():
     while True:
         message = await zsocket.recv_string()
         topic, s, m = message.partition(" ")
+        await handleMessage(topic, s, m)
         try:
             ZMQ_MESSAGE_COUNT += 1
             ZMQ_LAST_TIME = time.time()
-            await handleMessage(topic, s, m)
+            # await handleMessage(topic, s, m)
         except Exception as e:
+            print(e)
             logger.error('Error handling message %s', e)
 
 

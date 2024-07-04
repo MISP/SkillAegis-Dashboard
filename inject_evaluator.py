@@ -6,7 +6,6 @@ import operator
 from config import logger
 
 
-# .Event.Attribute[] | select(.value == "evil.exe") | .Tag
 def jq_extract(path: str, data: dict, extract_type='first'):
     query = jq.compile(path).input_value(data)
     try:
@@ -15,28 +14,40 @@ def jq_extract(path: str, data: dict, extract_type='first'):
         return None
 
 
+# Replace the substring `{{variable}}` by context[variable] in the provided string
+def apply_replacement_from_context(string: str, context: dict) -> str:
+    replacement_regex = r"{{(\w+)}}"
+    matches = re.fullmatch(replacement_regex, string, re.MULTILINE)
+    if not matches:
+        return string
+    subst_str = matches.groups()[0]
+    subst = str(context.get(subst_str, ''))
+    return re.sub(replacement_regex, subst, string)
+
+
 ##
 ## Data Filtering
 ##
 
-def condition_satisfied(evaluation_config: dict, data_to_validate: Union[dict, list, str]) -> bool:
+def condition_satisfied(evaluation_config: dict, data_to_validate: Union[dict, list, str], context: dict) -> bool:
     if type(data_to_validate) is bool:
         data_to_validate = "1" if data_to_validate else "0"
     if type(data_to_validate) is str:
-        return eval_condition_str(evaluation_config, data_to_validate)
+        return eval_condition_str(evaluation_config, data_to_validate, context)
     elif type(data_to_validate) is list:
-        return eval_condition_list(evaluation_config, data_to_validate)
+        return eval_condition_list(evaluation_config, data_to_validate, context)
     elif type(data_to_validate) is dict:
         # Not sure how we could have condition on this
-        return eval_condition_dict(evaluation_config, data_to_validate)
+        return eval_condition_dict(evaluation_config, data_to_validate, context)
     return False
 
 
-def eval_condition_str(evaluation_config: dict, data_to_validate: str) -> bool:
+def eval_condition_str(evaluation_config: dict, data_to_validate: str, context: dict) -> bool:
     comparison_type = evaluation_config['comparison']
     values = evaluation_config['values']
     if len(values) == 0:
         return False
+    values = [apply_replacement_from_context(v, context) for v in values]
 
     if comparison_type == 'contains':
         values = [v.lower() for v in values]
@@ -56,7 +67,7 @@ def eval_condition_str(evaluation_config: dict, data_to_validate: str) -> bool:
     return False
 
 
-def eval_condition_list(evaluation_config: dict, data_to_validate: str) -> bool:
+def eval_condition_list(evaluation_config: dict, data_to_validate: str, context: dict) -> bool:
     comparison_type = evaluation_config['comparison']
     values = evaluation_config['values']
     comparators = {
@@ -69,7 +80,7 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str) -> bool:
 
     if len(values) == 0:
         return False
-
+    values = [apply_replacement_from_context(v, context) for v in values]
 
     if comparison_type == 'contains' or comparison_type == 'equals':
         data_to_validate_set = set(data_to_validate)
@@ -102,7 +113,7 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str) -> bool:
     return False
 
 
-def eval_condition_dict(evaluation_config: dict, data_to_validate: str) -> bool:
+def eval_condition_dict(evaluation_config: dict, data_to_validate: str, context: dict) -> bool:
     comparison_type = evaluation_config['comparison']
     values = evaluation_config['values']
     comparators = {
@@ -112,6 +123,10 @@ def eval_condition_dict(evaluation_config: dict, data_to_validate: str) -> bool:
         '>=': operator.ge,
         '=': operator.eq,
     }
+
+    if len(values) == 0:
+        return False
+    values = [apply_replacement_from_context(v, context) for v in values]
 
     comparison_type = evaluation_config['comparison']
     if comparison_type == 'contains':
@@ -129,21 +144,31 @@ def eval_condition_dict(evaluation_config: dict, data_to_validate: str) -> bool:
     return False
 
 
-def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict) -> bool:
+def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
     for evaluation_params in inject_evaluation['parameters']:
         for evaluation_path, evaluation_config in evaluation_params.items():
+            evaluation_path = apply_replacement_from_context(evaluation_path, context)
             data_to_validate = jq_extract(evaluation_path, data, evaluation_config.get('extract_type', 'first'))
             if data_to_validate is None:
                 logger.debug('Could not extract data')
                 return False
-            if not condition_satisfied(evaluation_config, data_to_validate):
+            if not condition_satisfied(evaluation_config, data_to_validate, context):
                 return False
     return True
 
 
 ##
-## Query comparison
+## Query mirror
 ##
 
-def eval_query_mirror(user_id: int, expected_data, data_to_validate) -> bool:
+def eval_query_mirror(user_id: int, expected_data, data_to_validate, context: dict) -> bool:
     return expected_data == data_to_validate
+
+
+
+##
+## Query search
+##
+
+def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
+    return eval_data_filtering(user_id, inject_evaluation, data, context)

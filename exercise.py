@@ -10,7 +10,7 @@ from typing import Union
 import jq
 
 import db
-from inject_evaluator import eval_data_filtering, eval_query_mirror
+from inject_evaluator import eval_data_filtering, eval_query_mirror, eval_query_search
 import misp_api
 import config
 from config import logger
@@ -351,11 +351,13 @@ def inject_checker_router(user_id: int, inject_evaluation: dict, data: dict, con
         return False
 
     if inject_evaluation['evaluation_strategy'] == 'data_filtering':
-        return eval_data_filtering(user_id, inject_evaluation, data_to_validate)
+        return eval_data_filtering(user_id, inject_evaluation, data_to_validate, context)
     elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
         expected_data = data_to_validate['expected_data']
         data_to_validate = data_to_validate['data_to_validate']
-        return eval_query_mirror(user_id, expected_data, data_to_validate)
+        return eval_query_mirror(user_id, expected_data, data_to_validate, context)
+    elif inject_evaluation['evaluation_strategy'] == 'query_search':
+        return eval_query_search(user_id, inject_evaluation, data_to_validate, context)
     return False
 
 
@@ -367,6 +369,8 @@ def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict) -> U
     elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
         perfomed_query = parse_performed_query_from_log(data)
         data_to_validate = fetch_data_for_query_mirror(user_id, inject_evaluation, perfomed_query)
+    elif inject_evaluation['evaluation_strategy'] == 'query_search':
+        data_to_validate = fetch_data_for_query_search(user_id, inject_evaluation)
     return data_to_validate
 
 
@@ -436,6 +440,18 @@ def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, perfomed_
             'data_to_validate' : data_to_validate,
         }
     return data
+
+
+def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> Union[None, dict]:
+    authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
+    if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
+            return None
+    query_context = inject_evaluation['evaluation_context']['query_context']
+    search_method = query_context['request_method']
+    search_url = query_context['url']
+    search_payload = inject_evaluation['payload']
+    search_data  = misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
+    return search_data
 
 
 @debounce_check_active_tasks(debounce_seconds=2)
