@@ -205,11 +205,10 @@ async def forward_zmq_to_socketio():
     while True:
         message = await zsocket.recv_string()
         topic, s, m = message.partition(" ")
-        await handleMessage(topic, s, m)
         try:
             ZMQ_MESSAGE_COUNT += 1
             ZMQ_LAST_TIME = time.time()
-            # await handleMessage(topic, s, m)
+            await handleMessage(topic, s, m)
         except Exception as e:
             logger.error('Error handling message %s', e)
 
