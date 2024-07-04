@@ -145,5 +145,5 @@ def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict) -> bo
 ## Query comparison
 ##
 
-def eval_query_comparison(user_id: int, expected_data, data_to_validate) -> bool:
+def eval_query_mirror(user_id: int, expected_data, data_to_validate) -> bool:
     return expected_data == data_to_validate

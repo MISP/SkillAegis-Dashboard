@@ -10,7 +10,7 @@ from typing import Union
 import jq
 
 import db
-from inject_evaluator import eval_data_filtering, eval_query_comparison
+from inject_evaluator import eval_data_filtering, eval_query_mirror
 import misp_api
 import config
 from config import logger
@@ -352,10 +352,10 @@ def inject_checker_router(user_id: int, inject_evaluation: dict, data: dict, con
 
     if inject_evaluation['evaluation_strategy'] == 'data_filtering':
         return eval_data_filtering(user_id, inject_evaluation, data_to_validate)
-    elif inject_evaluation['evaluation_strategy'] == 'query_comparison':
+    elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
         expected_data = data_to_validate['expected_data']
         data_to_validate = data_to_validate['data_to_validate']
-        return eval_query_comparison(user_id, expected_data, data_to_validate)
+        return eval_query_mirror(user_id, expected_data, data_to_validate)
     return False
 
 
@@ -364,9 +364,9 @@ def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict) -> U
     if inject_evaluation['evaluation_strategy'] == 'data_filtering':
         event_id = parse_event_id_from_log(data)
         data_to_validate = fetch_data_for_data_filtering(event_id=event_id)
-    elif inject_evaluation['evaluation_strategy'] == 'query_comparison':
+    elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
         perfomed_query = parse_performed_query_from_log(data)
-        data_to_validate = fetch_data_for_query_comparison(user_id, inject_evaluation, perfomed_query)
+        data_to_validate = fetch_data_for_query_mirror(user_id, inject_evaluation, perfomed_query)
     return data_to_validate
 
 
@@ -419,7 +419,7 @@ def fetch_data_for_data_filtering(event_id=None) -> Union[None, dict]:
     return data
 
 
-def fetch_data_for_query_comparison(user_id: int, inject_evaluation: dict, perfomed_query: dict) -> Union[None, dict]:
+def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, perfomed_query: dict) -> Union[None, dict]:
     data = None
     authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
     if perfomed_query is not None:

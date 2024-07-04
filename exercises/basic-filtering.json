@@ -119,7 +119,7 @@
             }
           ],
           "result": "Published 48h retreived",
-          "evaluation_strategy": "query_comparison",
+          "evaluation_strategy": "query_mirror",
           "evaluation_context": {
             "request_is_rest": true,
             "query_context": {
@@ -134,7 +134,7 @@
         }
       ],
       "name": "Get Published in the past 48h",
-      "target_tool": "MISP-query",
+      "target_tool": "MISP",
       "uuid": "e2216993-6192-4e7c-ae30-97cfe9de61b4"
     },
     {
@@ -150,7 +150,7 @@
             }
           ],
           "result": "IP CSV retrieved",
-          "evaluation_strategy": "query_comparison",
+          "evaluation_strategy": "query_mirror",
           "evaluation_context": {
             "request_is_rest": true,
             "query_context": {
@@ -165,7 +165,7 @@
         }
       ],
       "name": "IP IoCs changed in the past 48h in CSV",
-      "target_tool": "MISP-query",
+      "target_tool": "MISP",
       "uuid": "caf68c86-65ed-4df3-99b8-7e346fa498ba"
     },
     {
@@ -180,7 +180,7 @@
             }
           ],
           "result": "20 Attribute tagged retrieved",
-          "evaluation_strategy": "query_comparison",
+          "evaluation_strategy": "query_mirror",
           "evaluation_context": {
             "request_is_rest": true,
             "query_context": {
@@ -195,7 +195,7 @@
         }
       ],
       "name": "First 20 Attribute with TLP lower than `amber`",
-      "target_tool": "MISP-query",
+      "target_tool": "MISP",
       "uuid": "3e96fb13-4aba-448c-8d79-efb93392cc88"
     },
     {
@@ -209,7 +209,7 @@
             }
           ],
           "result": "Phising counted",
-          "evaluation_strategy": "query_comparison",
+          "evaluation_strategy": "query_mirror",
           "evaluation_context": {
             "request_is_rest": true,
             "query_context": {
@@ -224,7 +224,7 @@
         }
       ],
       "name": "Event count with `Phishing - T1566` involved",
-      "target_tool": "MISP-query",
+      "target_tool": "MISP",
       "uuid": "1da0fdc8-9d0d-4618-a811-66491e196833"
     }
   ]

@@ -219,6 +219,7 @@
         }
       ],
       "name": "Event Creation",
+      "description": "Create an Event containing `ransomware`",
       "target_tool": "MISP",
       "uuid": "8e8dbda2-0f5e-4101-83ff-63c1ddda2cae"
     },
