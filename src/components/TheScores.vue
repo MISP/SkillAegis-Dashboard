@@ -98,7 +98,7 @@
               class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-2"
             >
             <span
-              class="select-none cursor-pointer text-nowrap"
+              class="select-none cursor-pointer flex justify-center content-center flex-wrap h-9"
               @click="toggleCompleted(progress.exercises[exercise.uuid].tasks_completion[task.uuid], user_id, exercise.uuid, task.uuid)"
             >
               <span class="flex flex-col">
