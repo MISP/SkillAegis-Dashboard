@@ -57,13 +57,13 @@
       <span class="font-bold">{{ notificationAPICounter }}</span>
     </span>
     <span class="flex items-center">
-      <label class="mr-1 flex items-center cursor-pointer">
+      <label class="mr-1 flex items-center cursor-pointer text-slate-700 dark:text-slate-300">
         <input type="checkbox" class="toggle toggle-warning [--fallback-su:#22c55e] mr-1" :checked="verbose" @change="verbose = !verbose"/>
         Verbose
       </label>
     </span>
     <span class="flex items-center">
-      <label class="mr-1 flex items-center cursor-pointer">
+      <label class="mr-1 flex items-center cursor-pointer text-slate-700 dark:text-slate-300">
         <input type="checkbox" class="toggle toggle-success [--fallback-su:#22c55e] mr-1" :checked="api_query" @change="api_query = !api_query"/>
         <FontAwesomeIcon :icon="faCog" size="sm" :mask="faCloud" transform="shrink-7 left-1" class="mr-1"></FontAwesomeIcon>
         API Queries
