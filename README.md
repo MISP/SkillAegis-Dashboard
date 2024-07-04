@@ -8,12 +8,15 @@ source venv/bin/activate
 
 # Install deps
 pip3 install -r REQUIREMENTS
+
+# Create config file and adapt it to your needs
+cp config.py.sample config.py
 ```
 
 ## Running the PROD setup
 ```bash
 python3 server.py
-# Access the page http://localhost:3000 with your browser
+# Access the page http://localhost:4000 with your browser
 ```
 
 
