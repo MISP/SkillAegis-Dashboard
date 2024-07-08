@@ -2,14 +2,16 @@
   import { ref, watch } from 'vue'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+  import { darkModeOn } from "@/settings.js"
 
-  const darkMode = ref(true)
+  const darkMode = ref(darkModeOn.value)
 
   watch(darkMode, (newValue) => {
+    darkModeOn.value = newValue
     if (newValue) {
-        document.getElementsByTagName('body')[0].classList.add('dark')
-      } else {
-        document.getElementsByTagName('body')[0].classList.remove('dark')
+      document.getElementsByTagName('body')[0].classList.add('dark')
+    } else {
+      document.getElementsByTagName('body')[0].classList.remove('dark')
     }
   })
 </script>

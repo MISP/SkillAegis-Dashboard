@@ -5,10 +5,13 @@ import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
 import TheDahboard from './TheDahboard.vue'
 import { socketConnected } from "@/socket";
+import { darkModeEnabled } from "@/settings.js"
 
 
 onMounted(() => {
-  document.getElementsByTagName('body')[0].classList.add('dark')
+  if (darkModeEnabled.value) {
+    document.getElementsByTagName('body')[0].classList.add('dark')
+  }
 })
 
 </script>

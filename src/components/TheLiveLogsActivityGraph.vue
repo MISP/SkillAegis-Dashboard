@@ -1,6 +1,7 @@
 <script setup>
   import { ref, watch, computed } from "vue"
   import { notificationHistory, notificationHistoryConfig } from "@/socket";
+  import { darkModeEnabled } from "@/settings.js"
 
   const theChart = ref(null)
   const chartInitSeries = [
@@ -16,48 +17,54 @@
     return [{data: Array.from(notificationHistory.value)}]
   })
 
-  const chartOptions = {
-    chart: {
-      type: 'bar',
-      width: '100%',
-      height: 32,
-      sparkline: {
-        enabled: true
+  const chartOptions = computed(() => {
+    return {
+      chart: {
+        type: 'bar',
+        width: '100%',
+        height: 32,
+        sparkline: {
+          enabled: true
+        },
+        dropShadow: {
+            enabled: true,
+            enabledOnSeries: undefined,
+            top: 2,
+            left: 1,
+            blur: 2,
+            color: '#000',
+            opacity: darkModeEnabled.value ? 0.35 : 0.15
+        },
+        animations: {
+            enabled: false,
+            easing: 'easeinout',
+            speed: 200,
+        },
       },
-      dropShadow: {
-        enabled: true,
-        enabledOnSeries: undefined,
-        top: 2,
-        left: 1,
-        blur: 3,
-        color: '#000',
-        opacity: 0.45
+      colors: [darkModeEnabled.value ? '#008ffb' : '#1f9eff'],
+      plotOptions: {
+        bar: {
+          columnWidth: '80%'
+        }
       },
-      animations: {
+      yaxis: {
+        min: 0,
+        labels: {
+          show: false,
+        }
+      },
+      tooltip: {
         enabled: false,
-        easing: 'easeinout',
-        speed: 200,
       },
-    },
-    plotOptions: {
-      bar: {
-        columnWidth: '80%'
-      }
-    },
-    yaxis: {
-      min: 0,
-    },
-    tooltip: {
-      enabled: false,
-    },
-  }
+    }
+  })
 
 </script>
 
 <template>
-  <div class="my-2 --ml-1 bg-slate-600 py-1 pl-1 pr-3 rounded-md relative flex flex-col">
+  <div class="my-2 --ml-1 bg-slate-50 dark:bg-slate-600 py-1 pl-1 pr-3 rounded-md relative flex flex-col">
     <div :class="`${!hasActivity ? 'hidden' : 'absolute'} h-10 -mt-1 w-full z-40`">
-      <div class="text-xxs flex justify-between h-full items-center">
+      <div class="text-xxs flex justify-between h-full items-center text-slate-500 dark:text-slate-300">
         <span class="-rotate-90 w-8 -ml-3">- {{ notificationHistoryConfig.buffer_timestamp_min }}min</span>
         <span class="-rotate-90 w-8 text-xs">–</span>
         <span class="-rotate-90 w-8 text-lg">–</span>
