@@ -51,7 +51,6 @@ zsocket.setsockopt_string(zmq.SUBSCRIBE, '')
 
 
 # Initialize Socket.IO server
-# sio = socketio.Server(cors_allowed_origins='*', async_mode='eventlet')
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
 app = web.Application()
 sio.attach(app)
@@ -212,6 +211,12 @@ async def keepalive():
         await sio.emit('keep_alive', payload)
 
 
+async def backup_exercises_progress():
+    while True:
+        await sio.sleep(5)
+        exercise_model.backup_exercises_progress()
+
+
 # Function to forward zmq messages to Socket.IO
 async def forward_zmq_to_socketio():
     global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME
@@ -232,6 +237,7 @@ async def init_app():
     sio.start_background_task(forward_zmq_to_socketio)
     sio.start_background_task(keepalive)
     sio.start_background_task(notification_history)
+    sio.start_background_task(backup_exercises_progress)
     return app
 
 
@@ -244,5 +250,7 @@ if __name__ == "__main__":
     if not exercises_loaded:
         logger.critical('Could not load exercises')
         sys.exit(1)
+
+    exercise_model.restore_exercices_progress()
 
     web.run_app(init_app(), host=config.server_host, port=config.server_port)

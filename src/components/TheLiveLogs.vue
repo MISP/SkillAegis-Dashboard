@@ -9,8 +9,8 @@
   const verbose = ref(false)
   const api_query = ref(false)
   const chartInitSeries = [
-    {data: Array.apply(null, {length: 180}).map(Function.call, Math.random)}
-    // {data: Array.from(Array(120)).map(()=> 0)}
+    // {data: Array.apply(null, {length: 180}).map(Function.call, Math.random)}
+    {data: Array.from(Array(12*20)).map(()=> 0)}
   ]
 
   const notificationHistorySeries = computed(() => {

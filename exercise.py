@@ -60,6 +60,29 @@ def read_exercise_dir():
     return exercises
 
 
+def backup_exercises_progress():
+    with open('backup.json', 'w') as f:
+        toBackup = {
+            'EXERCISES_STATUS': db.EXERCISES_STATUS,
+            'SELECTED_EXERCISES': db.SELECTED_EXERCISES,
+            'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
+            'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
+        }
+        json.dump(toBackup, f)
+
+
+def restore_exercices_progress():
+    try:
+        with open('backup.json', 'r') as f:
+            data = json.load(f)
+            db.EXERCISES_STATUS = data['EXERCISES_STATUS']
+            db.SELECTED_EXERCISES = data['SELECTED_EXERCISES']
+            db.USER_ID_TO_EMAIL_MAPPING = data['USER_ID_TO_EMAIL_MAPPING']
+            db.USER_ID_TO_AUTHKEY_MAPPING = data['USER_ID_TO_AUTHKEY_MAPPING']
+    except:
+        logger.info('Could not restore exercise progress')
+
+
 def is_validate_exercises(exercises: list) -> bool:
     exercises_uuid = set()
     tasks_uuid = set()
@@ -181,6 +204,7 @@ def resetAllExerciseProgress():
         for exercise_status in db.EXERCISES_STATUS.values():
             for task in exercise_status['tasks'].values():
                 mark_task_incomplete(user_id, exercise_status['uuid'], task['uuid'])
+    backup_exercises_progress()
 
 
 def get_completed_tasks_for_user(user_id: int):

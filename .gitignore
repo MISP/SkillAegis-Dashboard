@@ -2,6 +2,7 @@ __pycache__
 venv
 config.py
 misp_cache.sqlite
+backup.json
 
 # Logs
 logs
