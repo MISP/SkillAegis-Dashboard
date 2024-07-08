@@ -33,7 +33,12 @@
         blur: 3,
         color: '#000',
         opacity: 0.45
-      }
+      },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 200,
+      },
     },
     plotOptions: {
       bar: {
@@ -47,7 +52,7 @@
     },
     tooltip: {
       enabled: false,
-    }
+    },
   }
 
   watch(verbose, (newValue) => {
