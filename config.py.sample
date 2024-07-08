@@ -10,6 +10,7 @@ misp_skipssl = True
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
     'attributes': ['add', 'edit', 'delete', 'restSearch',],
+    'eventReports': ['add', 'edit', 'delete',],
     'tags': '*',
 }
 
