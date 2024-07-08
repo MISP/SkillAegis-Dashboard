@@ -1,6 +1,6 @@
 <script setup>
   import { ref, watch, computed } from "vue"
-  import { notifications, userCount, notificationCounter, notificationAPICounter, notificationHistory, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
+  import { notifications, userCount, notificationCounter, notificationAPICounter, notificationHistory, notificationHistoryConfig, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
 
@@ -9,9 +9,10 @@
   const verbose = ref(false)
   const api_query = ref(false)
   const chartInitSeries = [
-    // {data: Array.apply(null, {length: 180}).map(Function.call, Math.random)}
+    // {data: Array.apply(null, {length: 240}).map(Function.call, Math.random)}
     {data: Array.from(Array(12*20)).map(()=> 0)}
   ]
+  const hasActivity = ref(false)
 
   const notificationHistorySeries = computed(() => {
     return [{data: Array.from(notificationHistory.value)}]
@@ -45,8 +46,6 @@
         columnWidth: '80%'
       }
     },
-    xaxis: {
-    },
     yaxis: {
       min: 0,
     },
@@ -64,6 +63,7 @@
   })
 
   watch(notificationHistorySeries, (newValue) => {
+    hasActivity.value = notificationHistory.value.filter((x) => x != 0).length > 0
     theChart.value.updateSeries(newValue)
   })
 
@@ -122,8 +122,20 @@
     </span>
   </div>
 
-  <div class="my-2 -ml-1">
-    <apexchart ref="theChart" height="32" width="100%" :options="chartOptions" :series="chartInitSeries"></apexchart>
+  <div class="my-2 --ml-1 bg-slate-600 py-1 pl-1 pr-3 rounded-md relative flex flex-col">
+    <div :class="`${!hasActivity ? 'hidden' : 'absolute'} h-10 -mt-1 w-full z-40`">
+      <div class="text-xxs flex justify-between h-full items-center">
+        <span class="-rotate-90 w-8 -ml-3">- {{ notificationHistoryConfig.buffer_timestamp_min }}min</span>
+        <span class="-rotate-90 w-8 text-xs">–</span>
+        <span class="-rotate-90 w-8 text-lg">–</span>
+        <span class="-rotate-90 w-8 text-xs">–</span>
+        <span class="-rotate-90 w-8 -mr-1.5">- 0min</span>
+      </div>
+    </div>
+    <i :class="['text-center text-slate-600 dark:text-slate-400', hasActivity ? 'hidden' : 'block']">
+      - No recorded activity -
+    </i>
+    <apexchart ref="theChart" :class="hasActivity ? 'block' : 'absolute h-8 w-full'" height="32" width="100%" :options="chartOptions" :series="chartInitSeries"></apexchart>
   </div>
 
   <table class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full">

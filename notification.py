@@ -28,7 +28,15 @@ def get_notifications() -> list[dict]:
 
 
 def get_notifications_history() -> list[dict]:
-    return list(db.NOTIFICATION_HISTORY)
+    return {
+        'history': list(db.NOTIFICATION_HISTORY),
+        'config': {
+            'buffer_resolution_per_minute': db.NOTIFICATION_HISTORY_BUFFER_RESOLUTION_PER_MIN,
+            'buffer_timestamp_min': db.NOTIFICATION_HISTORY_BUFFER_TIMESPAN_MIN,
+            'frequency': db.NOTIFICATION_HISTORY_FREQUENCY,
+            'notification_history_size': db.notification_history_size,
+        },
+    }
 
 
 def reset_notifications():

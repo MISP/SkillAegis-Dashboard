@@ -8,10 +8,13 @@ export default {
     extend: {
       transitionProperty: {
         'width': 'width'
-      } ,
+      },
       screens: {
         '3xl': '1800px',
-      }
+      },
+      fontSize: {
+        'xxs': '0.6rem',
+      },
     },
   },
   plugins: [
