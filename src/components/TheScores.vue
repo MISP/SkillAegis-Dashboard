@@ -63,11 +63,11 @@
           <th
             v-for="(task, task_index) in exercise.tasks"
             :key="task.name"
-            class="border-b border-slate-100 dark:border-slate-700 p-3"
+            class="border-b border-slate-100 dark:border-slate-700 p-3 align-top"
             :title="task.description"
           >
             <div class="flex flex-col">
-              <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500">Task {{ task_index + 1 }}</span>
+              <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500 text-nowrap">Task {{ task_index + 1 }}</span>
               <i class="text-center">{{ task.name }}</i>
             </div>
           </th>
