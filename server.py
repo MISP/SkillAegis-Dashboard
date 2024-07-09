@@ -150,10 +150,11 @@ async def handleMessage(topic, s, message):
             if notification_model.is_accepted_notification(notification):
                 notification_model.record_notification(notification)
                 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN += 1
+                await sio.emit('notification', notification)
+            if notification_model.is_accepted_user_activity(notification):
                 user_id = notification_model.get_user_id(data)
                 if user_id is not None:
                     USER_ACTIVITY[user_id] += 1
-                await sio.emit('notification', notification)
 
         user_id = notification_model.get_user_id(data)
         if user_id is not None:

@@ -198,3 +198,20 @@ def is_accepted_notification(notification) -> bool:
         elif action in config.live_logs_accepted_scope[scope]:
             return True
     return False
+
+
+def is_accepted_user_activity(notification) -> bool:
+    global VERBOSE_MODE
+
+    if notification['user_agent'] == 'misp-exercise-dashboard': # Ignore message generated from this app
+        return False
+    if '@' not in notification['user']: # Ignore message from system
+        return False
+
+    scope, action = get_scope_action_from_url(notification['url'])
+    if scope in config.uesr_activity_accepted_scope:
+        if config.uesr_activity_accepted_scope == '*':
+            return True
+        elif action in config.uesr_activity_accepted_scope[scope]:
+            return True
+    return False
