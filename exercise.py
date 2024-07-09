@@ -322,6 +322,8 @@ def get_progress():
     completion_for_users = get_completion_for_users()
     progress = {}
     for user_id in completion_for_users.keys():
+        if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
+            continue
         progress[user_id] = {
             'email': db.USER_ID_TO_EMAIL_MAPPING[user_id],
             'exercises': {},
