@@ -321,7 +321,7 @@ def mark_task_incomplete(user_id: int, exercise_uuid: str , task_uuid: str):
 def get_progress():
     completion_for_users = get_completion_for_users()
     progress = {}
-    for user_id in completion_for_users:
+    for user_id in completion_for_users.keys():
         progress[user_id] = {
             'email': db.USER_ID_TO_EMAIL_MAPPING[user_id],
             'exercises': {},
