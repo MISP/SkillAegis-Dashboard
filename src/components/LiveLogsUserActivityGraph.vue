@@ -24,7 +24,7 @@
   const chartOptions = computed(() => {
     return {
       chart: {
-        height: 20,
+        height: 12,
         width: 208,
         type: 'heatmap',
         sparkline: {
@@ -56,12 +56,12 @@
                 {
                   from: 0,
                   to: colorRanges[0],
-                  color: darkModeEnabled.value ? '#172554' : '#bfdbfe',
+                  color: darkModeEnabled.value ? '#1e3a8a' : '#bfdbfe',
                 },
                 {
                   from: colorRanges[0] + 1,
                   to: colorRanges[1],
-                  color: darkModeEnabled.value ? '#1e40af' : '#93c5fd',
+                  color: darkModeEnabled.value ? '#1d4ed8' : '#93c5fd',
                 },
                 {
                   from: colorRanges[1] + 1,
