@@ -73,15 +73,16 @@ def backup_exercises_progress():
 
 def restore_exercices_progress():
     try:
+        
         with open('backup.json', 'r') as f:
             data = json.load(f)
             db.EXERCISES_STATUS = data['EXERCISES_STATUS']
             db.SELECTED_EXERCISES = data['SELECTED_EXERCISES']
             db.USER_ID_TO_EMAIL_MAPPING = {}
-            for user_id_str, email in data['USER_ID_TO_EMAIL_MAPPING']:
+            for user_id_str, email in data['USER_ID_TO_EMAIL_MAPPING'].items():
                 db.USER_ID_TO_EMAIL_MAPPING[int(user_id_str)] = email
             db.USER_ID_TO_AUTHKEY_MAPPING = {}
-            for user_id_str, authkey in data['USER_ID_TO_AUTHKEY_MAPPING']:
+            for user_id_str, authkey in data['USER_ID_TO_AUTHKEY_MAPPING'].items():
                 db.USER_ID_TO_AUTHKEY_MAPPING[int(user_id_str)] = authkey
     except:
         logger.info('Could not restore exercise progress')
@@ -212,14 +213,14 @@ def resetAllExerciseProgress():
 
 
 def get_completed_tasks_for_user(user_id: int):
-    completion = get_completion_for_users()[user_id]
+    completion = get_completion_for_users().get(user_id, {})
     completed_tasks = {}
     for exec_uuid, tasks in completion.items():
         completed_tasks[exec_uuid] = [task_uuid for task_uuid, completed in tasks.items() if completed]
     return completed_tasks
 
 def get_incomplete_tasks_for_user(user_id: int):
-    completion = get_completion_for_users()[user_id]
+    completion = get_completion_for_users().get(user_id, {})
     incomplete_tasks = {}
     for exec_uuid, tasks in completion.items():
         incomplete_tasks[exec_uuid] = [task_uuid for task_uuid, completed in tasks.items() if not completed]
@@ -367,7 +368,7 @@ def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dic
         else:
             logger.debug('Unknown request type')
             return False
-    return False
+    return True
 
 async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
     if not is_valid_evaluation_context(user_id, inject_evaluation, data, context):

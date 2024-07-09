@@ -9,7 +9,7 @@ misp_skipssl = True
 
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
-    'attributes': ['add', 'add_attachment', 'edit', 'delete', 'restSearch',],
+    'attributes': ['add', 'add_attachment', 'edit', 'revise_object', 'delete', 'restSearch',],
     'eventReports': ['add', 'edit', 'delete',],
     'tags': '*',
 }
@@ -17,7 +17,7 @@ live_logs_accepted_scope = {
 user_activity_accepted_scope = {
     'events': ['view', 'add', 'edit', 'delete', 'restSearch',],
     'attributes': ['add', 'add_attachment', 'edit', 'delete', 'restSearch',],
-    'objects': ['add', 'edit', 'delete',],
+    'objects': ['add', 'edit', 'revise_object', 'delete',],
     'eventReports': ['view', 'add', 'edit', 'delete',],
     'tags': '*',
 }
