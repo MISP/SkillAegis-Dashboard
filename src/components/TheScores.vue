@@ -22,6 +22,15 @@
 
   const hasExercises = computed(() => exercises.value.length > 0)
   const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
+  const sortedProgress = computed(() => Object.values(progresses.value).sort((a, b) => {
+    if (a.email < b.email) {
+      return -1;
+    }
+    if (a.email > b.email) {
+      return 1;
+    }
+    return 0;
+  }))
 
 </script>
 
@@ -85,7 +94,7 @@
           </td>
         </tr>
         <template v-else>
-          <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
+          <tr v-for="(progress) in sortedProgress" :key="progress.user_id" class="bg-slate-100 dark:bg-slate-900">
             <td class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative">
               <span class="flex flex-col max-w-60">
                 <span :title="user_id" class="text-nowrap inline-block leading-5 truncate">

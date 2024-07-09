@@ -331,6 +331,7 @@ def get_progress():
             continue
         progress[user_id] = {
             'email': db.USER_ID_TO_EMAIL_MAPPING[user_id],
+            'user_id': user_id,
             'exercises': {},
         }
         for exec_uuid, tasks_completion in completion_for_users[user_id].items():
