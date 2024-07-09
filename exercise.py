@@ -348,10 +348,10 @@ async def check_inject(user_id: int, inject: dict, data: dict, context: dict) ->
     for inject_evaluation in inject['inject_evaluation']:
         success = await inject_checker_router(user_id, inject_evaluation, data, context)
         if not success:
-            logger.info(f"Task not completed: {inject['uuid']}")
+            logger.info(f"Task not completed[{user_id}]: {inject['uuid']}")
             return False
     mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
-    logger.info(f"Task success: {inject['uuid']}")
+    logger.info(f"Task success[{user_id}]: {inject['uuid']}")
     return True
 
 
