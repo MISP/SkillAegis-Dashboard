@@ -3,6 +3,7 @@
   import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faGraduationCap, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
+  import LiveLogsUserActivityGraph from "./LiveLogsUserActivityGraph.vue"
 
   const collapsed_panels = ref([])
 
@@ -85,11 +86,14 @@
         </tr>
         <template v-else>
           <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
-            <td class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
-              <span :title="user_id" class="text-nowrap">
-                <FontAwesomeIcon v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1" :icon="faMedal" class="mr-1 text-amber-300"></FontAwesomeIcon>
-                <span class="text-lg font-bold font-mono">{{ progress.email.split('@')[0] }}</span>
-                <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
+            <td class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative">
+              <span class="flex flex-col">
+                <span :title="user_id" class="text-nowrap inline-block leading-5">
+                  <FontAwesomeIcon v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1" :icon="faMedal" class="mr-1 text-amber-300"></FontAwesomeIcon>
+                  <span class="text-lg font-bold font-mono leading-5">{{ progress.email.split('@')[0] }}</span>
+                  <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
+                </span>
+                <LiveLogsUserActivityGraph :user_id="user_id"></LiveLogsUserActivityGraph>
               </span>
             </td>
             <td

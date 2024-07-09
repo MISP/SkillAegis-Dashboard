@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:4000";
+const URL = process.env.NODE_ENV === "production" ? undefined : "http://localhost:40001";
 const MAX_LIVE_LOG = 30
 
 const initial_state = {
@@ -12,6 +12,8 @@ const initial_state = {
   notificationAPICounter: 0,
   notificationHistory: [],
   notificationHistoryConfig: {},
+  userActivity: {},
+  userActivityConfig: {},
   exercises: [],
   selected_exercises: [],
   progresses: {},
@@ -44,6 +46,8 @@ export const userCount = computed(() => Object.keys(state.progresses).length)
 export const diagnostic = computed(() => state.diagnostic)
 export const notificationHistory = computed(() => state.notificationHistory)
 export const notificationHistoryConfig = computed(() => state.notificationHistoryConfig)
+export const userActivity = computed(() => state.userActivity)
+export const userActivityConfig = computed(() => state.userActivityConfig)
 export const socketConnected = computed(() => connectionState.connected)
 export const zmqLastTime = computed(() => connectionState.zmq_last_time)
 
@@ -56,6 +60,7 @@ export function fullReload() {
   getSelectedExercises()
   getNotifications()
   getProgress()
+  getUsersActivity()
 }
 
 export function setCompletedState(completed, user_id, exec_uuid, task_uuid) {
@@ -121,6 +126,15 @@ function getProgress() {
     state.progresses = all_progress
   })
 }
+
+function getUsersActivity() {
+  socket.emit("get_users_activity", (user_activity_bundle) => {
+    console.log(user_activity_bundle);
+    state.userActivity = user_activity_bundle.activity
+    state.userActivityConfig = user_activity_bundle.config
+  });
+}
+
 
 function getDiangostic() {
   state.diagnostic = {}
@@ -201,6 +215,11 @@ socket.on("keep_alive", (keep_alive) => {
 socket.on("update_notification_history", (notification_history_bundle) => {
   state.notificationHistory = notification_history_bundle.history
   state.notificationHistoryConfig = notification_history_bundle.config
+});
+
+socket.on("update_users_activity", (user_activity_bundle) => {
+  state.userActivity = user_activity_bundle.activity
+  state.userActivityConfig = user_activity_bundle.config
 });
 
 function addLimited(target, message, maxCount) {

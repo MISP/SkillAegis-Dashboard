@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import collections
 import functools
 import json
 import sys
@@ -20,6 +21,7 @@ import misp_api
 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
+USER_ACTIVITY = collections.defaultdict(int)
 
 
 def debounce(debounce_seconds: int = 1):
@@ -110,6 +112,10 @@ async def get_diagnostic(sid):
     return await getDiagnostic()
 
 @sio.event
+async def get_users_activity(sid):
+    return notification_model.get_users_activity()
+
+@sio.event
 async def toggle_verbose_mode(sid, payload):
     return notification_model.set_verbose_mode(payload['verbose'])
 
@@ -144,6 +150,9 @@ async def handleMessage(topic, s, message):
             if notification_model.is_accepted_notification(notification):
                 notification_model.record_notification(notification)
                 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN += 1
+                user_id = notification_model.get_user_id(data)
+                if user_id is not None:
+                    USER_ACTIVITY[user_id] += 1
                 await sio.emit('notification', notification)
 
         user_id = notification_model.get_user_id(data)
@@ -201,6 +210,18 @@ async def notification_history():
         await sio.emit('update_notification_history', payload)
 
 
+async def record_users_activity():
+    global USER_ACTIVITY
+
+    while True:
+        await sio.sleep(db.USER_ACTIVITY_FREQUENCY)
+        for user_id, activity in USER_ACTIVITY.items():
+            notification_model.record_user_activity(user_id, activity)
+            USER_ACTIVITY[user_id] = 0
+        payload = notification_model.get_users_activity()
+        await sio.emit('update_users_activity', payload)
+
+
 async def keepalive():
     global ZMQ_LAST_TIME
     while True:
@@ -237,6 +258,7 @@ async def init_app():
     sio.start_background_task(forward_zmq_to_socketio)
     sio.start_background_task(keepalive)
     sio.start_background_task(notification_history)
+    sio.start_background_task(record_users_activity)
     sio.start_background_task(backup_exercises_progress)
     return app
 

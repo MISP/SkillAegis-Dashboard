@@ -5,7 +5,6 @@
 
   const theChart = ref(null)
   const chartInitSeries = [
-    // {data: Array.apply(null, {length: 240}).map(Function.call, Math.random)}
     {data: Array.from(Array(12*20)).map(()=> 0)}
   ]
   const hasActivity = computed(() => notificationHistory.value.length > 0)

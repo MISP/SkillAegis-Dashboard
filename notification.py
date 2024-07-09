@@ -27,14 +27,26 @@ def get_notifications() -> list[dict]:
     return list(db.NOTIFICATION_MESSAGES)
 
 
-def get_notifications_history() -> list[dict]:
+def get_notifications_history() -> dict:
     return {
         'history': list(db.NOTIFICATION_HISTORY),
         'config': {
             'buffer_resolution_per_minute': db.NOTIFICATION_HISTORY_BUFFER_RESOLUTION_PER_MIN,
             'buffer_timestamp_min': db.NOTIFICATION_HISTORY_BUFFER_TIMESPAN_MIN,
             'frequency': db.NOTIFICATION_HISTORY_FREQUENCY,
-            'notification_history_size': db.notification_history_size,
+            'notification_history_size': db.notification_history_buffer_size,
+        },
+    }
+
+
+def get_users_activity() -> dict:
+    return {
+        'activity': {user_id: list(activity) for user_id, activity in db.USER_ACTIVITY.items()},
+        'config': {
+            'timestamp_min': db.USER_ACTIVITY_TIMESPAN_MIN,
+            'buffer_resolution_per_minute': db.USER_ACTIVITY_BUFFER_RESOLUTION_PER_MIN,
+            'frequency': db.USER_ACTIVITY_FREQUENCY,
+            'activity_buffer_size': db.user_activity_buffer_size,
         },
     }
 
@@ -49,6 +61,10 @@ def record_notification(notification: dict):
 
 def record_notification_history(message_count: int):
     db.NOTIFICATION_HISTORY.append(message_count)
+
+
+def record_user_activity(user_id: int, count: int):
+    db.addUserActivity(user_id, count)
 
 
 def get_user_id(data: dict):
