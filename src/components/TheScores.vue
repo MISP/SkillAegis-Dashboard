@@ -87,11 +87,11 @@
         <template v-else>
           <tr v-for="(progress, user_id) in progresses" :key="user_id" class="bg-slate-100 dark:bg-slate-900">
             <td class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative">
-              <span class="flex flex-col">
-                <span :title="user_id" class="text-nowrap inline-block leading-5">
+              <span class="flex flex-col max-w-60">
+                <span :title="user_id" class="text-nowrap inline-block leading-5 truncate">
                   <FontAwesomeIcon v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1" :icon="faMedal" class="mr-1 text-amber-300"></FontAwesomeIcon>
-                  <span class="text-lg font-bold font-mono leading-5">{{ progress.email.split('@')[0] }}</span>
-                  <span class="text-xs font-mono">@{{ progress.email.split('@')[1] }}</span>
+                  <span class="text-lg font-bold font-mono leading-5 tracking-tight">{{ progress.email.split('@')[0] }}</span>
+                  <span class="text-xs font-mono tracking-tight">@{{ progress.email.split('@')[1] }}</span>
                 </span>
                 <LiveLogsUserActivityGraph :user_id="user_id"></LiveLogsUserActivityGraph>
               </span>

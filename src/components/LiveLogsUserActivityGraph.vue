@@ -25,7 +25,7 @@
     return {
       chart: {
         height: 12,
-        width: 208,
+        width: 224,
         type: 'heatmap',
         sparkline: {
           enabled: true
@@ -46,7 +46,7 @@
       plotOptions: {
         heatmap: {
             radius: 2,
-            enableShades: !true,
+            enableShades: false,
             shadeIntensity: 0.5,
             reverseNegativeShade: true,
             distributed: false,
@@ -124,6 +124,6 @@
     class="h-3 w-52"
     :title="`Activity over ${bufferSizeMin}min`"
   >
-    <apexchart type="heatmap" height="12" width="208" :options="chartOptions" :series="chartSeries"></apexchart>
+    <apexchart type="heatmap" height="12" width="224" :options="chartOptions" :series="chartSeries"></apexchart>
   </span>
 </template>
