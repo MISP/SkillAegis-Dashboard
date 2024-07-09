@@ -209,9 +209,9 @@ def is_accepted_user_activity(notification) -> bool:
         return False
 
     scope, action = get_scope_action_from_url(notification['url'])
-    if scope in config.uesr_activity_accepted_scope:
-        if config.uesr_activity_accepted_scope == '*':
+    if scope in config.user_activity_accepted_scope:
+        if config.user_activity_accepted_scope == '*':
             return True
-        elif action in config.uesr_activity_accepted_scope[scope]:
+        elif action in config.user_activity_accepted_scope[scope]:
             return True
     return False

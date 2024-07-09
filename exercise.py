@@ -77,8 +77,12 @@ def restore_exercices_progress():
             data = json.load(f)
             db.EXERCISES_STATUS = data['EXERCISES_STATUS']
             db.SELECTED_EXERCISES = data['SELECTED_EXERCISES']
-            db.USER_ID_TO_EMAIL_MAPPING = data['USER_ID_TO_EMAIL_MAPPING']
-            db.USER_ID_TO_AUTHKEY_MAPPING = data['USER_ID_TO_AUTHKEY_MAPPING']
+            db.USER_ID_TO_EMAIL_MAPPING = {}
+            for user_id_str, email in data['USER_ID_TO_EMAIL_MAPPING']:
+                db.USER_ID_TO_EMAIL_MAPPING[int(user_id_str)] = email
+            db.USER_ID_TO_AUTHKEY_MAPPING = {}
+            for user_id_str, authkey in data['USER_ID_TO_AUTHKEY_MAPPING']:
+                db.USER_ID_TO_AUTHKEY_MAPPING[int(user_id_str)] = authkey
     except:
         logger.info('Could not restore exercise progress')
 
@@ -323,6 +327,7 @@ def get_progress():
     progress = {}
     for user_id in completion_for_users.keys():
         if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
+            print('unknown user id', user_id)
             continue
         progress[user_id] = {
             'email': db.USER_ID_TO_EMAIL_MAPPING[user_id],
