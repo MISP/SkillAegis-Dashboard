@@ -129,7 +129,6 @@ function getProgress() {
 
 function getUsersActivity() {
   socket.emit("get_users_activity", (user_activity_bundle) => {
-    console.log(user_activity_bundle);
     state.userActivity = user_activity_bundle.activity
     state.userActivityConfig = user_activity_bundle.config
   });
