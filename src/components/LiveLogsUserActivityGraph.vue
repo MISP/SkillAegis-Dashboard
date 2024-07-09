@@ -8,18 +8,19 @@
   const theChart = ref(null)
   const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
   const bufferSizeMin = computed(() => userActivityConfig.value.timestamp_min)
-  const chartInitSeries = Array.from(Array(bufferSize.value)).map(() => 0)
+  const chartInitSeries = computed(() => Array.from(Array(bufferSize.value)).map(() => 0))
   
   const hasActivity = computed(() => userActivity.value.length != 0)
   const chartSeries = computed(() => {
-    return !hasActivity.value ? chartInitSeries : activitySeries.value
+    return !hasActivity.value ? chartInitSeries.value : activitySeries.value
   })
 
   const activitySeries = computed(() => {
-    const data = userActivity.value[props.user_id] === undefined ? chartInitSeries : userActivity.value[props.user_id]
+    const data = userActivity.value[props.user_id] === undefined ? chartInitSeries.value : userActivity.value[props.user_id]
     return [{data: Array.from(data)}]
   })
-  const colorRanges = [1, 3, 5, 7, 9, 1000]
+
+  const colorRanges = [1, 2, 3, 4, 5, 1000]
 
   const chartOptions = computed(() => {
     return {
