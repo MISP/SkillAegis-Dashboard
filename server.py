@@ -134,13 +134,13 @@ async def handleMessage(topic, s, message):
 
     if topic == 'misp_json_audit':
         user_id, email = notification_model.get_user_email_id_pair(data)
-        if user_id is not None and '@' in email:
+        if user_id is not None and user_id != 0 and '@' in email:
             if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
                 db.USER_ID_TO_EMAIL_MAPPING[user_id] = email
                 await sio.emit('new_user', email)
 
         user_id, authkey = notification_model.get_user_authkey_id_pair(data)
-        if user_id is not None:
+        if user_id is not None and user_id != 0:
             if authkey not in db.USER_ID_TO_AUTHKEY_MAPPING:
                 db.USER_ID_TO_AUTHKEY_MAPPING[user_id] = authkey
                 return
