@@ -6,7 +6,7 @@ export default {
   ],
   safelist: [
     {
-      pattern: /bg-+/, // Includes bg of all colors and shades
+      pattern: /bg-blue+/, // Includes bg of all colors and shades
     },
   ],
   theme: {
