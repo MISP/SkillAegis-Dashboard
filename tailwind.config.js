@@ -4,6 +4,11 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  safelist: [
+    {
+      pattern: /bg-+/, // Includes bg of all colors and shades
+    },
+  ],
   theme: {
     extend: {
       transitionProperty: {

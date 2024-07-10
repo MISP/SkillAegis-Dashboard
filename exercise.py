@@ -278,8 +278,9 @@ def get_completion_for_users():
             for user_id in completion_per_user.keys():
                 completion_per_user[int(user_id)][exercise_status['uuid']][task['uuid']] = False
             for entry in task['completed_by_user']:
-                user_id = entry['user_id']
-                completion_per_user[int(user_id)][exercise_status['uuid']][task['uuid']] = entry
+                user_id = int(entry['user_id'])
+                if user_id in completion_per_user:  # Ensure the user_id is known in USER_ID_TO_EMAIL_MAPPING
+                    completion_per_user[user_id][exercise_status['uuid']][task['uuid']] = entry
 
     return completion_per_user
 

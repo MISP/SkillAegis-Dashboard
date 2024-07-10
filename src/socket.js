@@ -98,7 +98,6 @@ export function toggleApiQueryMode(enabled) {
 
 export function remediateSetting(setting) {
   sendRemediateSetting(setting, (result) => {
-    console.log(result);
     if (result.success) {
       state.diagnostic['settings'][setting].value = state.diagnostic['settings'][setting].expected_value
     } else {
