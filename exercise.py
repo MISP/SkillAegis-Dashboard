@@ -11,8 +11,7 @@ import jq
 import db
 from inject_evaluator import eval_data_filtering, eval_query_mirror, eval_query_search
 import misp_api
-import config
-from config import logger
+from appConfig import logger
 
 
 ACTIVE_EXERCISES_DIR = "active_exercises"

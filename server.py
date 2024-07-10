@@ -14,7 +14,7 @@ import exercise as exercise_model
 import notification as notification_model
 import db
 import config
-from config import logger
+from appConfig import logger
 import misp_api
 
 
@@ -123,6 +123,10 @@ async def toggle_verbose_mode(sid, payload):
 async def toggle_apiquery_mode(sid, payload):
     return notification_model.set_apiquery_mode(payload['apiquery'])
 
+@sio.event
+async def remediate_setting(sid, payload):
+    return await doSettingRemediation(payload['name'])
+
 @sio.on('*')
 async def any_event(event, sid, data={}):
     logger.info('>> Unhandled event %s', event)
@@ -199,6 +203,11 @@ async def getDiagnostic() -> dict:
     diagnostic['settings'] = misp_settings
     diagnostic['zmq_message_count'] = ZMQ_MESSAGE_COUNT
     return diagnostic
+
+
+async def doSettingRemediation(setting) -> dict:
+    result = await misp_api.remediateSetting(setting)
+    return result
 
 
 async def notification_history():

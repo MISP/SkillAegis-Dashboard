@@ -96,6 +96,18 @@ export function toggleApiQueryMode(enabled) {
   sendToggleApiQueryMode(enabled)
 }
 
+export function remediateSetting(setting) {
+  sendRemediateSetting(setting, (result) => {
+    console.log(result);
+    if (result.success) {
+      state.diagnostic['settings'][setting].value = state.diagnostic['settings'][setting].expected_value
+    } else {
+      state.diagnostic['settings'][setting].error = true
+      state.diagnostic['settings'][setting].errorMessage = result.message
+    }
+  })
+}
+
 export const debouncedGetProgress = debounce(getProgress, 200, {leading: true})
 export const debouncedGetDiangostic = debounce(getDiangostic, 1000, {leading: true})
 
@@ -179,6 +191,15 @@ function sendToggleApiQueryMode(enabled) {
     apiquery: enabled
   }
   socket.emit("toggle_apiquery_mode", payload, () => {})
+}
+
+function sendRemediateSetting(setting, cb) {
+  const payload = {
+    name: setting
+  }
+  socket.emit("remediate_setting", payload, (result) => {
+    cb(result)
+  })
 }
 
 /* Event listener */

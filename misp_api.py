@@ -11,7 +11,8 @@ from requests_cache import CachedSession
 from requests.packages.urllib3.exceptions import InsecureRequestWarning # type: ignore
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-from config import misp_url, misp_apikey, misp_skipssl, logger
+from config import misp_url, misp_apikey, misp_skipssl
+from appConfig import logger, misp_settings
 
 requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
 adapterCache = requests.adapters.HTTPAdapter(pool_connections=50, pool_maxsize=50)
@@ -83,20 +84,24 @@ async def getVersion() -> Union[None, dict]:
 
 
 async def getSettings() -> Union[None, dict]:
-    SETTING_TO_QUERY = [
-        'Plugin.ZeroMQ_enable',
-        'Plugin.ZeroMQ_audit_notifications_enable',
-        'Plugin.ZeroMQ_event_notifications_enable',
-        'Plugin.ZeroMQ_attribute_notifications_enable',
-        'MISP.log_paranoid',
-        'MISP.log_paranoid_skip_db',
-        'MISP.log_paranoid_include_post_body',
-        'MISP.log_auth',
-        'Security.allow_unsafe_cleartext_apikey_logging',
-    ]
     settings = await get(f'/servers/serverSettings.json')
     if not settings:
         return None
-    return {
-        setting['setting']: setting['value'] for setting in settings.get('finalSettings', []) if setting['setting'] in SETTING_TO_QUERY
-    }
+    data = {}
+    for settingName, expectedSettingValue in misp_settings.items():
+        data[settingName] = {
+            'expected_value': expectedSettingValue,
+            'value': None
+        }
+    for setting in settings.get('finalSettings', []):
+        if setting['setting'] in misp_settings:
+            data[setting['setting']]['value'] = setting['value']
+    return data
+
+
+async def remediateSetting(setting) ->dict:
+    if setting in misp_settings:
+        payload = {
+            'value': misp_settings[setting],
+        }
+        return await post(f'/servers/serverSettingsEdit/{setting}', payload)

@@ -76,7 +76,7 @@
 
   <table class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full">
       <thead>
-        <tr class="font-medium dark:text-slate-200 text-slate-600 ">
+        <tr class="font-medium dark:text-slate-200 text-slate-600">
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left"></th>
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-2 text-left">User</th>
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Time</th>

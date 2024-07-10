@@ -1,10 +1,11 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic, remediateSetting } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan, faRotate } from '@fortawesome/free-solid-svg-icons'
+  import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan, faRotate, faHammer, faCheck } from '@fortawesome/free-solid-svg-icons'
 
   const admin_modal = ref(null)
+  const clickedButtons = ref([])
 
   const diagnosticLoading = computed(() => Object.keys(diagnostic.value).length == 0)
   const isMISPOnline = computed(() => diagnostic.value.version?.version !== undefined)
@@ -15,10 +16,16 @@
     changeExerciseSelection(exec_uuid, state_enabled);
   }
 
+  function settingHandler(setting) {
+    remediateSetting(setting)
+  }
+
   function showTheModal() {
     admin_modal.value.showModal()
+    clickedButtons.value = []
     debouncedGetDiangostic()
   }
+
 </script>
 
 <template>
@@ -131,23 +138,54 @@
               <div v-if="diagnosticLoading" class="flex justify-center">
                 <span class="loading loading-dots loading-lg"></span>
               </div>
-              <div
-                v-for="(value, setting) in diagnostic['settings']"
-                :key="setting"
-              >
-                <div>
-                  <label class="label cursor-pointer justify-start p-0 pt-1">
-                    <input
-                      type="checkbox"
-                      :checked="value"
-                      :value="setting"
-                      :class="`checkbox ${value ? 'checkbox-success' : 'checkbox-danger'} [--fallback-bc:#cbd5e1]`"
-                      disabled
-                    />
-                    <span class="font-mono font-semibold text-base ml-3">{{ setting }}</span>
-                  </label>
-                </div>
-              </div>
+              <table v-else class="bg-white dark:bg-slate-700 rounded-lg shadow-xl w-full mt-2">
+                <thead>
+                  <tr>
+                    <th class="border-b border-slate-200 dark:border-slate-600 p-2 text-left">Setting</th>
+                    <th class="border-b border-slate-200 dark:border-slate-600 p-2 text-left">Value</th>
+                    <th class="border-b border-slate-200 dark:border-slate-600 p-2 text-left">Expected Value</th>
+                    <th class="border-b border-slate-200 dark:border-slate-600 p-2 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(settingValues, setting) in diagnostic['settings']"
+                    :key="setting"
+                  >
+                    <td class="font-mono font-semibold text-base px-2">{{ setting }}</td>
+                    <td
+                      :class="`font-mono text-base tracking-tight px-2 ${settingValues.expected_value != settingValues.value ? 'text-red-600 dark:text-red-600' : ''}`"
+                    >
+                      <i v-if="settingValues.value === undefined || settingValues.value === null" class="text-nowrap">- none -</i>
+                      {{ settingValues.value }}
+                    </td>
+                    <td class="font-mono text-base tracking-tight px-2">{{ settingValues.expected_value }}</td>
+                    <td class="px-2 text-center">
+                      <span v-if="settingValues.error === true"
+                        class="text-red-600 dark:text-red-600"
+                      >Error: {{ settingValues.errorMessage }}</span>
+                      <button
+                        v-else-if="settingValues.expected_value != settingValues.value"
+                        @click="clickedButtons.push(setting) && settingHandler(setting)"
+                        :disabled="clickedButtons.includes(setting)"
+                        class="h-8 min-h-8 px-2 font-semibold bg-green-600 text-slate-200 hover:bg-green-700 btn gap-1"
+                      >
+                        <template v-if="!clickedButtons.includes(setting)">
+                          <FontAwesomeIcon :icon="faHammer" size="sm" fixed-width></FontAwesomeIcon>
+                          Remediate
+                        </template>
+                        <template v-else>
+                          <span class="loading loading-dots loading-sm"></span>
+                        </template>
+                      </button>
+                      <span v-else class="text-base font-bold text-green-600 dark:text-green-600">
+                        <FontAwesomeIcon :icon="faCheck" class=""></FontAwesomeIcon>
+                        OK
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </template>
 

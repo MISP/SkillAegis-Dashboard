@@ -3,7 +3,7 @@ from typing import Union
 import jq
 import re
 import operator
-from config import logger
+from appConfig import logger
 
 
 def jq_extract(path: str, data: dict, extract_type='first'):

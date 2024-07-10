@@ -5,6 +5,7 @@ import re
 from typing import Union
 import db
 import config
+import appConfig
 from urllib.parse import parse_qs
 
 
@@ -192,10 +193,10 @@ def is_accepted_notification(notification) -> bool:
         return False
 
     scope, action = get_scope_action_from_url(notification['url'])
-    if scope in config.live_logs_accepted_scope:
-        if config.live_logs_accepted_scope == '*':
+    if scope in appConfig.live_logs_accepted_scope:
+        if appConfig.live_logs_accepted_scope == '*':
             return True
-        elif action in config.live_logs_accepted_scope[scope]:
+        elif action in appConfig.live_logs_accepted_scope[scope]:
             return True
     return False
 
@@ -209,9 +210,9 @@ def is_accepted_user_activity(notification) -> bool:
         return False
 
     scope, action = get_scope_action_from_url(notification['url'])
-    if scope in config.user_activity_accepted_scope:
-        if config.user_activity_accepted_scope == '*':
+    if scope in appConfig.user_activity_accepted_scope:
+        if appConfig.user_activity_accepted_scope == '*':
             return True
-        elif action in config.user_activity_accepted_scope[scope]:
+        elif action in appConfig.user_activity_accepted_scope[scope]:
             return True
     return False
