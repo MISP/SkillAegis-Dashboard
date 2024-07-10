@@ -85,6 +85,10 @@ def restore_exercices_progress():
                 db.USER_ID_TO_AUTHKEY_MAPPING[int(user_id_str)] = authkey
     except:
         logger.info('Could not restore exercise progress')
+        db.EXERCISES_STATUS = {}
+        db.SELECTED_EXERCISES = []
+        db.USER_ID_TO_EMAIL_MAPPING = {}
+        db.USER_ID_TO_AUTHKEY_MAPPING = {}
 
 
 def is_validate_exercises(exercises: list) -> bool:
