@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed } from "vue";
-  import { active_exercises as exercises, progresses, setCompletedState } from "@/socket";
+  import { active_exercises as exercises, progresses, userCount, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faGraduationCap, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
   import LiveLogsUserActivityGraph from "./LiveLogsUserActivityGraph.vue"
@@ -20,6 +20,7 @@
     }
   }
 
+  const compactTable = computed(() => { return userCount.value > 20 })
   const hasExercises = computed(() => exercises.value.length > 0)
   const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
   const sortedProgress = computed(() => Object.values(progresses.value).sort((a, b) => {
@@ -102,13 +103,16 @@
                   <span class="text-lg font-bold font-mono leading-5 tracking-tight">{{ progress.email.split('@')[0] }}</span>
                   <span class="text-xs font-mono tracking-tight">@{{ progress.email.split('@')[1] }}</span>
                 </span>
-                <LiveLogsUserActivityGraph :user_id="progress.user_id"></LiveLogsUserActivityGraph>
+                <LiveLogsUserActivityGraph
+                  :user_id="progress.user_id"
+                  :compact_view="compactTable"
+                ></LiveLogsUserActivityGraph>
               </span>
             </td>
             <td
               v-for="(task, task_index) in exercise.tasks"
               :key="task_index"
-              class="text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-2"
+              :class="`text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 ${compactTable ? 'p-0' : 'p-2'}`"
             >
             <span
               class="select-none cursor-pointer flex justify-center content-center flex-wrap h-9"

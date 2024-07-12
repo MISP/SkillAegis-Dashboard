@@ -3,7 +3,7 @@
   import { userActivity, userActivityConfig } from "@/socket";
   import { darkModeEnabled } from "@/settings.js"
 
-  const props = defineProps(['user_id'])
+  const props = defineProps(['user_id', 'compact_view'])
 
   const theChart = ref(null)
   const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
@@ -54,14 +54,14 @@
 
 <template>
   <span
-    class="h-3 w-56"
+    :class="`w-56 ${props.compact_view ? 'h-1 inline-flex' : 'h-3'}`"
     :title="`Activity over ${bufferSizeMin}min`"
   >
     <span
       v-for="(value, i) in chartSeries"
       :key="i"
-      :class="[`inline-block h-3 rounded-[1px] mr-px`, `bg-${palleteColor}-${getPalleteIndexFromValue(value)}`]"
-      :style="`width: ${parseInt((224 - chartSeries.length) / chartSeries.length)}px`"
+      :class="[`inline-block rounded-[1px] mr-px`, props.compact_view ? 'h-1' : 'h-3', `bg-${palleteColor}-${getPalleteIndexFromValue(value)}`]"
+      :style="`width: ${((224 - chartSeries.length) / chartSeries.length).toFixed(1)}px`"
     ></span>
   </span>
 </template>

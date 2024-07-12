@@ -19,6 +19,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <TheScores></TheScores>
-  <TheLiveLogs></TheLiveLogs>
+  <div class="mb-3">
+    <TheScores></TheScores>
+    <TheLiveLogs></TheLiveLogs>
+  </div>
 </template>
