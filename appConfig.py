@@ -19,7 +19,6 @@ misp_settings = {
     'Plugin.ZeroMQ_audit_notifications_enable': True,
     'Plugin.ZeroMQ_event_notifications_enable': True,
     'Plugin.ZeroMQ_attribute_notifications_enable': True,
-    'MISP.log_new_audit': False,
     'MISP.log_paranoid': True,
     'MISP.log_paranoid_skip_db': True,
     'MISP.log_paranoid_include_post_body': True,
