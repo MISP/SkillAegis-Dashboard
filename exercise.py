@@ -15,6 +15,7 @@ from appConfig import logger
 
 
 ACTIVE_EXERCISES_DIR = "active_exercises"
+LAST_BACKUP = {}
 
 def debounce_check_active_tasks(debounce_seconds: int = 1):
     func_last_execution_time = {}
@@ -60,14 +61,16 @@ def read_exercise_dir():
 
 
 def backup_exercises_progress():
-    with open('backup.json', 'w') as f:
-        toBackup = {
-            'EXERCISES_STATUS': db.EXERCISES_STATUS,
-            'SELECTED_EXERCISES': db.SELECTED_EXERCISES,
-            'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
-            'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
-        }
-        json.dump(toBackup, f)
+    toBackup = {
+        'EXERCISES_STATUS': db.EXERCISES_STATUS,
+        'SELECTED_EXERCISES': db.SELECTED_EXERCISES,
+        'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
+        'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
+    }
+    if toBackup != LAST_BACKUP:
+        with open('backup.json', 'w') as f:
+            json.dump(toBackup, f)
+            LAST_BACKUP = toBackup
 
 
 def restore_exercices_progress():
