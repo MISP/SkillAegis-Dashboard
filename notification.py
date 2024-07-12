@@ -75,6 +75,10 @@ def get_user_id(data: dict):
         data = data['Log']
         if 'user_id' in data:
             return int(data['user_id'])
+    if 'AuditLog' in data:
+        data = data['AuditLog']
+        if 'user_id' in data:
+            return int(data['user_id'])
     return None
 
 

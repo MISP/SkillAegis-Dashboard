@@ -61,6 +61,7 @@ def read_exercise_dir():
 
 
 def backup_exercises_progress():
+    global LAST_BACKUP
     toBackup = {
         'EXERCISES_STATUS': db.EXERCISES_STATUS,
         'SELECTED_EXERCISES': db.SELECTED_EXERCISES,
@@ -247,8 +248,8 @@ def get_available_tasks_for_user(user_id: int) -> list[str]:
 
 
 def get_model_action(data: dict):
-    if 'Log' in data:
-        data = data['Log']
+    if 'Log' in data or 'AuditLog' in data:
+        data = data['Log'] if 'Log' in data else data['AuditLog']
         if 'model' in data and 'action' in data:
             return (data['model'], data['action'],)
     return (None, None,)
@@ -260,8 +261,9 @@ def is_accepted_query(data: dict) -> bool:
             # # improved condition below. It blocks some queries
             # if data['Log']['change'].startswith('attribute_count'):
             #     return False
-            if data['Log']['change'].startswith('Validation errors:'):
-                return False
+            if 'Log' in data:
+                if data['Log']['change'].startswith('Validation errors:'):
+                    return False
             return True
 
     if data.get('user_agent', None) == 'misp-exercise-dashboard':
@@ -430,6 +432,13 @@ def parse_event_id_from_log(data: dict) -> Union[int, None]:
             if event_id_search is not None:
                 event_id = event_id_search.group(1)
                 return event_id
+    elif 'AuditLog' in data:
+        log = data['AuditLog']
+        if 'model' in log and 'model_id' in log and log['model'] == 'Event':
+            return int(log['model_id'])
+        if 'change' in log:
+            if 'event_id' in log:
+                return int(log['event_id'])
     return None
 
 
