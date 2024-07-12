@@ -62,7 +62,7 @@
 
 <template>
   <div class="my-2 --ml-1 bg-slate-50 dark:bg-slate-600 py-1 pl-1 pr-3 rounded-md relative flex flex-col">
-    <div :class="`${!hasActivity ? 'hidden' : 'absolute'} h-10 -mt-1 w-full z-40`">
+    <div :class="`${!hasActivity ? 'hidden' : 'absolute'} h-10 -mt-1 w-full z-30`">
       <div class="text-xxs flex justify-between h-full items-center text-slate-500 dark:text-slate-300">
         <span class="-rotate-90 w-8 -ml-3">- {{ notificationHistoryConfig.buffer_timestamp_min }}min</span>
         <span class="-rotate-90 w-8 text-xs">–</span>

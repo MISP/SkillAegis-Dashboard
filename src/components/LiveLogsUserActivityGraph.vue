@@ -54,14 +54,14 @@
 
 <template>
   <span
-    :class="`w-56 ${props.compact_view ? 'h-1 inline-flex' : 'h-3'}`"
+    :class="`w-60 ${props.compact_view ? 'h-1.5 inline-flex' : 'h-3'}`"
     :title="`Activity over ${bufferSizeMin}min`"
   >
     <span
       v-for="(value, i) in chartSeries"
       :key="i"
-      :class="[`inline-block rounded-[1px] mr-px`, props.compact_view ? 'h-1' : 'h-3', `bg-${palleteColor}-${getPalleteIndexFromValue(value)}`]"
-      :style="`width: ${((224 - chartSeries.length) / chartSeries.length).toFixed(1)}px`"
+      :class="[`inline-block rounded-[1px] mr-px`, props.compact_view ? 'h-1.5' : 'h-3', `bg-${palleteColor}-${getPalleteIndexFromValue(value)}`]"
+      :style="`width: ${((240 - chartSeries.length) / chartSeries.length).toFixed(1)}px`"
     ></span>
   </span>
 </template>

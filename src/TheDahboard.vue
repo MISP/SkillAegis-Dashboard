@@ -3,6 +3,7 @@ import { onMounted, watch } from 'vue'
 import TheLiveLogs from './components/TheLiveLogs.vue'
 import TheScores from './components/TheScores.vue'
 import { resetState, fullReload, socketConnected } from "@/socket";
+import { fullscreenModeOn } from "@/settings.js"
 
 
 watch(socketConnected, (isConnected) => {
@@ -21,6 +22,6 @@ onMounted(() => {
 <template>
   <div class="mb-3">
     <TheScores></TheScores>
-    <TheLiveLogs></TheLiveLogs>
+    <TheLiveLogs v-show="!fullscreenModeOn"></TheLiveLogs>
   </div>
 </template>
