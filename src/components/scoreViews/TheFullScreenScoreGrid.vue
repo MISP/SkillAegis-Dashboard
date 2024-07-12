@@ -95,6 +95,7 @@
     }
   }
 
+  const compactGrid = computed(() => { return userCount.value > 70 })
   const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
   const sortedProgress = computed(() => Object.values(progresses.value).sort((a, b) => {
     if (a.email < b.email) {
@@ -140,6 +141,7 @@
           dark:bg-blue-800 bg-blue-500 dark:text-slate-300 text-slate-100
         "
       >
+        <!-- Modal header -->
         <div class="flex justify-between items-center">
           <span class="text-lg font-semibold">{{ exercise.name }}</span>
           <span class="mr-8">
@@ -153,6 +155,7 @@
         </div>
       </div>
 
+      <!-- Tasks name and pie charts -->
       <div class="p-2">
         <div class="flex justify-between mb-3">
           <span
@@ -175,7 +178,8 @@
           </span>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <!-- User grid -->
+        <div :class="`flex flex-wrap ${compactGrid ? 'gap-1' : 'gap-2'}`">
           <span
             v-for="(progress) in sortedProgress"
             :key="progress.user_id"
@@ -188,18 +192,19 @@
               flex p-2 mb-1
               text-slate-600 dark:text-slate-400
             ">
-              <span class="flex flex-col w-60">
+              <span :class="`flex flex-col ${compactGrid ? 'w-[120px]' : 'w-60'}`">
                 <span :title="progress.user_id" class="text-nowrap inline-block leading-5 truncate mb-1">
                   <FontAwesomeIcon
                     v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1"
                     :icon="faMedal" class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
-                  <span class="text-lg font-bold font-mono leading-5 tracking-tight">{{ progress.email.split('@')[0] }}</span>
-                  <span class="text-xs font-mono tracking-tight">@{{ progress.email.split('@')[1] }}</span>
+                  <span :class="`${compactGrid ? 'text-base' : 'text-lg'} font-bold font-mono leading-5 tracking-tight`">{{ progress.email.split('@')[0] }}</span>
+                  <span :class="`${compactGrid ? 'text-xs' : 'text-xs'} font-mono tracking-tight`">@{{ progress.email.split('@')[1] }}</span>
                 </span>
                 <LiveLogsUserActivityGraph
                   :user_id="progress.user_id"
                   :compact_view="true"
+                  :ultra_compact_view="true"
                 ></LiveLogsUserActivityGraph>
               </span>
             </span>
@@ -218,20 +223,20 @@
                     <FontAwesomeIcon
                       v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid]"
                       :icon="(progress.exercises[exercise.uuid].tasks_completion[task.uuid] && progress.exercises[exercise.uuid].tasks_completion[task.uuid].first_completion) ? faCircleCheck : faCheck"
-                      class="text-xl dark:text-green-400 text-green-600"
+                      :class="`${compactGrid ? 'text-xs' : 'text-xl'} dark:text-green-400 text-green-600`"
                       fixed-width
                     />
                     <FontAwesomeIcon
                       v-else-if="task.requirements?.inject_uuid !== undefined && !progress.exercises[exercise.uuid].tasks_completion[task.requirements.inject_uuid]"
                       title="All requirements for that task haven't been fullfilled yet"
                       :icon="faHourglassHalf"
-                      class="text-lg dark:text-slate-500 text-slate-400"
+                      :class="`${compactGrid ? 'text-xs' : 'text-lg'} dark:text-slate-500 text-slate-400`"
                       fixed-width
                     />
                     <FontAwesomeIcon
                       v-else
                       :icon="faTimes"
-                      class="text-xl dark:text-slate-500 text-slate-400"
+                      :class="`${compactGrid ? 'text-xs' : 'text-xl'} dark:text-slate-500 text-slate-400`"
                       fixed-width
                     />
                   </span>
