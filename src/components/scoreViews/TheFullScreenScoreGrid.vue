@@ -96,6 +96,7 @@
   }
 
   const compactGrid = computed(() => { return userCount.value > 70 })
+  const ultraCompactGrid = computed(() => { return userCount.value > 100 })
   const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
   const sortedProgress = computed(() => Object.values(progresses.value).sort((a, b) => {
     if (a.email < b.email) {
@@ -192,7 +193,7 @@
               flex p-2 mb-1
               text-slate-600 dark:text-slate-400
             ">
-              <span :class="`flex flex-col ${compactGrid ? 'w-[120px]' : 'w-60'}`">
+              <span :class="`flex flex-col ${compactGrid ? 'w-[120px]' : 'w-60'} ${compactGrid ? '' : 'mb-1'}`">
                 <span :title="progress.user_id" class="text-nowrap inline-block leading-5 truncate mb-1">
                   <FontAwesomeIcon
                     v-if="progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1"
@@ -203,8 +204,8 @@
                 </span>
                 <LiveLogsUserActivityGraph
                   :user_id="progress.user_id"
-                  :compact_view="true"
-                  :ultra_compact_view="true"
+                  :compact_view="compactGrid"
+                  :ultra_compact_view="ultraCompactGrid"
                 ></LiveLogsUserActivityGraph>
               </span>
             </span>

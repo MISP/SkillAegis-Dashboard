@@ -23,13 +23,13 @@
   const colorRanges = [0, 1, 2, 3, 4, 5, 1000]
   const palleteColor = 'blue'
   const colorPalleteIndexDark = [
-    '950',
     '900',
     '700',
     '600',
     '500',
     '400',
     '300',
+    '200',
   ]
   const colorPalleteIndexLight = [
     '50',
