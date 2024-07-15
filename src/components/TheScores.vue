@@ -2,9 +2,10 @@
   import { ref, computed } from "vue";
   import { active_exercises as exercises } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faGraduationCap, faUpRightAndDownLeftFromCenter, faDownLeftAndUpRightToCenter } from '@fortawesome/free-solid-svg-icons'
+  import { faGraduationCap, faUpRightAndDownLeftFromCenter, faDownLeftAndUpRightToCenter, faWarning, faUser } from '@fortawesome/free-solid-svg-icons'
   import TheScoreTable from "./scoreViews/TheScoreTable.vue"
   import TheFullScreenScoreGrid from "./scoreViews/TheFullScreenScoreGrid.vue"
+  import ThePlayerGrid from "./ThePlayerGrid.vue"
   import { fullscreenModeOn } from "@/settings.js"
 
   const hasExercises = computed(() => exercises.value.length > 0)
@@ -29,9 +30,29 @@
 
   <div
     v-if="!hasExercises"
-    class="text-center text-slate-600 dark:text-slate-400 p-3 pl-6"
+    class="text-slate-600 dark:text-slate-400 p-3 pl-6"
   >
-    <i>- No Exercise available -</i>
+    <div class="
+      p-2 border-l-4 text-left rounded
+      dark:bg-yellow-300 dark:text-slate-900 dark:border-yellow-700 
+      bg-yellow-200 text-slate-900 border-yellow-700 
+    ">
+      <FontAwesomeIcon :icon="faWarning" class="text-yellow-700 text-lg mx-3"></FontAwesomeIcon>
+      <strong class="">No Exercise available.</strong>
+      <span class="ml-1">Select an exercise in the <i class="underline">Admin panel</i>.</span>
+    </div>
+
+    <div class="
+      mt-2 px-2 py-1 rounded border
+      bg-slate-600 border-slate-800
+    ">
+      <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400">
+        <FontAwesomeIcon :icon="faUser"></FontAwesomeIcon>
+        Active Players
+      </h4>
+
+      <ThePlayerGrid></ThePlayerGrid>
+    </div>
   </div>
 
   <template
