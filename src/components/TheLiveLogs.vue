@@ -2,7 +2,7 @@
   import { ref, watch, computed } from "vue"
   import { notifications, userCount, notificationCounter, notificationAPICounter, toggleVerboseMode, toggleApiQueryMode } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faSignal, faCloud, faCog, faUser, faCircle } from '@fortawesome/free-solid-svg-icons'
+  import { faSignal, faCloud, faCog, faUsers, faCircle } from '@fortawesome/free-solid-svg-icons'
   import TheLiveLogsActivityGraphVue from "./TheLiveLogsActivityGraph.vue";
 
 
@@ -18,7 +18,7 @@
   })
 
   function getClassFromResponseCode(response_code) {
-    if (String(response_code).startsWith('2')) {
+    if (String(response_code).startsWith('2') || response_code == 302) {
       return 'text-green-500'
     } else if (String(response_code).startsWith('5')) {
       return 'text-red-600'
@@ -39,7 +39,7 @@
   <div class="mb-2 flex flex-wrap gap-x-3">
     <span class="rounded-lg py-1 px-2 dark:bg-sky-700 bg-sky-400 text-slate-800 dark:text-slate-200">
       <span class="mr-1">
-        <FontAwesomeIcon :icon="faUser" size="sm"></FontAwesomeIcon>
+        <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
         Players:
       </span>
       <span class="font-bold">{{ userCount }}</span>

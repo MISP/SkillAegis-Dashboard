@@ -2,7 +2,7 @@
   import { ref, computed } from "vue";
   import { active_exercises as exercises } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { faGraduationCap, faUpRightAndDownLeftFromCenter, faDownLeftAndUpRightToCenter, faWarning, faUser } from '@fortawesome/free-solid-svg-icons'
+  import { faGraduationCap, faUpRightAndDownLeftFromCenter, faDownLeftAndUpRightToCenter, faWarning } from '@fortawesome/free-solid-svg-icons'
   import TheScoreTable from "./scoreViews/TheScoreTable.vue"
   import TheFullScreenScoreGrid from "./scoreViews/TheFullScreenScoreGrid.vue"
   import ThePlayerGrid from "./ThePlayerGrid.vue"
@@ -42,17 +42,7 @@
       <span class="ml-1">Select an exercise in the <i class="underline">Admin panel</i>.</span>
     </div>
 
-    <div class="
-      mt-2 px-2 py-1 rounded border
-      bg-slate-600 border-slate-800
-    ">
-      <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400">
-        <FontAwesomeIcon :icon="faUser"></FontAwesomeIcon>
-        Active Players
-      </h4>
-
-      <ThePlayerGrid></ThePlayerGrid>
-    </div>
+    <ThePlayerGrid></ThePlayerGrid>
   </div>
 
   <template

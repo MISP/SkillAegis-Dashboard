@@ -2,6 +2,7 @@
   import { ref, computed } from "vue";
   import { progresses, userCount } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+  import { faUsers } from '@fortawesome/free-solid-svg-icons'
   import { darkModeEnabled } from "@/settings.js"
   import LiveLogsUserActivityGraph from "./LiveLogsUserActivityGraph.vue"
 
@@ -19,6 +20,16 @@
 </script>
 
 <template>
+<div class="
+  mt-2 px-2 pt-1 pb-2 rounded border
+  bg-slate-600 border-slate-800
+">
+
+  <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400">
+    <FontAwesomeIcon :icon="faUsers"></FontAwesomeIcon>
+    Active Players
+  </h4>
+
   <div :class="`flex flex-wrap ${compactGrid ? 'gap-1' : 'gap-2'}`">
     <span
       v-for="(progress) in sortedProgress"
@@ -43,4 +54,5 @@
       </span>
     </span>
   </div>
+</div>
 </template>
