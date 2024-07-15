@@ -3,6 +3,7 @@
   import { active_exercises as exercises, progresses, userCount, setCompletedState } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faCheck, faTimes, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
+  import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
   import LiveLogsUserActivityGraph from "../LiveLogsUserActivityGraph.vue"
 
   const props = defineProps(['exercise', 'exercise_index'])
@@ -135,8 +136,11 @@
                 <span class="text-nowrap">
                   <FontAwesomeIcon
                     v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid]"
-                    :icon="faCheck"
-                    :class="`text-xl ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}`"
+                    :icon="progress.exercises[exercise.uuid].tasks_completion[task.uuid].first_completion ? faCircleCheck : faCheck"
+                    :class="`
+                      ${progress.exercises[exercise.uuid].tasks_completion[task.uuid] ? 'dark:text-green-400 text-green-600' : 'dark:text-slate-500 text-slate-400'}
+                      ${progress.exercises[exercise.uuid].tasks_completion[task.uuid].first_completion ? 'text-lg' : 'text-xl'}
+                    `"
                   />
                   <FontAwesomeIcon
                     v-else-if="task.requirements?.inject_uuid !== undefined && !progress.exercises[exercise.uuid].tasks_completion[task.requirements.inject_uuid]"
