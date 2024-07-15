@@ -89,13 +89,18 @@ def restore_exercices_progress():
                 db.USER_ID_TO_AUTHKEY_MAPPING[int(user_id_str)] = authkey
     except:
         logger.info('Could not restore exercise progress')
-        db.EXERCISES_STATUS = {}
-        db.SELECTED_EXERCISES = []
-        db.USER_ID_TO_EMAIL_MAPPING = {}
-        db.USER_ID_TO_AUTHKEY_MAPPING = {}
+        resetAll()
 
     if len(db.EXERCISES_STATUS) == 0:
         init_exercises_tasks()
+
+
+def resetAll():
+    db.EXERCISES_STATUS = {}
+    db.SELECTED_EXERCISES = []
+    db.USER_ID_TO_EMAIL_MAPPING = {}
+    db.USER_ID_TO_AUTHKEY_MAPPING = {}
+    init_exercises_tasks()
 
 
 def is_validate_exercises(exercises: list) -> bool:
@@ -219,6 +224,11 @@ def resetAllExerciseProgress():
         for exercise_status in db.EXERCISES_STATUS.values():
             for task in exercise_status['tasks'].values():
                 mark_task_incomplete(user_id, exercise_status['uuid'], task['uuid'])
+    backup_exercises_progress()
+
+
+def resetAllCommand():
+    resetAll()
     backup_exercises_progress()
 
 

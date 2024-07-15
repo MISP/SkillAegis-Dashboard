@@ -88,7 +88,12 @@
             <div class="flex flex-col">
               <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500 text-nowrap">Task {{ task_index + 1 }}</span>
               <i class="text-center">{{ task.name }}</i>
-              <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="taskCompletionPercentages[task.uuid]" :aria-valuemin="0" aria-valuemax="100">
+              <div
+                role="progressbar"
+                class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600"
+                :aria-valuenow="taskCompletionPercentages[task.uuid]" :aria-valuemin="0" aria-valuemax="100"
+                :title="`${taskCompletionPercentages[task.uuid].toFixed(0)}%`"
+              >
                 <div
                   class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-blue-500 transition-width transition-slowest ease"
                   :style="`width: ${taskCompletionPercentages[task.uuid]}%`"

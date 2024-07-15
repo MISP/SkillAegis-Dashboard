@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic, remediateSetting } from "@/socket";
+  import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetAll, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic, remediateSetting } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan, faRotate, faHammer, faCheck } from '@fortawesome/free-solid-svg-icons'
 
@@ -64,6 +64,13 @@
             >
               <FontAwesomeIcon :icon="faTrash" size="lg" fixed-width></FontAwesomeIcon>
               Reset All Exercises
+            </button>
+            <button
+              @click="resetAll()"
+              class="h-10 min-h-10 px-2 py-1 font-semibold bg-red-600 text-slate-200 hover:bg-red-700 btn btn-sm gap-1"
+            >
+              <FontAwesomeIcon :icon="faTrash" size="lg" fixed-width></FontAwesomeIcon>
+              Reset All
             </button>
             <button
               @click="resetLiveLogs()"

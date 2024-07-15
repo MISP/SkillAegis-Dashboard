@@ -76,6 +76,10 @@ export function resetAllExerciseProgress() {
   sendResetAllExerciseProgress()
 }
 
+export function resetAll() {
+  sendResetAll()
+}
+
 export function resetLiveLogs() {
   sendResetLiveLogs()
 }
@@ -162,6 +166,12 @@ function sendCompletedState(completed, payload) {
 
 function sendResetAllExerciseProgress() {
   socket.emit("reset_all_exercise_progress", () => {
+    getProgress()
+  })
+}
+
+function sendResetAll() {
+  socket.emit("reset_all", () => {
     getProgress()
   })
 }

@@ -119,6 +119,10 @@ async def reset_all_exercise_progress(sid):
     return exercise_model.resetAllExerciseProgress()
 
 @sio.event
+async def reset_all(sid):
+    return exercise_model.resetAllCommand()
+
+@sio.event
 async def reset_notifications(sid):
     return notification_model.reset_notifications()
 

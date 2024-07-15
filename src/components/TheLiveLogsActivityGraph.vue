@@ -48,7 +48,7 @@
       },
       yaxis: {
         min: 0,
-        max: 30,
+        max: 20,
         labels: {
           show: false,
         }
