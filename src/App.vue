@@ -43,8 +43,8 @@ body {
   @apply 3xl:container mx-auto;
   @apply mx-auto;
   @apply mt-4;
-  @apply 3xl:w-11/12;
-  @apply lg:w-5/6;
+  @apply lg:w-11/12;
+  @apply 3xl:w-5/6;
 }
 
 </style>

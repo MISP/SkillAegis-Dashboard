@@ -38,13 +38,14 @@
     v-for="(exercise, exercise_index) in exercises"
     :key="exercise.name"
   >
-    <div :class="fullscreen_panel === false ? 'relative' : ''">
+    <div :class="fullscreen_panel === false ? 'relative min-w-fit' : ''">
       <span
         v-show="fullscreen_panel === false || fullscreen_panel === exercise_index"
         :class="['inline-block absolute shadow-lg z-50', fullscreen_panel === false ? 'top-0 -right-7' : 'top-2 right-2']"
       >
         <button
           @click="toggleFullScreen(exercise_index)"
+          title="Toggle fullscreen mode"
           :class="`
             w-7 p-1 focus-outline font-semibold
             text-slate-800 bg-slate-100  hover:bg-slate-200  dark:text-slate-200 dark:bg-slate-800  dark:hover:bg-slate-900
