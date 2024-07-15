@@ -33,6 +33,26 @@
     return 0;
   }))
 
+  const taskCompletionPercentages = computed(() => {
+    const completions = {}
+    Object.values(props.exercise.tasks).forEach(task => {
+      completions[task.uuid] = 0
+    })
+
+    sortedProgress.value.forEach(progress => {
+      for (const [taskUuid, taskCompletion] of Object.entries(progress.exercises[props.exercise.uuid].tasks_completion)) {
+        if (taskCompletion !== false) {
+          completions[taskUuid] += 1
+        }
+      }
+    });
+  
+    for (const [taskUuid, taskCompletionSum] of Object.entries(completions)) {
+      completions[taskUuid] = 100 * (taskCompletionSum / userCount.value)
+    }
+    return completions
+  })
+
 </script>
 
 <template>
@@ -67,6 +87,12 @@
             <div class="flex flex-col">
               <span class="text-center font-normal text-sm dark:text-blue-200 text-slate-500 text-nowrap">Task {{ task_index + 1 }}</span>
               <i class="text-center">{{ task.name }}</i>
+              <div class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600" role="progressbar" :aria-valuenow="taskCompletionPercentages[task.uuid]" :aria-valuemin="0" aria-valuemax="100">
+                <div
+                  class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-blue-500 transition-width transition-slowest ease"
+                  :style="`width: ${taskCompletionPercentages[task.uuid]}%`"
+                ></div>
+              </div>
             </div>
           </th>
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Progress</th>

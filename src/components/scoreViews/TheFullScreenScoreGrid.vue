@@ -219,6 +219,7 @@
                 :key="task_index"
                 class="select-none cursor-pointer"
                 @click="toggleCompleted(progress.exercises[exercise.uuid].tasks_completion[task.uuid], progress.user_id, exercise.uuid, task.uuid)"
+                :title="task.name"
               >
                   <span class="text-nowrap">
                     <FontAwesomeIcon
