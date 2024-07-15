@@ -5,6 +5,7 @@ import functools
 import json
 import sys
 import time
+import traceback
 import zmq
 import socketio
 from aiohttp import web
@@ -39,6 +40,20 @@ def debounce(debounce_seconds: int = 1):
                 return func(*args, **kwargs)
             else:
                 return None
+        return wrapper
+    return decorator
+
+
+def timer():
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            t1 = time.time()
+            res = func(*args, **kwargs)
+            elapsed = time.time() - t1
+            if elapsed > 0.1:
+                print(elapsed)
+            return res
         return wrapper
     return decorator
 
@@ -164,9 +179,12 @@ async def handleMessage(topic, s, message):
         if user_id is not None:
             if exercise_model.is_accepted_query(data):
                 context = get_context(topic, user_id, data)
-                succeeded_once = await exercise_model.check_active_tasks(user_id, data, context)
-                if succeeded_once:
-                    await sendRefreshScore()
+                checking_task = exercise_model.check_active_tasks(user_id, data, context)
+                if checking_task is not None:  # Make sure check_active_tasks was not debounced
+                    succeeded_once = await checking_task
+                    if succeeded_once:
+                        sendRefreshScoreTask = sendRefreshScore()
+                        await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 
 @debounce(debounce_seconds=1)
@@ -264,8 +282,48 @@ async def forward_zmq_to_socketio():
             logger.error('Error handling message %s', e)
 
 
+# Function to forward zmq messages to Socket.IO
+async def forward_fake_zmq_to_socketio():
+    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME
+    filename = sys.argv[1]
+    line_number = sum(1 for _ in open(filename))
+    print(f'Preparing to feed {line_number} lines..')
+    await sio.sleep(2)
+
+    print('Feeding started')
+    line_count = 0
+    last_print = time.time()
+    with open(filename) as f:
+        for line in f:
+            line_count += 1
+            now = time.time()
+            if line_count % (int(line_number/100)) == 0 or (now - last_print >= 5):
+                last_print = now
+                print(f'Feeding {line_count} / {line_number} - ({100* line_count / line_number:.1f}%)')
+            split = line.split(' ', 1)
+            topic = split[0]
+            s = ''
+            m = split[1]
+            if topic != 'misp_json_self':
+                await sio.sleep(0.01)
+            try:
+                ZMQ_MESSAGE_COUNT += 1
+                ZMQ_LAST_TIME = time.time()
+                await handleMessage(topic, s, m)
+            except Exception as e:
+                print(e)
+                print(line)
+                print(traceback.format_exc())
+                logger.error('Error handling message: %s', e)
+                await sio.sleep(5)
+
+
 async def init_app():
-    sio.start_background_task(forward_zmq_to_socketio)
+    if len(sys.argv) == 2:
+        sio.start_background_task(forward_fake_zmq_to_socketio)
+    else:
+        exercise_model.restore_exercices_progress()
+        sio.start_background_task(forward_zmq_to_socketio)
     sio.start_background_task(keepalive)
     sio.start_background_task(notification_history)
     sio.start_background_task(record_users_activity)
@@ -282,7 +340,5 @@ if __name__ == "__main__":
     if not exercises_loaded:
         logger.critical('Could not load exercises')
         sys.exit(1)
-
-    exercise_model.restore_exercices_progress()
 
     web.run_app(init_app(), host=config.server_host, port=config.server_port)

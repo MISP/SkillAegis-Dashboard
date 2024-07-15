@@ -95,7 +95,7 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str, context:
     if comparison_type == 'contains-regex':
         regex = re.compile(values[0])
         for candidate in data_to_validate:
-            if regex.match(candidate):
+            if regex.match(candidate) is not None:
                 return True
         return False
     elif comparison_type == 'count':

@@ -94,6 +94,9 @@ def restore_exercices_progress():
         db.USER_ID_TO_EMAIL_MAPPING = {}
         db.USER_ID_TO_AUTHKEY_MAPPING = {}
 
+    if len(db.EXERCISES_STATUS) == 0:
+        init_exercises_tasks()
+
 
 def is_validate_exercises(exercises: list) -> bool:
     exercises_uuid = set()
@@ -384,6 +387,7 @@ async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dic
         return False
 
     if 'evaluation_strategy' not in inject_evaluation:
+        logger.warning('Evaluation strategy not specified in inject')
         return False
 
     data_to_validate = await get_data_to_validate(user_id, inject_evaluation, data)
@@ -437,7 +441,7 @@ def parse_event_id_from_log(data: dict) -> Union[int, None]:
         if 'model' in log and 'model_id' in log and log['model'] == 'Event':
             return int(log['model_id'])
         if 'change' in log:
-            if 'event_id' in log:
+            if 'event_id' in log and log['event_id'] is not None:
                 return int(log['event_id'])
     return None
 
