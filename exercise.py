@@ -271,9 +271,6 @@ def is_accepted_query(data: dict) -> bool:
     model, action = get_model_action(data)
     if model in ['Event', 'Attribute', 'Object', 'Tag',]:
         if action in ['add', 'edit', 'delete', 'publish', 'tag']:
-            # # improved condition below. It blocks some queries
-            # if data['Log']['change'].startswith('attribute_count'):
-            #     return False
             if 'Log' in data:
                 if data['Log']['change'].startswith('Validation errors:'):
                     return False

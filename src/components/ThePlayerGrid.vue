@@ -22,7 +22,7 @@
 <template>
 <div class="
   mt-2 px-2 pt-1 pb-2 rounded border
-  bg-slate-600 border-slate-800
+  bg-slate-100 border-slate-300 dark:bg-slate-600 dark:border-slate-800
 ">
 
   <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400">
@@ -41,7 +41,7 @@
         text-slate-600 dark:text-slate-400
       ">
         <span :class="`flex flex-col ${compactGrid ? 'w-[120px]' : 'w-60'}`">
-          <span :title="progress.user_id" class="text-nowrap inline-block leading-5 truncate mb-1">
+          <span :title="progress.user_id" class="text-nowrap inline-block leading-5 truncate">
             <span :class="`${compactGrid ? 'text-base' : 'text-lg'} font-bold font-mono leading-5 tracking-tight`">{{ progress.email.split('@')[0] }}</span>
             <span :class="`${compactGrid ? 'text-xs' : 'text-xs'} font-mono tracking-tight`">@{{ progress.email.split('@')[1] }}</span>
           </span>
