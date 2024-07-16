@@ -198,7 +198,7 @@
 
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop">
+      <form method="dialog" class="modal-backdrop backdrop-blur">
         <button>close</button>
       </form>
     </dialog>

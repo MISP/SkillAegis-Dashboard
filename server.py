@@ -320,6 +320,7 @@ async def forward_fake_zmq_to_socketio():
                 print(traceback.format_exc())
                 logger.error('Error handling message: %s', e)
                 await sio.sleep(5)
+    print('Feeding done.')
 
 
 async def init_app():

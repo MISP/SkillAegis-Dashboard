@@ -103,5 +103,6 @@ async def remediateSetting(setting) ->dict:
     if setting in misp_settings:
         payload = {
             'value': misp_settings[setting],
+            'force': 1,
         }
         return await post(f'/servers/serverSettingsEdit/{setting}', payload)
