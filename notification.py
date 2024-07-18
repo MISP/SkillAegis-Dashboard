@@ -187,7 +187,7 @@ def get_scope_action_from_url(url) -> Union[str, None]:
 def is_accepted_notification(notification) -> bool:
     global VERBOSE_MODE
 
-    if notification['user_agent'] == 'misp-exercise-dashboard': # Ignore message generated from this app
+    if notification['user_agent'] == 'SkillAegis': # Ignore message generated from this app
         return False
     if VERBOSE_MODE:
         return True
@@ -208,7 +208,7 @@ def is_accepted_notification(notification) -> bool:
 def is_accepted_user_activity(notification) -> bool:
     global VERBOSE_MODE
 
-    if notification['user_agent'] == 'misp-exercise-dashboard': # Ignore message generated from this app
+    if notification['user_agent'] == 'SkillAegis': # Ignore message generated from this app
         return False
     if '@' not in notification['user']: # Ignore message from system
         return False

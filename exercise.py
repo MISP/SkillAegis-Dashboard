@@ -276,7 +276,7 @@ def is_accepted_query(data: dict) -> bool:
                     return False
             return True
 
-    if data.get('user_agent', None) == 'misp-exercise-dashboard':
+    if data.get('user_agent', None) == 'SkillAegis':
         return None
     url = data.get('url', None)
     if url is not None:

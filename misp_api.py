@@ -22,7 +22,7 @@ requestSession.mount('http://', adapterCache)
 
 async def get(url, data={}, api_key=misp_apikey):
     headers = {
-        'User-Agent': 'misp-exercise-dashboard',
+        'User-Agent': 'SkillAegis',
         "Authorization": api_key,
         "Accept": "application/json",
         "Content-Type": "application/json"
@@ -46,7 +46,7 @@ async def get(url, data={}, api_key=misp_apikey):
 
 async def post(url, data={}, api_key=misp_apikey):
     headers = {
-        'User-Agent': 'misp-exercise-dashboard',
+        'User-Agent': 'SkillAegis',
         "Authorization": api_key,
         "Accept": "application/json",
         "Content-Type": "application/json"

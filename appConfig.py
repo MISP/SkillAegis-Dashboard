@@ -27,10 +27,10 @@ misp_settings = {
 }
 
 import logging
-logger = logging.getLogger('misp-exercise-dashboard')
+logger = logging.getLogger('SkillAegis')
 format = '[%(levelname)s] %(asctime)s - %(message)s'
 formatter = logging.Formatter(format)
-logging.basicConfig(filename='misp-exercise-dashboard.log', encoding='utf-8', level=logging.DEBUG, format=format)
+logging.basicConfig(filename='SkillAegis.log', encoding='utf-8', level=logging.DEBUG, format=format)
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)

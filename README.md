@@ -1,4 +1,4 @@
-# misp-exercise-dashboard
+# SkillAegis
 
 ## Installation
 ```bash
