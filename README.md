@@ -1,5 +1,7 @@
 # SkillAegis
 
+<img alt="SkillAegis Logo" src="src/assets/skillaegis-logo.svg"/> 
+
 ## Installation
 ```bash
 # Setup venv
