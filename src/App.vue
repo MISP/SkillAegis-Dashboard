@@ -18,7 +18,12 @@ onMounted(() => {
 
 <template>
   <main>
-    <h1 class="text-2xl text-center text-slate-500 dark:text-slate-400 absolute top-1 left-1">Exercise Dashboard</h1>
+    <h1 class="text-xl text-center text-slate-500 dark:text-slate-400 absolute inset-x-0 top-0">
+      <div class="flex flex-col items-center mt-2">
+        <span id="logo" class="hover:cursor-pointer"></span>
+        <span>SkillAegis</span>
+      </div>
+    </h1>
     <div class="absolute top-1 right-1">
       <div class="flex gap-2">
         <TheThemeButton></TheThemeButton>
@@ -26,7 +31,9 @@ onMounted(() => {
         <TheSocketConnectionState></TheSocketConnectionState>
       </div>
     </div>
-    <TheDahboard></TheDahboard>
+    <div class="mt-12">
+      <TheDahboard></TheDahboard>
+    </div>
   </main>
 </template>
 
@@ -45,6 +52,16 @@ body {
   @apply mt-4;
   @apply lg:w-11/12;
   @apply 3xl:w-5/6;
+}
+
+#logo {
+  background-image: url(@/assets/skillaegis-logo.svg);
+  width: 64px;
+  height: 64px;
+  display: block;
+  background-size: 64px;
+  /* cyan-400 */
+  /* filter: invert(71%) sepia(97%) saturate(1333%) hue-rotate(147deg) brightness(95%) contrast(96%); */
 }
 
 </style>
