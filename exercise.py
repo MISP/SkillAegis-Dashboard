@@ -12,9 +12,10 @@ import db
 from inject_evaluator import eval_data_filtering, eval_query_mirror, eval_query_search
 import misp_api
 from appConfig import logger
+import config
 
 
-ACTIVE_EXERCISES_DIR = "active_exercises"
+ACTIVE_EXERCISES_DIR = Path(config.exercise_directory)
 LAST_BACKUP = {}
 
 def debounce_check_active_tasks(debounce_seconds: int = 1):
@@ -49,14 +50,18 @@ def load_exercises() -> bool:
 
 
 def read_exercise_dir():
-    script_dir = Path(__file__).parent
-    target_dir = script_dir / ACTIVE_EXERCISES_DIR
+    target_dir = ACTIVE_EXERCISES_DIR
     json_files = target_dir.glob("*.json")
     exercises = []
     for json_file in json_files:
         with open(json_file) as f:
-            parsed_exercise = json.load(f)
-            exercises.append(parsed_exercise)
+            try:
+                parsed_exercise = json.load(f)
+                exercises.append(parsed_exercise)
+            except json.JSONDecodeError as e:
+                print(f'Could not parse {json_file}', str(e))
+            except Exception as e:
+                print(f'Error while reading {json_file}', str(e))
     return exercises
 
 
@@ -101,6 +106,10 @@ def resetAll():
     db.USER_ID_TO_EMAIL_MAPPING = {}
     db.USER_ID_TO_AUTHKEY_MAPPING = {}
     init_exercises_tasks()
+
+def reloadFromDisk():
+    resetAll()
+    load_exercises()
 
 
 def is_validate_exercises(exercises: list) -> bool:
@@ -197,7 +206,7 @@ def get_exercises():
                 "name": exercise['exercise']['name'],
                 "uuid": exercise['exercise']['uuid'],
                 "description": exercise['exercise']['description'],
-                "level": exercise['exercise']['meta']['level'],
+                "level": exercise['exercise']['meta'].get('level', 'Beginner'),
                 "priority": exercise['exercise']['meta'].get('priority', 50),
                 "tasks": tasks,
             }

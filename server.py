@@ -146,6 +146,10 @@ async def toggle_apiquery_mode(sid, payload):
 async def remediate_setting(sid, payload):
     return await doSettingRemediation(payload['name'])
 
+@sio.event
+async def reload_from_disk(sid):
+    return exercise_model.reloadFromDisk()
+
 @sio.on('*')
 async def any_event(event, sid, data={}):
     logger.info('>> Unhandled event %s', event)

@@ -84,6 +84,10 @@ export function resetLiveLogs() {
   sendResetLiveLogs()
 }
 
+export function reloadFromDisk() {
+  sendReloadFromDisk()
+}
+
 export function changeExerciseSelection(exec_uuid, state_enabled) {
   const payload = {
     exercise_uuid: exec_uuid,
@@ -178,6 +182,12 @@ function sendResetAll() {
 function sendResetLiveLogs() {
   socket.emit('reset_notifications', () => {
     getNotifications()
+  })
+}
+
+function sendReloadFromDisk() {
+  socket.emit('reload_from_disk', () => {
+    getExercises()
   })
 }
 

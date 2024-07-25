@@ -10,7 +10,8 @@ import {
   resetLiveLogs,
   changeExerciseSelection,
   debouncedGetDiangostic,
-  remediateSetting
+  remediateSetting,
+  reloadFromDisk
 } from '../socket'
 import {
   faScrewdriverWrench,
@@ -20,7 +21,8 @@ import {
   faBan,
   faRotate,
   faHammer,
-  faCheck
+  faCheck,
+  faFileImport
 } from '@fortawesome/free-solid-svg-icons'
 import { toast } from '../utils.js'
 
@@ -85,6 +87,13 @@ function showTheModal() {
           >
             <FontAwesomeIcon :icon="faBan" size="lg"> fixed-width</FontAwesomeIcon>
             Clear Live Logs
+          </button>
+          <button
+            @click="reloadFromDisk()"
+            class="h-10 min-h-10 font-semibold btn-danger btn gap-1"
+          >
+            <FontAwesomeIcon :icon="faFileImport" size="lg"> fixed-width</FontAwesomeIcon>
+            Reload Exercises From Disk
           </button>
         </div>
 

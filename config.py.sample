@@ -6,3 +6,5 @@ zmq_url = 'tcp://localhost:50000'
 misp_url = 'https://localhost/'
 misp_apikey = 'FI4gCRghRZvLVjlLPLTFZ852x2njkkgPSz0zQ3E0'
 misp_skipssl = True
+
+exercise_directory = '../scenarios'
