@@ -32,7 +32,7 @@
 
 <template>
 <div>
-  <h3 class="text-2xl mt-6 mb-2 font-bold text-blue-500 dark:text-blue-400">
+  <h3 class="text-2xl mt-6 mb-2 font-bold text-blue-500 dark:text-blue-400 uppercase">
     <FontAwesomeIcon :icon="faSignal"></FontAwesomeIcon>
     Live logs
   </h3>

@@ -23,7 +23,7 @@
 </script>
 
 <template>
-  <h3 class="text-2xl mt-6 mb-2 font-bold text-blue-500 dark:text-blue-400">
+  <h3 class="text-2xl mt-6 mb-2 font-bold text-blue-500 dark:text-blue-400 uppercase">
     <FontAwesomeIcon :icon="faGraduationCap"></FontAwesomeIcon>
     Active Exercises
   </h3>
@@ -32,15 +32,10 @@
     v-if="!hasExercises"
     class="text-slate-600 dark:text-slate-400 p-3 pl-6"
   >
-    <div class="
-      p-2 border-l-4 text-left rounded
-      dark:bg-yellow-300 dark:text-slate-900 dark:border-yellow-700 
-      bg-yellow-200 text-slate-900 border-yellow-700 
-    ">
-      <FontAwesomeIcon :icon="faWarning" class="text-yellow-700 text-lg mx-3"></FontAwesomeIcon>
+    <Alert variant="warning">
       <strong class="">No Exercise available.</strong>
       <span class="ml-1">Select an exercise in the <i class="underline">Admin panel</i>.</span>
-    </div>
+    </Alert>
 
     <ThePlayerGrid></ThePlayerGrid>
   </div>

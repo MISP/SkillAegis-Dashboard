@@ -25,7 +25,7 @@
   bg-slate-100 border-slate-300 dark:bg-slate-600 dark:border-slate-800
 ">
 
-  <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400">
+  <h4 class="text-xl mb-2 font-bold text-blue-500 dark:text-blue-400 uppercase">
     <FontAwesomeIcon :icon="faUsers"></FontAwesomeIcon>
     Active Players
   </h4>
