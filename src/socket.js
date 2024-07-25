@@ -3,7 +3,7 @@ import { io } from 'socket.io-client'
 import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:40001'
+const URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000'
 const MAX_LIVE_LOG = 30
 
 const initial_state = {
@@ -191,14 +191,14 @@ function sendToggleVerboseMode(enabled) {
   const payload = {
     verbose: enabled
   }
-  socket.emit('toggle_verbose_mode', payload, () => {})
+  socket.emit('toggle_verbose_mode', payload, () => { })
 }
 
 function sendToggleApiQueryMode(enabled) {
   const payload = {
     apiquery: enabled
   }
-  socket.emit('toggle_apiquery_mode', payload, () => {})
+  socket.emit('toggle_apiquery_mode', payload, () => { })
 }
 
 function sendRemediateSetting(setting, cb) {
