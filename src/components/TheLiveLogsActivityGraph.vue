@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { notificationHistory, notificationHistoryConfig } from '@/socket'
-import { darkModeEnabled } from '@/settings.js'
+import { notificationHistory, notificationHistoryConfig } from '../socket'
+import { darkModeEnabled } from '../settings.js'
 
 const theChart = ref(null)
 const chartInitSeries = [{ data: Array.from(Array(12 * 20)).map(() => 0) }]

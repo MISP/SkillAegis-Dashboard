@@ -5,8 +5,8 @@ import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
 import TheDahboard from './TheDahboard.vue'
 import Toaster from '@/components/elements/Toaster.vue'
-import { socketConnected } from '@/socket'
-import { darkModeEnabled } from '@/settings.js'
+import { socketConnected } from './socket'
+import { darkModeEnabled } from './settings.js'
 
 onMounted(() => {
   if (darkModeEnabled.value) {

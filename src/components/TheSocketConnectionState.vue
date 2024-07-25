@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { socketConnected, zmqLastTime } from '@/socket'
+import { socketConnected, zmqLastTime } from '../socket'
 
 const zmqLastTimeSecond = ref('?')
 

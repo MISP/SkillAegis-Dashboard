@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { allToasts, removeToast } from '@/utils.js'
+import { allToasts, removeToast } from '../../utils.js'
 import Toast from '@/components/elements/Toast.vue'
 
 const container = ref()

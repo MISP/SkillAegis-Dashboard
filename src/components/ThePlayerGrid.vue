@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { progresses, userCount } from '@/socket'
+import { progresses, userCount } from '../socket'
 import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { darkModeEnabled } from '@/settings.js'
+import { darkModeEnabled } from '../settings.js'
 import LiveLogsUserActivityGraph from './LiveLogsUserActivityGraph.vue'
 
 const compactGrid = computed(() => {

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { removeToast } from '@/utils.js'
+import { removeToast } from '../../utils.js'
 import {
   faCancel,
   faCheck,

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { active_exercises as exercises, progresses, userCount, setCompletedState } from '@/socket'
+import { active_exercises as exercises, progresses, userCount, setCompletedState } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'

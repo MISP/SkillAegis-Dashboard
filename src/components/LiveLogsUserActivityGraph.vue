@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { userActivity, userActivityConfig } from '@/socket'
-import { darkModeEnabled } from '@/settings.js'
+import { userActivity, userActivityConfig } from '../socket'
+import { darkModeEnabled } from '../settings.js'
 
 const props = defineProps(['user_id', 'compact_view', 'ultra_compact_view'])
 

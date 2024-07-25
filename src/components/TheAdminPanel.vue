@@ -11,7 +11,7 @@ import {
   changeExerciseSelection,
   debouncedGetDiangostic,
   remediateSetting
-} from '@/socket'
+} from '../socket'
 import {
   faScrewdriverWrench,
   faTrash,
@@ -22,7 +22,7 @@ import {
   faHammer,
   faCheck
 } from '@fortawesome/free-solid-svg-icons'
-import { toast } from '@/utils.js'
+import { toast } from '../utils.js'
 
 const admin_modal = ref(null)
 const clickedButtons = ref([])

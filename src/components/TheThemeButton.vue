@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
-import { darkModeOn } from '@/settings.js'
+import { darkModeOn } from '../settings.js'
 
 const darkMode = ref(darkModeOn.value)
 

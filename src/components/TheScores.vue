@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { active_exercises as exercises } from '@/socket'
+import { active_exercises as exercises } from '../socket'
 import {
   faGraduationCap,
   faUpRightAndDownLeftFromCenter,
@@ -10,7 +10,7 @@ import {
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
 import ThePlayerGrid from './ThePlayerGrid.vue'
-import { fullscreenModeOn } from '@/settings.js'
+import { fullscreenModeOn } from '../settings.js'
 
 const hasExercises = computed(() => exercises.value.length > 0)
 const fullscreen_panel = ref(false)

@@ -7,10 +7,9 @@ import {
   notificationAPICounter,
   toggleVerboseMode,
   toggleApiQueryMode
-} from '@/socket'
+} from '../socket'
 import { faSignal, faCloud, faCog, faUsers, faCircle } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
-import ToggleSwitch from '@/components/elements/ToggleSwitch.vue'
 
 const verbose = ref(false)
 const api_query = ref(false)
