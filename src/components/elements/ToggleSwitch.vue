@@ -1,12 +1,12 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
-     <label class="grid cursor-pointer place-items-center">
-      <input
-        type="checkbox"
-        class="toggle theme-controller bg-slate-500 col-span-2 col-start-1 row-start-1 [--tglbg:#e2e8f0] dark:[--tglbg:#1d232a]" />
-    </label>
+  <label class="grid cursor-pointer place-items-center">
+    <input
+      type="checkbox"
+      class="toggle theme-controller bg-slate-500 col-span-2 col-start-1 row-start-1 [--tglbg:#e2e8f0] dark:[--tglbg:#1d232a]"
+    />
+  </label>
 </template>
 
 <style scoped>
@@ -30,7 +30,7 @@
     @apply bg-current;
   }
   &:checked,
-  &[aria-checked="true"] {
+  &[aria-checked='true'] {
     background-image: none;
     --handleoffsetcalculator: var(--handleoffset);
   }
@@ -42,12 +42,10 @@
   }
   &:disabled {
     @apply cursor-not-allowed bg-transparent opacity-30;
-    --togglehandleborder: 0 0 0 3px #000 inset,
-      var(--handleoffsetcalculator) 0 0 3px #000 inset;
+    --togglehandleborder: 0 0 0 3px #000 inset, var(--handleoffsetcalculator) 0 0 3px #000 inset;
   }
 
   &-success {
-    
   }
 }
 

@@ -1,83 +1,82 @@
-
 .btn {
-    @apply px-2 py-1 font-semibold rounded border text-nowrap select-none;
-    @apply transition-all duration-75;
-    @apply border-slate-300;
+  @apply px-2 py-1 font-semibold rounded border text-nowrap select-none;
+  @apply transition-all duration-75;
+  @apply border-slate-300;
 
-    &.btn-sm {
-        @apply px-1 py-0;
-    }
+  &.btn-sm {
+    @apply px-1 py-0;
+  }
 
-    &.btn-xs {
-        @apply px-0.5 py-0;
-        @apply text-sm;
-    }
+  &.btn-xs {
+    @apply px-0.5 py-0;
+    @apply text-sm;
+  }
 
-    &.btn-lg {
-        @apply px-3 py-1;
-        @apply text-lg;
-    }
-    
-    &.btn:not(:disabled) {
-        @apply hover:bg-slate-200 hover:border-slate-300;
-        @apply active:scale-90
-    }
+  &.btn-lg {
+    @apply px-3 py-1;
+    @apply text-lg;
+  }
 
-    &.btn:disabled {
-        @apply cursor-not-allowed opacity-60;
-    }
-    &.btn-primary:not(:disabled) {
-        @apply border-none;
-        @apply bg-blue-600 text-white hover:bg-blue-700;
-    }
+  &.btn:not(:disabled) {
+    @apply hover:bg-slate-200 hover:border-slate-300;
+    @apply active:scale-90;
+  }
 
-    &.btn-info:not(:disabled) {
-        @apply border-none;
-        @apply bg-blue-500 text-white hover:bg-blue-600;
-    }
+  &.btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+  &.btn-primary:not(:disabled) {
+    @apply border-none;
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
 
-    &.btn-danger:not(:disabled) {
-        @apply border-none;
-        @apply bg-red-600 text-white hover:bg-red-700;
-    }
-    
-    &.btn-success:not(:disabled) {
-        @apply border-none;
-        @apply bg-green-600 text-white hover:bg-green-700;
-    }
+  &.btn-info:not(:disabled) {
+    @apply border-none;
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
 
-    &.btn-warning:not(:disabled) {
-        @apply border-none;
-        @apply bg-amber-600 text-white hover:bg-amber-700;
-    }
+  &.btn-danger:not(:disabled) {
+    @apply border-none;
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
 
-    &.btn-outline-primary:not(:disabled) {
-        @apply hover:bg-blue-600 hover:border-blue-700 hover:text-white;
-        @apply border-blue-700 hover:border-blue-800
-    }
+  &.btn-success:not(:disabled) {
+    @apply border-none;
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
 
-    &.btn-outline-info:not(:disabled) {
-        @apply hover:bg-blue-500 hover:border-blue-700 hover:text-white;
-        @apply border-blue-700 hover:border-blue-800
-    }
+  &.btn-warning:not(:disabled) {
+    @apply border-none;
+    @apply bg-amber-600 text-white hover:bg-amber-700;
+  }
 
-    &.btn-outline-danger:not(:disabled) {
-        @apply hover:bg-red-500 hover:border-red-700 hover:text-white;
-        @apply border-red-700 hover:border-red-800
-    }
-    
-    &.btn-outline-success:not(:disabled) {
-        @apply hover:bg-green-500 hover:border-green-700 hover:text-white;
-        @apply border-green-700 hover:border-green-800
-    }
+  &.btn-outline-primary:not(:disabled) {
+    @apply hover:bg-blue-600 hover:border-blue-700 hover:text-white;
+    @apply border-blue-700 hover:border-blue-800;
+  }
 
-    &.btn-outline-warning:not(:disabled) {
-        @apply hover:bg-amber-500 hover:border-amber-700 hover:text-white;
-        @apply border-amber-700 hover:border-amber-800
-    }
+  &.btn-outline-info:not(:disabled) {
+    @apply hover:bg-blue-500 hover:border-blue-700 hover:text-white;
+    @apply border-blue-700 hover:border-blue-800;
+  }
 
-    &.btn-link:not(:disabled) {
-        @apply border-none;
-        @apply hover:bg-transparent hover:border-transparent hover:text-inherit;
-    }
+  &.btn-outline-danger:not(:disabled) {
+    @apply hover:bg-red-500 hover:border-red-700 hover:text-white;
+    @apply border-red-700 hover:border-red-800;
+  }
+
+  &.btn-outline-success:not(:disabled) {
+    @apply hover:bg-green-500 hover:border-green-700 hover:text-white;
+    @apply border-green-700 hover:border-green-800;
+  }
+
+  &.btn-outline-warning:not(:disabled) {
+    @apply hover:bg-amber-500 hover:border-amber-700 hover:text-white;
+    @apply border-amber-700 hover:border-amber-800;
+  }
+
+  &.btn-link:not(:disabled) {
+    @apply border-none;
+    @apply hover:bg-transparent hover:border-transparent hover:text-inherit;
+  }
 }

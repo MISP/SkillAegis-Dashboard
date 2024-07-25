@@ -1,7 +1,7 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@import "./styled-components/toggle.css";
-@import "./styled-components/button.css";
-@import "./styled-components/transitions.css";
+@import './styled-components/toggle.css';
+@import './styled-components/button.css';
+@import './styled-components/transitions.css';

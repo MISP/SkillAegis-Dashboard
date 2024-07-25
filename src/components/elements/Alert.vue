@@ -45,8 +45,8 @@ const messages = computed(() => {
   return Array.isArray(props.message)
     ? props.message
     : props.message !== undefined
-    ? [props.message]
-    : []
+      ? [props.message]
+      : []
 })
 </script>
 

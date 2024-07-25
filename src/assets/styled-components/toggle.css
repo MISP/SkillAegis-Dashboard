@@ -3,76 +3,88 @@
 }
 
 .toggle {
-    --tglbg: theme(colors.slate.200);
-    --animation-input: 0.2s;
-    --handleoffset: 1.5rem;
-    --handleoffsetcalculator: calc(var(--handleoffset) * -1);
-    --togglehandleborder: 0 0;
-    @apply h-6 w-12 rounded-3xl cursor-pointer appearance-none border border-current bg-current;
-    transition:
-      background,
-      box-shadow var(--animation-input, 0.2s) ease-out;
+  --tglbg: theme(colors.slate.200);
+  --animation-input: 0.2s;
+  --handleoffset: 1.5rem;
+  --handleoffsetcalculator: calc(var(--handleoffset) * -1);
+  --togglehandleborder: 0 0;
+  @apply h-6 w-12 rounded-3xl cursor-pointer appearance-none border border-current bg-current;
+  transition:
+    background,
+    box-shadow var(--animation-input, 0.2s) ease-out;
+  box-shadow:
+    var(--handleoffsetcalculator) 0 0 2px var(--tglbg) inset,
+    0 0 0 2px var(--tglbg) inset,
+    var(--togglehandleborder);
+  @apply text-slate-500;
+
+  &:focus-visible {
+    @apply outline outline-2 outline-offset-2;
+  }
+
+  &:hover {
+    @apply bg-current;
+  }
+
+  &:checked,
+  &[aria-checked='true'] {
+    background-image: none;
+    --handleoffsetcalculator: var(--handleoffset);
+  }
+
+  &:indeterminate {
     box-shadow:
-      var(--handleoffsetcalculator) 0 0 2px var(--tglbg) inset,
-      0 0 0 2px var(--tglbg) inset,
-      var(--togglehandleborder);
-    @apply text-slate-500;
+      calc(var(--handleoffset) / 2) 0 0 2px var(--tglbg) inset,
+      calc(var(--handleoffset) / -2) 0 0 2px var(--tglbg) inset,
+      0 0 0 2px var(--tglbg) inset;
+  }
+
+  &:disabled {
+    @apply cursor-not-allowed bg-transparent opacity-30;
+    --togglehandleborder: 0 0 0 3px #000 inset, var(--handleoffsetcalculator) 0 0 3px #000 inset;
+  }
+
+  &.toggle-success {
     &:focus-visible {
-      @apply outline outline-2 outline-offset-2;
+      @apply outline-green-400;
     }
-    &:hover {
-      @apply bg-current;
-    }
+
     &:checked,
-    &[aria-checked="true"] {
-      background-image: none;
-      --handleoffsetcalculator: var(--handleoffset);
-    }
-    &:indeterminate {
-      box-shadow:
-        calc(var(--handleoffset) / 2) 0 0 2px var(--tglbg) inset,
-        calc(var(--handleoffset) / -2) 0 0 2px var(--tglbg) inset,
-        0 0 0 2px var(--tglbg) inset;
-    }
-    &:disabled {
-      @apply cursor-not-allowed bg-transparent opacity-30;
-      --togglehandleborder: 0 0 0 3px #000 inset,
-        var(--handleoffsetcalculator) 0 0 3px #000 inset;
-    }
-    &.toggle-success {
-        &:focus-visible {
-            @apply outline-green-400;
-        }
-        &:checked,
-        &[aria-checked="true"] {
-            @apply border-green-500 bg-green-400 text-slate-900 border-opacity-10;
-        }
-    }
-    &.toggle-warning {
-        &:focus-visible {
-            @apply outline-amber-400;
-        }
-        &:checked,
-        &[aria-checked="true"] {
-            @apply border-amber-500 bg-amber-400 text-slate-900 border-opacity-10;
-        }
-    }
-    &.toggle-info {
-        &:focus-visible {
-            @apply outline-blue-400;
-        }
-        &:checked,
-        &[aria-checked="true"] {
-            @apply border-blue-500 bg-blue-400 text-slate-900 border-opacity-10;
-        }
-    }
-    &.toggle-danger {
-        &:focus-visible {
-            @apply outline-red-400;
-        }
-        &:checked,
-        &[aria-checked="true"] {
-            @apply border-red-500 bg-red-400 text-slate-900 border-opacity-10;
-        }
+    &[aria-checked='true'] {
+      @apply border-green-500 bg-green-400 text-slate-900 border-opacity-10;
     }
   }
+
+  &.toggle-warning {
+    &:focus-visible {
+      @apply outline-amber-400;
+    }
+
+    &:checked,
+    &[aria-checked='true'] {
+      @apply border-amber-500 bg-amber-400 text-slate-900 border-opacity-10;
+    }
+  }
+
+  &.toggle-info {
+    &:focus-visible {
+      @apply outline-blue-400;
+    }
+
+    &:checked,
+    &[aria-checked='true'] {
+      @apply border-blue-500 bg-blue-400 text-slate-900 border-opacity-10;
+    }
+  }
+
+  &.toggle-danger {
+    &:focus-visible {
+      @apply outline-red-400;
+    }
+
+    &:checked,
+    &[aria-checked='true'] {
+      @apply border-red-500 bg-red-400 text-slate-900 border-opacity-10;
+    }
+  }
+}

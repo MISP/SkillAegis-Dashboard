@@ -82,7 +82,10 @@ onMounted(() => {
         ></FontAwesomeIcon>
       </button>
     </div>
-    <div class="text-slate-600 p-1 font-light" v-if="props.message !== undefined && props.message.length > 0">
+    <div
+      class="text-slate-600 p-1 font-light"
+      v-if="props.message !== undefined && props.message.length > 0"
+    >
       {{ props.message }}
     </div>
     <div v-if="props.confirm" class="flex gap-1">

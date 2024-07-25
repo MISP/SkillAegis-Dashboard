@@ -1,20 +1,20 @@
-import { computed, ref } from "vue"
+import { computed, ref } from 'vue'
 
 let toastID = 0
 export const toastBuffer = ref([])
 export const allToasts = computed(() => toastBuffer.value)
 export function toast(toast) {
-    toastID += 1
-    toast.id = toastID
-    toastBuffer.value.push(toast)
+  toastID += 1
+  toast.id = toastID
+  toastBuffer.value.push(toast)
 }
 export function removeToast(id) {
-    toastBuffer.value = toastBuffer.value.filter((toast) => toast.id != id)
+  toastBuffer.value = toastBuffer.value.filter((toast) => toast.id != id)
 }
 export function ajaxFeedback(response) {
-    toast({
-        variant: response.success ? 'success' : 'danger',
-        message: String(response.message),
-        title: response.title,
-    })
+  toast({
+    variant: response.success ? 'success' : 'danger',
+    message: String(response.message),
+    title: response.title
+  })
 }

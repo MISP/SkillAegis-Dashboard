@@ -1,23 +1,23 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch } from 'vue'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 
 const props = defineProps({
-    showModal: Boolean,
-});
+  showModal: Boolean
+})
 
 const dialog = ref(null)
 
-const emit = defineEmits(["modal-close"]);
+const emit = defineEmits(['modal-close'])
 
 function closeModal() {
-    emit('modal-close')
+  emit('modal-close')
 }
 </script>
 
 <template>
-    <Teleport to="body">
-        <div>
+  <Teleport to="body">
+    <div>
       <Transition>
         <div
           v-if="props.showModal"
@@ -34,11 +34,12 @@ function closeModal() {
               <slot name="header"></slot>
             </h2>
             <span class="ml-auto text-xl">
-                <button @click.stop="closeModal()"
-                    class="hover:text-slate-200 hover:dark:text-slate-50 hover:bg-slate-200/20 rounded-full p-1"
-                >
-                    <FontAwesomeIcon :icon="faTimes" class="fa-fw"></FontAwesomeIcon>
-                </button>
+              <button
+                @click.stop="closeModal()"
+                class="hover:text-slate-200 hover:dark:text-slate-50 hover:bg-slate-200/20 rounded-full p-1"
+              >
+                <FontAwesomeIcon :icon="faTimes" class="fa-fw"></FontAwesomeIcon>
+              </button>
             </span>
           </div>
           <div class="px-4 py-3 bg-slate-100">
@@ -46,15 +47,15 @@ function closeModal() {
           </div>
           <div class="px-4 py-3 bg-slate-100 rounded-b-lg">
             <slot name="footer">
-                <div class="flex flex-row-reverse">
-                  <button class="btn btn-primary btn-lg" @click.stop="closeModal()">Ok</button>
-                </div>
+              <div class="flex flex-row-reverse">
+                <button class="btn btn-primary btn-lg" @click.stop="closeModal()">Ok</button>
+              </div>
             </slot>
           </div>
         </div>
       </Transition>
     </div>
-    </Teleport>
+  </Teleport>
 </template>
 
 <style scoped>
