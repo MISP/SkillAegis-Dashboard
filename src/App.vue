@@ -4,16 +4,15 @@ import TheThemeButton from './components/TheThemeButton.vue'
 import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
 import TheDahboard from './TheDahboard.vue'
-import { socketConnected } from "@/socket";
-import { darkModeEnabled } from "@/settings.js"
-
+import Toaster from '@/components/elements/Toaster.vue'
+import { socketConnected } from './socket'
+import { darkModeEnabled } from './settings.js'
 
 onMounted(() => {
   if (darkModeEnabled.value) {
     document.getElementsByTagName('body')[0].classList.add('dark')
   }
 })
-
 </script>
 
 <template>
@@ -34,6 +33,7 @@ onMounted(() => {
     <div class="mt-12">
       <TheDahboard></TheDahboard>
     </div>
+    <Toaster></Toaster>
   </main>
 </template>
 
@@ -63,5 +63,4 @@ body {
   /* cyan-400 */
   /* filter: invert(71%) sepia(97%) saturate(1333%) hue-rotate(147deg) brightness(95%) contrast(96%); */
 }
-
 </style>

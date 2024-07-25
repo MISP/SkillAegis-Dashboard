@@ -2,9 +2,8 @@
 import { onMounted, watch } from 'vue'
 import TheLiveLogs from './components/TheLiveLogs.vue'
 import TheScores from './components/TheScores.vue'
-import { resetState, fullReload, socketConnected } from "@/socket";
-import { fullscreenModeOn } from "@/settings.js"
-
+import { resetState, fullReload, socketConnected } from './socket'
+import { fullscreenModeOn } from './settings.js'
 
 watch(socketConnected, (isConnected) => {
   if (isConnected) {
@@ -16,7 +15,6 @@ watch(socketConnected, (isConnected) => {
 onMounted(() => {
   fullReload()
 })
-
 </script>
 
 <template>
