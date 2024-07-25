@@ -4,6 +4,7 @@ import TheThemeButton from './components/TheThemeButton.vue'
 import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
 import TheDahboard from './TheDahboard.vue'
+import Toaster from '@/components/elements/Toaster.vue'
 import { socketConnected } from "@/socket";
 import { darkModeEnabled } from "@/settings.js"
 
@@ -34,6 +35,7 @@ onMounted(() => {
     <div class="mt-12">
       <TheDahboard></TheDahboard>
     </div>
+    <Toaster></Toaster>
   </main>
 </template>
 

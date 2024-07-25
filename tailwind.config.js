@@ -8,6 +8,15 @@ export default {
     {
       pattern: /bg-blue+/, // Includes bg of all colors and shades
     },
+    {
+      pattern: /bg-(red|green|blue|amber)-(100|200|300|800)/, // Includes bg of all colors and shades
+    },
+    {
+      pattern: /text-(red|green|blue|amber)-(100|700|800)/, // Includes bg of all colors and shades
+    },
+    {
+      pattern: /border-(red|green|blue|amber)-(700)/, // Includes bg of all colors and shades
+    },
   ],
   theme: {
     extend: {
@@ -18,8 +27,13 @@ export default {
         '3xl': '1800px',
       },
       fontSize: {
-        'xxs': '0.6rem',
+        '2xs': '0.66rem',
       },
+      maxWidth: {
+        '8xl': '88rem',
+        '9xl': '96rem',
+        '10xl': '104rem',
+      }
     },
   },
   plugins: [

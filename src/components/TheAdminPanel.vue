@@ -3,6 +3,7 @@
   import { exercises, selected_exercises, diagnostic, fullReload, resetAllExerciseProgress, resetAll, resetLiveLogs, changeExerciseSelection, debouncedGetDiangostic, remediateSetting } from "@/socket";
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { faScrewdriverWrench, faTrash, faSuitcaseMedical, faGraduationCap, faBan, faRotate, faHammer, faCheck } from '@fortawesome/free-solid-svg-icons'
+  import { toast } from '@/utils.js'
 
   const admin_modal = ref(null)
   const clickedButtons = ref([])

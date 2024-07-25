@@ -1,5 +1,8 @@
+import { computed, ref } from "vue"
+
 let toastID = 0
 export const toastBuffer = ref([])
+export const allToasts = computed(() => toastBuffer.value)
 export function toast(toast) {
     toastID += 1
     toast.id = toastID
