@@ -3,6 +3,9 @@
 import collections
 import functools
 import json
+import argparse
+import os
+from pathlib import Path
 import sys
 import time
 import traceback
@@ -19,6 +22,7 @@ from appConfig import logger
 import misp_api
 
 
+ZMQ_LOG_FILE = None
 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
@@ -292,8 +296,8 @@ async def forward_zmq_to_socketio():
 
 # Function to forward zmq messages to Socket.IO
 async def forward_fake_zmq_to_socketio():
-    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME
-    filename = sys.argv[1]
+    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME, ZMQ_LOG_FILE
+    filename = ZMQ_LOG_FILE
     line_number = sum(1 for _ in open(filename))
     print(f'Preparing to feed {line_number} lines..')
     await sio.sleep(2)
@@ -327,8 +331,11 @@ async def forward_fake_zmq_to_socketio():
     print('Feeding done.')
 
 
-async def init_app():
-    if len(sys.argv) == 2:
+async def init_app(zmq_log_file=None):
+    global ZMQ_LOG_FILE
+
+    if zmq_log_file is not None:
+        ZMQ_LOG_FILE = zmq_log_file
         sio.start_background_task(forward_fake_zmq_to_socketio)
     else:
         exercise_model.restore_exercices_progress()
@@ -343,11 +350,31 @@ async def init_app():
 app.router.add_static('/assets', 'dist/assets')
 app.router.add_get('/', index)
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description='Parse command-line arguments for SkillAegis Dashboard.')
+
+    parser.add_argument('--host', type=str, required=False, default=config.server_host, help='The host to listen to')
+    parser.add_argument('--port', type=int, required=False, default=config.server_port, help='The port to listen to')
+    parser.add_argument('--exercise_folder', type=str, required=False, default=config.exercise_directory, help='The folder containing all exercises')
+    parser.add_argument('--zmq_log_file', type=str, required=False, default=None, help='A ZMQ log file to replay. Will disable the ZMQ subscription defined in the settings.')
+
+    args = parser.parse_args()
+
+    # Validate exercise_folder
+    if not os.path.isdir(args.exercise_folder):
+        parser.error(f"The specified exercise_folder does not exist or is not a directory: {args.exercise_folder}")
+    else:
+        exercise_model.ACTIVE_EXERCISES_DIR = Path(args.exercise_folder)
+
+    if args.zmq_log_file and not os.path.isfile(args.zmq_log_file):
+        parser.error(f"The specified zmq_log_file does not exist or is not a file: {args.zmq_log_file}")
 
     exercises_loaded = exercise_model.load_exercises()
     if not exercises_loaded:
         logger.critical('Could not load exercises')
         sys.exit(1)
 
-    web.run_app(init_app(), host=config.server_host, port=config.server_port)
+    web.run_app(init_app(args.zmq_log_file), host=args.host, port=args.port)
+
+if __name__ == "__main__":
+    main()
