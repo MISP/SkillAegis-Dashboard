@@ -20,7 +20,7 @@ onMounted(() => {
     <h1 class="text-xl text-center text-slate-500 dark:text-slate-400 absolute inset-x-0 top-0">
       <div class="flex flex-col items-center mt-2">
         <span id="logo" class="hover:cursor-pointer"></span>
-        <span>SkillAegis</span>
+        <span id="logo-text"></span>
       </div>
     </h1>
     <div class="absolute top-1 right-1">
@@ -62,5 +62,17 @@ body {
   background-size: 64px;
   /* cyan-400 */
   /* filter: invert(71%) sepia(97%) saturate(1333%) hue-rotate(147deg) brightness(95%) contrast(96%); */
+}
+
+#logo-text {
+  margin-top: 0.6rem;
+  width: 92px;
+  height: 20px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: initial;
+  background-image: url(@/assets/skillaegis-text.svg);
+  /* Forces color #94a3b8 */
+  filter: invert(72%) sepia(6%) saturate(998%) hue-rotate(176deg) brightness(90%) contrast(84%);
 }
 </style>
