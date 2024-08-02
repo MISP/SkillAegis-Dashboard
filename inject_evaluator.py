@@ -12,6 +12,8 @@ def jq_extract(path: str, data: dict, extract_type='first'):
         return query.first() if extract_type == 'first' else query.all()
     except StopIteration:
         return None
+    except ValueError:
+        return None
 
 
 # Replace the substring `{{variable}}` by context[variable] in the provided string
@@ -141,13 +143,7 @@ def eval_condition_dict(evaluation_config: dict, data_to_validate: str, context:
     elif comparison_type == 'equals':
         pass
     elif comparison_type == 'count':
-        if values[0].isdigit():
-            return len(data_to_validate) == values[0]
-        elif values[0][0] in comparators.keys():
-            count = len(data_to_validate)
-            value_operator = values[0][0]
-            value = int(values[0][1:])
-            return comparators[value_operator](count, value)
+        return count_comparison(values, data_to_validate)
     return False
 
 
