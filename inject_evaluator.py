@@ -66,20 +66,13 @@ def eval_condition_str(evaluation_config: dict, data_to_validate: str, context: 
     elif comparison_type == 'regex':
         return re.fullmatch(values[0], data_to_validate)
     elif comparison_type == 'count':
-        return len(data_to_validate) == values[0]
+        return count_comparison(values, data_to_validate)
     return False
 
 
 def eval_condition_list(evaluation_config: dict, data_to_validate: str, context: dict) -> bool:
     comparison_type = evaluation_config['comparison']
     values = evaluation_config['values']
-    comparators = {
-        '<': operator.lt,
-        '<=': operator.le,
-        '>': operator.gt,
-        '>=': operator.ge,
-        '=': operator.eq,
-    }
 
     if len(values) == 0:
         return False
@@ -96,25 +89,35 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str, context:
     if comparison_type == 'contains-regex':
         regex = re.compile(values[0])
         for candidate in data_to_validate:
-            if regex.match(candidate) is not None:
-                return True
-        return False
+            if regex.match(candidate) is None:
+                return False
+        return True
     elif comparison_type == 'count':
-        value = values[0]
-        if value.isdigit():
-            value = int(value)
-            return len(data_to_validate) == value
-        elif value[:2] in comparators.keys():
-            count = len(data_to_validate)
-            value_operator = values[0][:2]
-            value = int(value[2:])
-            return comparators[value_operator](count, value)
-        elif value[0] in comparators.keys():
-            count = len(data_to_validate)
-            value_operator = value[0]
-            value = int(value[1:])
-            return comparators[value_operator](count, value)
+        return count_comparison(values, data_to_validate)
     return False
+
+def count_comparison(values: str, data_to_validate: str) -> bool:
+    comparators = {
+        '<': operator.lt,
+        '<=': operator.le,
+        '>': operator.gt,
+        '>=': operator.ge,
+        '=': operator.eq,
+    }
+    value = values[0]
+    if value.isdigit():
+        value = int(value)
+        return len(data_to_validate) == value
+    elif value[:2] in comparators.keys():
+        count = len(data_to_validate)
+        value_operator = values[0][:2]
+        value = int(value[2:])
+        return comparators[value_operator](count, value)
+    elif value[0] in comparators.keys():
+        count = len(data_to_validate)
+        value_operator = value[0]
+        value = int(value[1:])
+        return comparators[value_operator](count, value)
 
 
 def eval_condition_dict(evaluation_config: dict, data_to_validate: str, context: dict) -> bool:
