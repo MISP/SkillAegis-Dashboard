@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import json
 from typing import Union
 import jq
 import re
 import operator
-from appConfig import logger
 
 
 def jq_extract(path: str, data: dict, extract_type='first'):
@@ -17,6 +17,7 @@ def jq_extract(path: str, data: dict, extract_type='first'):
 # Replace the substring `{{variable}}` by context[variable] in the provided string
 def apply_replacement_from_context(string: str, context: dict) -> str:
     replacement_regex = r"{{(\w+)}}"
+    string = str(string)
     if r'{{' not in string and r'}}' not in string:
         return string
     matches = re.fullmatch(replacement_regex, string, re.MULTILINE)
@@ -101,6 +102,7 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str, context:
     elif comparison_type == 'count':
         value = values[0]
         if value.isdigit():
+            value = int(value)
             return len(data_to_validate) == value
         elif value[:2] in comparators.keys():
             count = len(data_to_validate)
@@ -146,17 +148,34 @@ def eval_condition_dict(evaluation_config: dict, data_to_validate: str, context:
     return False
 
 
-def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
+def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> Union[bool, tuple]:
+    debug_steps = []
+    eval_state = None
     for evaluation_params in inject_evaluation['parameters']:
+        if eval_state is False:
+            break
+        debug_step = []
         for evaluation_path, evaluation_config in evaluation_params.items():
+            if eval_state is False:
+                break
             evaluation_path = apply_replacement_from_context(evaluation_path, context)
             data_to_validate = jq_extract(evaluation_path, data, evaluation_config.get('extract_type', 'first'))
+            debug_step.append({'message': f'Testing `{evaluation_path}`', 'data': {}, 'style': 'primary'})
+            cond_satisfied = False
             if data_to_validate is None:
-                logger.debug('Could not extract data')
-                return False
-            if not condition_satisfied(evaluation_config, data_to_validate, context):
-                return False
-    return True
+                debug_step.append({'message': f'The provided path could not extract data', 'data': data, 'style': 'error'})
+                eval_state = False
+            else:
+                cond_satisfied = condition_satisfied(evaluation_config, data_to_validate, context)
+            if not cond_satisfied:
+                debug_step.append({'message': f'Condition not satisfied', 'data': {}, 'style': 'fail'})
+                debug_step.append({'message': f'The provided path extracted the following data to validate', 'data': data_to_validate, 'style': ''})
+                eval_state = False
+            else:
+                eval_state = True
+                debug_step.append({'message': f'Condition satisfied', 'data': {}, 'style': 'success'})
+        debug_steps = debug_steps + [debug_step] if len(debug_step) > 0 else debug_steps
+    return eval_state if not debug else (eval_state, debug_steps,)
 
 
 ##
@@ -172,5 +191,5 @@ def eval_query_mirror(user_id: int, expected_data, data_to_validate, context: di
 ## Query search
 ##
 
-def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
-    return eval_data_filtering(user_id, inject_evaluation, data, context)
+def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> bool:
+    return eval_data_filtering(user_id, inject_evaluation, data, context, debug = debug)
