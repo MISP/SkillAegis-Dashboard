@@ -4,6 +4,10 @@ config.py
 misp_cache.sqlite
 backup.json
 
+# ZMQ live logs
+zmq.live
+*.live
+
 # Logs
 logs
 *.log
