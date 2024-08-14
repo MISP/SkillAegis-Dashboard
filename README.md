@@ -125,3 +125,11 @@ npm run build
 ```sh
 npm run lint
 ```
+
+# License
+This software is licensed under GNU Affero General Public License version 3
+
+```
+Copyright (c) 2024 Sami Mokaddem
+Copyright (c) 2024 CIRCL - Computer Incident Response Center Luxembourg
+```
