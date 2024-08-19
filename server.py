@@ -81,6 +81,10 @@ async def index(request):
     with open('dist/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
 
+async def favicon(request):
+    with open('dist/favicon.ico', 'rb') as f:
+        return web.Response(body=f.read(), content_type='image/x-icon')
+
 
 @sio.event
 async def connect(sid, environ):
@@ -349,6 +353,7 @@ async def init_app(zmq_log_file=None):
 
 app.router.add_static('/assets', 'dist/assets')
 app.router.add_get('/', index)
+app.router.add_get('/favicon.ico', favicon)
 
 def main():
     parser = argparse.ArgumentParser(description='Parse command-line arguments for SkillAegis Dashboard.')
