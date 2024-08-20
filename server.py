@@ -228,6 +228,10 @@ async def getDiagnostic() -> dict:
     global ZMQ_MESSAGE_COUNT
 
     diagnostic = {}
+    diagnostic['MISP'] = {
+        'url': config.misp_url,
+        'apikey': config.misp_apikey[0:4] + '*'*32 + config.misp_apikey[36:],
+    }
     misp_version = await misp_api.getVersion()
     if misp_version is None:
         diagnostic['online'] = False

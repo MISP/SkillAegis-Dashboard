@@ -26,7 +26,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { toast } from '../utils.js'
 
-const admin_modal = ref(null)
 const clickedButtons = ref([])
 
 const diagnosticLoading = computed(() => Object.keys(diagnostic.value).length == 0)
@@ -121,6 +120,19 @@ function showTheModal() {
           Diagnostic
         </h3>
         <h4 class="font-semibold ml-1 my-3">
+          <div>
+            <table class="mb-2 table-auto bg-white dark:bg-slate-700 dark:text-slate-100 text-slate-700 rounded-lg shadow-xl inline-block">
+              <tr>
+                <td class="px-2"><strong>MISP URL</strong></td>
+                <td class="px-2"><a class="text-sm font-mono tracking-tight text-sky-500 hover:underline" target="_blank" :href="diagnostic['MISP']['url']">{{ diagnostic['MISP']['url'] }}</a></td>
+              </tr>
+              <tr>
+                <td class="px-2"><strong>API Key</strong></td>
+                <td class="px-2"><span class="text-sm font-mono tracking-tight">{{ diagnostic['MISP']['apikey'] }}</span></td>
+              </tr>
+            </table>
+          </div>
+
           <strong>MISP Status:</strong>
           <span class="ml-2">
             <span
