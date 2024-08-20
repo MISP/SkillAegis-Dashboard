@@ -120,7 +120,7 @@ function showTheModal() {
           Diagnostic
         </h3>
         <h4 class="font-semibold ml-1 my-3">
-          <div>
+          <div v-if="!diagnosticLoading">
             <table class="mb-2 table-auto bg-white dark:bg-slate-700 dark:text-slate-100 text-slate-700 rounded-lg shadow-xl inline-block">
               <tr>
                 <td class="px-2"><strong>MISP URL</strong></td>

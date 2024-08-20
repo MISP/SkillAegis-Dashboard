@@ -1,92 +1,65 @@
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import debounce from 'lodash.debounce'
 import { notificationHistory, notificationHistoryConfig } from '../socket'
 import { darkModeEnabled } from '../settings.js'
 
-const theChart = ref(null)
-const chartInitSeries = [{ data: Array.from(Array(12 * 20)).map(() => 0) }]
 const hasActivity = computed(() => notificationHistory.value.length > 0)
-const chartSeries = computed(() => {
-  return notificationHistory.value ? notificationHistorySeries.value : chartInitSeries.value
+const rawNotificationHistory = computed(() => Array.from(notificationHistory.value))
+
+const theSvg = ref()
+const svgSize = ref(100)
+const svgXPadding = 20
+const rectWidth = computed(() => {
+  return (svgSize.value - svgXPadding) / rawNotificationHistory.value.length
+})
+onMounted(() => {
+    window.addEventListener('resize', () => debouncedSetSVGSize() )
+    setSVGSize()
+})
+onUnmounted(() => {
+    window.removeEventListener('resize', () => setSVGSize())
 })
 
-const notificationHistorySeries = computed(() => {
-  return [{ data: Array.from(notificationHistory.value) }]
-})
-
-const chartOptions = computed(() => {
-  return {
-    chart: {
-      type: 'bar',
-      width: '100%',
-      height: 32,
-      sparkline: {
-        enabled: true
-      },
-      dropShadow: {
-        enabled: true,
-        enabledOnSeries: undefined,
-        top: 2,
-        left: 1,
-        blur: 2,
-        color: '#000',
-        opacity: darkModeEnabled.value ? 0.35 : 0.15
-      },
-      animations: {
-        enabled: false,
-        easing: 'easeinout',
-        speed: 200
-      }
-    },
-    colors: [darkModeEnabled.value ? '#008ffb' : '#1f9eff'],
-    plotOptions: {
-      bar: {
-        columnWidth: '80%'
-      }
-    },
-    yaxis: {
-      min: 0,
-      max: 20,
-      labels: {
-        show: false
-      }
-    },
-    tooltip: {
-      enabled: false
-    }
+const debouncedSetSVGSize = debounce(setSVGSize, 400, { leading: true })
+function setSVGSize() {
+  if (theSvg.value.width) {
+    svgSize.value = theSvg.value.width.baseVal.value
   }
-})
+}
 </script>
 
 <template>
-  <div
-    class="my-2 --ml-1 bg-slate-50 dark:bg-slate-600 py-1 pl-1 pr-3 rounded-md relative flex flex-col"
-  >
-    <div :class="`${!hasActivity ? 'hidden' : 'absolute'} h-10 -mt-1 w-full z-30`">
-      <div
-        class="text-2xs flex justify-between h-full items-center text-slate-500 dark:text-slate-300 select-none"
-      >
-        <span class="-rotate-90 w-8 -ml-3"
-          >- {{ notificationHistoryConfig.buffer_timestamp_min }}min</span
-        >
-        <span class="-rotate-90 w-8 text-xs">–</span>
-        <span class="-rotate-90 w-8 text-lg">–</span>
-        <span class="-rotate-90 w-8 text-xs">–</span>
-        <span class="-rotate-90 w-8 -mr-1.5">- 0min</span>
-      </div>
-    </div>
-    <i
-      :class="['text-center text-slate-600 dark:text-slate-400', hasActivity ? 'hidden' : 'block']"
-    >
-      - No recorded activity -
-    </i>
-    <apexchart
-      ref="theChart"
-      :class="hasActivity ? 'block' : 'absolute h-8 w-full'"
-      height="32"
+  <div class="my-2 relative">
+    <svg
+      ref="theSvg"
+      xmlns="http://www.w3.org/2000/svg"
       width="100%"
-      :options="chartOptions"
-      :series="chartSeries"
-    ></apexchart>
+      height="40px"
+      class="bg-slate-50 dark:bg-slate-600 rounded-md relative overflow-hidden"
+    >
+      <text 
+        v-if="!hasActivity"
+        :fill="darkModeEnabled ? '#94a3b8' : '#475569'" font-size="1rem" dominant-baseline="central" text-anchor="middle" x="50%" y="50%"
+      >
+        - No recorded activity -
+      </text>
+      <g>
+        <rect v-for="(value, i) in rawNotificationHistory" :key="i"
+          :x="(svgXPadding/2) + rectWidth * i" :y="36 - (Math.min(value, 30)/30) * 32" :width="rectWidth*0.8" :height="(Math.min(value, 30)/30) * 32"
+          :fill="darkModeEnabled ? '#008ffb' : '#1f9eff'"
+          :style="`filter: drop-shadow(2px 1px 2px rgba(0, 0, 0, ${darkModeEnabled ? 0.35 : 0.15}))`"
+        />
+      </g>
+      <g v-if="hasActivity" style="user-select: none;">
+        <text :fill="darkModeEnabled ? '#cbd5e1' : '#64748b'" font-size="0.66rem" text-anchor="middle" transform="translate(12, 20) rotate(-90)">- {{ notificationHistoryConfig.buffer_timestamp_min }}min</text>
+        <text :fill="darkModeEnabled ? '#cbd5e1' : '#64748b'" font-size="0.5rem" text-anchor="middle" x="25%" y="40">|</text>
+        <text :fill="darkModeEnabled ? '#cbd5e1' : '#64748b'" font-size="0.75rem" text-anchor="middle" x="50%" y="37">|</text>
+        <text :fill="darkModeEnabled ? '#cbd5e1' : '#64748b'" font-size="0.5rem" text-anchor="middle" x="75%" y="40">|</text>
+        <svg x="100%" style="overflow: visible;">
+            <text :fill="darkModeEnabled ? '#cbd5e1' : '#64748b'" font-size="0.66rem" text-anchor="end" x="-7" y="-3" transform="rotate(-90)">- 0min</text>
+        </svg>
+      </g>
+    </svg>
   </div>
 </template>
