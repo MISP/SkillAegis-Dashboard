@@ -8,11 +8,21 @@ import {
   toggleVerboseMode,
   toggleApiQueryMode
 } from '../socket'
-import { faSignal, faCloud, faCog, faUsers, faCircle } from '@fortawesome/free-solid-svg-icons'
+import { faSignal, faCloud, faCog, faUsers, faCircle, faUser } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
 
 const verbose = ref(false)
 const api_query = ref(false)
+const tracked_user = ref(null)
+
+const filtered_notifications = computed(() => {
+  if (tracked_user.value !== null && tracked_user.value.length > 0) {
+    return notifications.value.filter((notification) => {
+      return notification.user.startsWith(tracked_user.value)
+    })
+  }
+  return notifications.value
+})
 
 watch(verbose, (newValue) => {
   toggleVerboseMode(newValue == true)
@@ -102,6 +112,27 @@ function getClassFromResponseCode(response_code) {
           API Queries
         </label>
       </span>
+      <span class="flex items-center">
+        <label class="mr-1 relative flex items-center cursor-pointer">
+          <FontAwesomeIcon
+            :icon="faUser"
+            size="sm"
+            class="absolute left-2 text-slate-400 dark:text-slate-300"
+          ></FontAwesomeIcon>
+          <input
+            type="text"
+            class="
+              shadow border font-mono w-full rounded py-1 pl-7 pr-2 leading-tight
+              bg-slate-50 text-slate-700 border-slate-300
+              dark:bg-slate-500 dark:text-slate-200 dark:border-slate-400
+              focus:outline-none focus:border focus:border-slate-300 focus:dark:border-slate-300
+            "
+            placeholder="Track User"
+            v-model="tracked_user"
+          />
+          
+        </label>
+      </span>
     </div>
 
     <TheLiveLogsActivityGraphVue></TheLiveLogsActivityGraphVue>
@@ -126,7 +157,7 @@ function getClassFromResponseCode(response_code) {
           </td>
         </tr>
         <template v-else>
-          <tr v-for="notification in notifications" :key="notification.id">
+          <tr v-for="notification in filtered_notifications" :key="notification.id">
             <td
               class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-1 pl-2 w-12 whitespace-nowrap"
             >
