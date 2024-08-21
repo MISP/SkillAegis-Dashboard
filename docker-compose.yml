@@ -1,0 +1,14 @@
+services:
+    skillaegis-dashboard:
+        build: .
+        container_name: skillaegis-dashboard
+        image: skillaegis/dashboard:latest
+        working_dir: /app
+        environment:
+            - SKILLAEGIS_HOST=0.0.0.0
+            - SKILLAEGIS_PORT=4001
+            - SKILLAEGIS_EXERCISE_FOLDER=scenarios
+        volumes:
+            - ./scenarios:/app/scenarios
+        ports:
+            - "4001:4001"

@@ -8,9 +8,9 @@ usage() {
     exit 1
 }
 
-HOST=""
-PORT=""
-EXERCISE_FOLDER=""
+HOST="${SKILLAEGIS_HOST:-""}"
+PORT="${SKILLAEGIS_PORT:-""}"
+EXERCISE_FOLDER="${SKILLAEGIS_EXERCISE_FOLDER:-""}"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -33,7 +33,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ -z "$EXERCISE_FOLDER" ]; then
-    echo "Error: --exercise_folder argument is required."
+    echo "Error: --exercise_folder value is required."
     usage
 fi
 
