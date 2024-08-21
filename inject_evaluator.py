@@ -93,7 +93,9 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str, context:
         for candidate in data_to_validate:
             if regex.match(candidate) is None:
                 return False
-        return True
+            else:
+                return True
+        return False
     elif comparison_type == 'count':
         return count_comparison(values, data_to_validate)
     return False
