@@ -68,21 +68,17 @@ const taskCompletionPercentages = computed(() => {
           :colspan="2 + exercise.tasks.length"
           class="rounded-tl-lg border-b border-slate-100 dark:border-slate-700 text-md p-3 pl-6 text-center dark:bg-blue-800 bg-blue-500 dark:text-slate-300 text-slate-100"
         >
-          <div class="flex justify-between items-center">
-            <span class="dark:text-blue-200 text-slate-200"># {{ exercise_index + 1 }}</span>
-            <span class="text-lg">{{ exercise.name }}</span>
-            <span class="">
-              Level:
-              <span
-                :class="{
-                  'rounded-lg px-1 ml-2': true,
-                  'dark:bg-sky-400 bg-sky-400 text-neutral-950': exercise.level == 'beginner',
-                  'dark:bg-orange-400 bg-orange-400 text-neutral-950': exercise.level == 'advanced',
-                  'dark:bg-red-600 bg-red-600 text-neutral-950': exercise.level == 'expert'
-                }"
-                >{{ exercise.level }}</span
-              >
+          <div class="flex justify-centerx items-center">
+            <span
+              :class="{
+                'rounded-lg px-1': true,
+                'dark:bg-sky-400 bg-sky-400 text-neutral-950': exercise.level == 'beginner',
+                'dark:bg-orange-400 bg-orange-400 text-neutral-950': exercise.level == 'advanced',
+                'dark:bg-red-600 bg-red-600 text-neutral-950': exercise.level == 'expert'
+              }"
+              >{{ exercise.level }}
             </span>
+            <span class="text-lg grow">{{ exercise.name }}</span>
           </div>
         </th>
       </tr>
@@ -119,7 +115,6 @@ const taskCompletionPercentages = computed(() => {
             </div>
           </div>
         </th>
-        <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Progress</th>
       </tr>
     </thead>
     <tbody :class="`${collapsed_panels.includes(exercise_index) ? 'hidden' : ''}`">
@@ -213,8 +208,8 @@ const taskCompletionPercentages = computed(() => {
                       ]
                     "
                     title="All requirements for that task haven't been fullfilled yet"
-                    :icon="faHourglassHalf"
-                    :class="`text-lg ${
+                    :icon="faTimes"
+                    :class="`text-xl ${
                       progress.exercises[exercise.uuid].tasks_completion[task.uuid]
                         ? 'dark:text-green-400 text-green-600'
                         : 'dark:text-slate-500 text-slate-400'
@@ -222,8 +217,9 @@ const taskCompletionPercentages = computed(() => {
                   />
                   <FontAwesomeIcon
                     v-else
-                    :icon="faTimes"
-                    :class="`text-xl ${
+                    title="This task is ready to be fullfilled"
+                    :icon="faHourglassHalf"
+                    :class="`text-lg ${
                       progress.exercises[exercise.uuid].tasks_completion[task.uuid]
                         ? 'dark:text-green-400 text-green-600'
                         : 'dark:text-slate-500 text-slate-400'
@@ -260,26 +256,6 @@ const taskCompletionPercentages = computed(() => {
                 </span>
               </span>
             </span>
-          </td>
-          <td
-            class="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-3"
-          >
-            <div
-              class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600"
-              role="progressbar"
-              :aria-valuenow="progress.exercises[exercise.uuid].score"
-              :aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              <div
-                class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"
-                :style="`width: ${
-                  100 *
-                  (progress.exercises[exercise.uuid].score /
-                    progress.exercises[exercise.uuid].max_score)
-                }%`"
-              ></div>
-            </div>
           </td>
         </tr>
       </template>
