@@ -206,7 +206,7 @@ def get_exercises():
                 "name": exercise['exercise']['name'],
                 "uuid": exercise['exercise']['uuid'],
                 "description": exercise['exercise']['description'],
-                "level": exercise['exercise']['meta'].get('level', 'Beginner'),
+                "level": exercise['exercise']['meta'].get('level', 'beginner'),
                 "priority": exercise['exercise']['meta'].get('priority', 50),
                 "tasks": tasks,
             }
