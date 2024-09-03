@@ -79,6 +79,9 @@ def restore_exercices_progress():
     if len(db.EXERCISES_STATUS) == 0:
         init_exercises_tasks()
 
+    from backend.server import start_timed_injects
+    start_timed_injects()
+
 
 def resetAll():
     db.EXERCISES_STATUS = {}
@@ -199,6 +202,10 @@ def get_selected_exercises():
     return db.SELECTED_EXERCISES
 
 
+def get_all_exercises():
+    return db.ALL_EXERCISES
+
+
 def change_exercise_selection(exercise_uuid: str, selected: bool):
     if selected:
         if exercise_uuid not in db.SELECTED_EXERCISES:
@@ -206,6 +213,10 @@ def change_exercise_selection(exercise_uuid: str, selected: bool):
     else:
         if exercise_uuid in db.SELECTED_EXERCISES:
             db.SELECTED_EXERCISES.remove(exercise_uuid)
+
+    from backend.server import start_timed_injects
+    start_timed_injects()
+
 
 
 def resetAllExerciseProgress():

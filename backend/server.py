@@ -13,6 +13,7 @@ import zmq
 import socketio
 from aiohttp import web
 import zmq.asyncio
+from random import getrandbits
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -31,6 +32,9 @@ ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
 USER_ACTIVITY = collections.defaultdict(int)
+
+# Each running timed injects will look in this list if they should be still running.
+# If it's not, it will stop. (Based on inject_uuid, trigger_type and random ID)
 RUNNING_TIMED_INJECTS = []
 
 
@@ -291,14 +295,59 @@ async def backup_exercises_progress():
         exercise_model.backup_exercises_progress()
 
 
-async def start_timed_injects(sio, injects):
-    for inject in injects.values():
-        if 'timing' in inject:
-            for trigger_type, value in inject['timing'].items():
+def start_timed_injects():
+    global RUNNING_TIMED_INJECTS
+
+    full_selected_exercises = [exercise for exercise in exercise_model.get_all_exercises() if exercise['exercise']['uuid'] in exercise_model.get_selected_exercises()]
+    selected_inject_flows = []
+    for exercise in full_selected_exercises:
+        for inject_flow in exercise['inject_flow']:
+            selected_inject_flows.append(inject_flow)
+
+    stop_all_timed_injects()
+
+    for injectF in selected_inject_flows:
+        if 'timing' in injectF:
+            for trigger_type, value in injectF['timing'].items():
                 if trigger_type == 'triggered_at' and value is not None:
-                    print(inject['inject_uuid'], trigger_type, value)
-                elif trigger_type == 'periodic_run_every' and value is not None:
-                    print(inject['inject_uuid'], trigger_type, value)
+                    start_timed_inject(injectF, trigger_type, value)
+                if trigger_type == 'periodic_run_every' and value is not None:
+                    start_timed_inject(injectF, trigger_type, value)
+
+
+def start_timed_inject(injectF, trigger_type, value):
+    global sio, RUNNING_TIMED_INJECTS
+    if f'{trigger_type}-{injectF['inject_uuid']}' in RUNNING_TIMED_INJECTS:
+        return  # Timed inject already running
+    random_bits = getrandbits(32)
+    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    RUNNING_TIMED_INJECTS.append(uniq_str)
+    sio.start_background_task(timed_inject, injectF, trigger_type, value, random_bits)
+
+
+def stop_all_timed_injects():
+    global RUNNING_TIMED_INJECTS
+    RUNNING_TIMED_INJECTS = []
+
+
+async def timed_inject(injectF, trigger_type, value, random_bits):
+    global sio, RUNNING_TIMED_INJECTS
+
+    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    if trigger_type == 'triggered_at':
+        seconds = value
+        await sio.sleep(seconds)
+        if uniq_str not in RUNNING_TIMED_INJECTS:
+            return  # Timed inject has been stopped
+        print(trigger_type, injectF['inject_uuid'])
+
+    elif trigger_type == 'periodic_run_every':
+        seconds = value
+        while True:
+            await sio.sleep(seconds)
+            if uniq_str not in RUNNING_TIMED_INJECTS:
+                return  # Timed inject has been stopped
+            print(trigger_type, injectF['inject_uuid'])
 
 
 # Function to forward zmq messages to Socket.IO
@@ -367,9 +416,6 @@ async def init_app(zmq_log_file=None):
     sio.start_background_task(notification_history)
     sio.start_background_task(record_users_activity)
     sio.start_background_task(backup_exercises_progress)
-
-    injects = db.INJECT_BY_UUID
-    await start_timed_injects(sio, injects)
 
     return app
 
