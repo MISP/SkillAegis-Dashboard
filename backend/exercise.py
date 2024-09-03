@@ -9,34 +9,14 @@ from typing import Union
 import jq
 
 import db
-from inject_evaluator import eval_data_filtering, eval_query_mirror, eval_query_search
-import misp_api
-from appConfig import logger
-import config
+
+import backend.misp_api as misp_api
+from backend.appConfig import logger
+import backend.config as config
 
 
 ACTIVE_EXERCISES_DIR = Path(config.exercise_directory)
 LAST_BACKUP = {}
-
-def debounce_check_active_tasks(debounce_seconds: int = 1):
-    func_last_execution_time = {}
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            user_id = args[0]
-            now = time.time()
-            key = f"{user_id}_{func.__name__}"
-            if key not in func_last_execution_time:
-                func_last_execution_time[key] = now
-                return func(*args, **kwargs)
-            elif now >= func_last_execution_time[key] + debounce_seconds:
-                func_last_execution_time[key] = now
-                return func(*args, **kwargs)
-            else:
-                logger.debug(f">> Debounced for `{user_id}`")
-                return None
-        return wrapper
-    return decorator
 
 
 def load_exercises() -> bool:
@@ -269,33 +249,6 @@ def get_available_tasks_for_user(user_id: int) -> list[str]:
     return available_tasks
 
 
-def get_model_action(data: dict):
-    if 'Log' in data or 'AuditLog' in data:
-        data = data['Log'] if 'Log' in data else data['AuditLog']
-        if 'model' in data and 'action' in data:
-            return (data['model'], data['action'],)
-    return (None, None,)
-
-def is_accepted_query(data: dict) -> bool:
-    model, action = get_model_action(data)
-    if model in ['Event', 'Attribute', 'Object', 'Tag',]:
-        if action in ['add', 'edit', 'delete', 'publish', 'tag']:
-            if 'Log' in data:
-                if data['Log']['change'].startswith('Validation errors:'):
-                    return False
-            return True
-
-    if data.get('user_agent', None) == 'SkillAegis':
-        return None
-    url = data.get('url', None)
-    if url is not None:
-        return url in [
-            '/attributes/restSearch',
-            '/events/restSearch',
-        ]
-    return False
-
-
 def get_completion_for_users():
     completion_per_user = {int(user_id): {} for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys()}
     for exercise_status in db.EXERCISES_STATUS.values():
@@ -370,168 +323,3 @@ def get_progress():
                 'max_score': db.EXERCISES_STATUS[exec_uuid]['max_score'],
             }
     return progress
-
-
-async def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
-    for inject_evaluation in inject['inject_evaluation']:
-        success = await inject_checker_router(user_id, inject_evaluation, data, context)
-        if not success:
-            logger.info(f"Task not completed[{user_id}]: {inject['uuid']}")
-            return False
-    mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
-    logger.info(f"Task success[{user_id}]: {inject['uuid']}")
-    return True
-
-
-def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
-    if 'evaluation_context' not in inject_evaluation or len(inject_evaluation['evaluation_context']) == 0:
-        return True
-    if 'request_is_rest' in inject_evaluation['evaluation_context']:
-        if 'request_is_rest' in context:
-            if inject_evaluation['evaluation_context']['request_is_rest'] == context['request_is_rest']:
-                return True
-            else:
-                logger.debug('Request type does not match state of `request_is_rest`')
-                return False
-        else:
-            logger.debug('Unknown request type')
-            return False
-    return True
-
-async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
-    if not is_valid_evaluation_context(user_id, inject_evaluation, data, context):
-        return False
-
-    if 'evaluation_strategy' not in inject_evaluation:
-        logger.warning('Evaluation strategy not specified in inject')
-        return False
-
-    data_to_validate = await get_data_to_validate(user_id, inject_evaluation, data)
-    if data_to_validate is None:
-        logger.debug('Could not fetch data to validate')
-        return False
-
-    if inject_evaluation['evaluation_strategy'] == 'data_filtering':
-        return eval_data_filtering(user_id, inject_evaluation, data_to_validate, context)
-    elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
-        expected_data = data_to_validate['expected_data']
-        data_to_validate = data_to_validate['data_to_validate']
-        return eval_query_mirror(user_id, expected_data, data_to_validate, context)
-    elif inject_evaluation['evaluation_strategy'] == 'query_search':
-        return eval_query_search(user_id, inject_evaluation, data_to_validate, context)
-    return False
-
-
-async def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict) -> Union[dict, list, str, None]:
-    data_to_validate = None
-    if inject_evaluation['evaluation_strategy'] == 'data_filtering':
-        event_id = parse_event_id_from_log(data)
-        data_to_validate = await fetch_data_for_data_filtering(event_id=event_id)
-    elif inject_evaluation['evaluation_strategy'] == 'query_mirror':
-        perfomed_query = parse_performed_query_from_log(data)
-        data_to_validate = await fetch_data_for_query_mirror(user_id, inject_evaluation, perfomed_query)
-    elif inject_evaluation['evaluation_strategy'] == 'query_search':
-        data_to_validate = await fetch_data_for_query_search(user_id, inject_evaluation)
-    return data_to_validate
-
-
-def parse_event_id_from_log(data: dict) -> Union[int, None]:
-    event_id_from_change_field_regex = r".*event_id \(.*\) => \((\d+)\).*"
-    event_id_from_title_field_regex = r".*from Event \((\d+)\).*"
-    if 'Log' in data:
-        log = data['Log']
-        if 'model' in log and 'model_id' in log and log['model'] == 'Event':
-            return int(log['model_id'])
-        if 'change' in log:
-            event_id_search = re.search(event_id_from_change_field_regex, log['change'], re.IGNORECASE)
-            if event_id_search is not None:
-                event_id = event_id_search.group(1)
-                return event_id
-        if 'title' in log:
-            event_id_search = re.search(event_id_from_title_field_regex, log['title'], re.IGNORECASE)
-            if event_id_search is not None:
-                event_id = event_id_search.group(1)
-                return event_id
-    elif 'AuditLog' in data:
-        log = data['AuditLog']
-        if 'model' in log and 'model_id' in log and log['model'] == 'Event':
-            return int(log['model_id'])
-        if 'change' in log:
-            if 'event_id' in log and log['event_id'] is not None:
-                return int(log['event_id'])
-    return None
-
-
-def parse_performed_query_from_log(data: dict) -> Union[dict, None]:
-    performed_query = {
-        'request_method': '',
-        'url': '',
-        'payload': {},
-    }
-    if 'request' in data:
-        request = data['request']
-        performed_query['request_method'] = data.get('request_method', None)
-        performed_query['url'] = data.get('url', None)
-        if request.startswith('application/json\n\n'):
-            query_raw = request.replace('application/json\n\n', '')
-            try:
-                payload = json.loads(query_raw)
-                performed_query['payload'] = payload
-            except:
-                pass
-        if performed_query['request_method'] is not None and performed_query['url'] is not None:
-            return performed_query 
-    return None
-
-
-async def fetch_data_for_data_filtering(event_id=None) -> Union[None, dict]:
-    data = None
-    if event_id is not None:
-        data = await misp_api.getEvent(event_id)
-    return data
-
-
-async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, perfomed_query: dict) -> Union[None, dict]:
-    data = None
-    authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
-    if perfomed_query is not None:
-        if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
-            return None
-        query_context = inject_evaluation['evaluation_context']['query_context']
-        expected_method = query_context['request_method']
-        expected_url = query_context['url']
-        expected_payload = inject_evaluation['parameters'][0]
-        expected_data  = await misp_api.doRestQuery(authkey, expected_method, expected_url, expected_payload)
-        data_to_validate  = await misp_api.doRestQuery(authkey, perfomed_query['request_method'], perfomed_query['url'], perfomed_query['payload'])
-        data = {
-            'expected_data' : expected_data,
-            'data_to_validate' : data_to_validate,
-        }
-    return data
-
-
-async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> Union[None, dict]:
-    authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
-    if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
-            return None
-    query_context = inject_evaluation['evaluation_context']['query_context']
-    search_method = query_context['request_method']
-    search_url = query_context['url']
-    search_payload = query_context['payload']
-    search_data  = await misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
-    return search_data
-
-
-@debounce_check_active_tasks(debounce_seconds=2)
-async def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
-    succeeded_once = False
-    available_tasks = get_available_tasks_for_user(user_id)
-    for task_uuid in available_tasks:
-        inject = db.INJECT_BY_UUID[task_uuid]
-        if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
-            continue
-        logger.debug(f"[{task_uuid}] :: checking: {inject['name']}")
-        completed = await check_inject(user_id, inject, data, context)
-        if completed:
-            succeeded_once = True
-    return succeeded_once

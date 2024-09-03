@@ -4,8 +4,8 @@ import json
 import re
 from typing import Union
 import db
-import config
-import appConfig
+import backend.config as config
+import backend.appConfig as appConfig
 from urllib.parse import parse_qs
 
 

@@ -11,8 +11,8 @@ from requests_cache import CachedSession
 from requests.packages.urllib3.exceptions import InsecureRequestWarning # type: ignore
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-from config import misp_url, misp_apikey, misp_skipssl
-from appConfig import logger, misp_settings
+from backend.config import misp_url, misp_apikey, misp_skipssl
+from backend.appConfig import logger, misp_settings
 
 requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
 adapterCache = requests.adapters.HTTPAdapter(pool_connections=50, pool_maxsize=50)

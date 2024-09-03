@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
-import json
+#!/urs/bin/env python3
+
+import operator
 from typing import Union
 import jq
 import re
-import operator
 
 
 def jq_extract(path: str, data: dict, extract_type='first'):
@@ -30,9 +30,7 @@ def apply_replacement_from_context(string: str, context: dict) -> str:
     return re.sub(replacement_regex, subst, string)
 
 
-##
 ## Data Filtering
-##
 
 def condition_satisfied(evaluation_config: dict, data_to_validate: Union[dict, list, str], context: dict) -> bool:
     if type(data_to_validate) is bool:
@@ -179,18 +177,14 @@ def eval_data_filtering(user_id: int, inject_evaluation: dict, data: dict, conte
     return eval_state if not debug else (eval_state, debug_steps,)
 
 
-##
 ## Query mirror
-##
 
 def eval_query_mirror(user_id: int, expected_data, data_to_validate, context: dict) -> bool:
     return expected_data == data_to_validate
 
 
 
-##
 ## Query search
-##
 
 def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> bool:
     return eval_data_filtering(user_id, inject_evaluation, data, context, debug = debug)

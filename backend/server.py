@@ -14,12 +14,16 @@ import socketio
 from aiohttp import web
 import zmq.asyncio
 
-import exercise as exercise_model
-import notification as notification_model
-import db
-import config
-from appConfig import logger
-import misp_api
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import backend.exercise as exercise_model
+import backend.notification as notification_model
+import backend.db as db
+import backend.config as config
+from backend.appConfig import logger
+import backend.misp_api as misp_api
+
+from backend.target_tools.misp.exercise import check_active_tasks as check_active_tasks_misp, is_accepted_query as is_accepted_query_misp
 
 
 ZMQ_LOG_FILE = None
@@ -27,6 +31,7 @@ ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
 USER_ACTIVITY = collections.defaultdict(int)
+RUNNING_TIMED_INJECTS = []
 
 
 def debounce(debounce_seconds: int = 1):
@@ -78,11 +83,11 @@ sio.attach(app)
 
 
 async def index(request):
-    with open('dist/index.html') as f:
+    with open('../dist/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
 
 async def favicon(request):
-    with open('dist/favicon.ico', 'rb') as f:
+    with open('../dist/favicon.ico', 'rb') as f:
         return web.Response(body=f.read(), content_type='image/x-icon')
 
 
@@ -193,9 +198,9 @@ async def handleMessage(topic, s, message):
 
         user_id = notification_model.get_user_id(data)
         if user_id is not None:
-            if exercise_model.is_accepted_query(data):
+            if is_accepted_query_misp(data):
                 context = get_context(topic, user_id, data)
-                checking_task = exercise_model.check_active_tasks(user_id, data, context)
+                checking_task = check_active_tasks_misp(user_id, data, context)
                 if checking_task is not None:  # Make sure check_active_tasks was not debounced
                     succeeded_once = await checking_task
                     if succeeded_once:
@@ -286,6 +291,16 @@ async def backup_exercises_progress():
         exercise_model.backup_exercises_progress()
 
 
+async def start_timed_injects(sio, injects):
+    for inject in injects.values():
+        if 'timing' in inject:
+            for trigger_type, value in inject['timing'].items():
+                if trigger_type == 'triggered_at' and value is not None:
+                    print(inject['inject_uuid'], trigger_type, value)
+                elif trigger_type == 'periodic_run_every' and value is not None:
+                    print(inject['inject_uuid'], trigger_type, value)
+
+
 # Function to forward zmq messages to Socket.IO
 async def forward_zmq_to_socketio():
     global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME
@@ -352,10 +367,14 @@ async def init_app(zmq_log_file=None):
     sio.start_background_task(notification_history)
     sio.start_background_task(record_users_activity)
     sio.start_background_task(backup_exercises_progress)
+
+    injects = db.INJECT_BY_UUID
+    await start_timed_injects(sio, injects)
+
     return app
 
 
-app.router.add_static('/assets', 'dist/assets')
+app.router.add_static('/assets', '../dist/assets')
 app.router.add_get('/', index)
 app.router.add_get('/favicon.ico', favicon)
 
