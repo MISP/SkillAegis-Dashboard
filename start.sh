@@ -41,4 +41,4 @@ HOST=${HOST:-$DEFAULT_HOST}
 PORT=${PORT:-$DEFAULT_PORT}
 
 source venv/bin/activate
-python3 server.py --host "$HOST" --port "$PORT" --exercise_folder "$EXERCISE_FOLDER"
+python3 ./backend/main.py --host "$HOST" --port "$PORT" --exercise_folder "$EXERCISE_FOLDER"

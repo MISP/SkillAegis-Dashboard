@@ -29,6 +29,8 @@ from backend.target_tools.misp.exercise import is_accepted_query as is_accepted_
 from backend.target_tools.suricata.exercise import getInstalledSuricataVersion
 
 
+WEB_DIST_DIR = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../dist')
+
 ZMQ_LOG_FILE = None
 ZMQ_START_LINE_NUMBER = 0
 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
@@ -91,11 +93,11 @@ sio.attach(app)
 
 
 async def index(request):
-    with open('../dist/index.html') as f:
+    with open(WEB_DIST_DIR + '/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
 
 async def favicon(request):
-    with open('../dist/favicon.ico', 'rb') as f:
+    with open(WEB_DIST_DIR + '/favicon.ico', 'rb') as f:
         return web.Response(body=f.read(), content_type='image/x-icon')
 
 
@@ -451,6 +453,6 @@ async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0):
     return app
 
 
-app.router.add_static('/assets', '../dist/assets')
+app.router.add_static('/assets', WEB_DIST_DIR + '/assets')
 app.router.add_get('/', index)
 app.router.add_get('/favicon.ico', favicon)
