@@ -22,6 +22,10 @@ The Dashboard allows you to deploy and run scenarios under the [Common Exercise 
 
 To get started with SkillAegis-Editor, follow these steps:
 
+0. Ensure Python **3.10** or higher is installed.
+    ```bash
+    python -V
+    ```
 1. Install dependencies
    ```bash
    python3 -m venv venv
