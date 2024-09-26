@@ -6,6 +6,7 @@ import { darkModeEnabled } from '../settings.js'
 
 const hasActivity = computed(() => notificationHistory.value.length > 0)
 const rawNotificationHistory = computed(() => Array.from(notificationHistory.value))
+const activityMaxValue = 15
 
 const theSvg = ref()
 const svgSize = ref(100)
@@ -46,7 +47,8 @@ function setSVGSize() {
       </text>
       <g>
         <rect v-for="(value, i) in rawNotificationHistory" :key="i"
-          :x="(svgXPadding/2) + rectWidth * i" :y="36 - (Math.min(value, 30)/30) * 32" :width="rectWidth*0.8" :height="(Math.min(value, 30)/30) * 32"
+          :x="(svgXPadding/2) + rectWidth * i"
+          :y="36 - (Math.min(value, activityMaxValue)/activityMaxValue) * 32" :width="rectWidth*0.8" :height="(Math.min(value, activityMaxValue)/activityMaxValue) * 32"
           :fill="darkModeEnabled ? '#008ffb' : '#1f9eff'"
           :style="`filter: drop-shadow(2px 1px 2px rgba(0, 0, 0, ${darkModeEnabled ? 0.35 : 0.15}))`"
         />

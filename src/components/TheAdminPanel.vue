@@ -32,6 +32,8 @@ const diagnosticLoading = computed(() => Object.keys(diagnostic.value).length ==
 const isMISPOnline = computed(() => diagnostic.value.version?.version !== undefined)
 const isZMQActive = computed(() => diagnostic.value.zmq_message_count > 0)
 const ZMQMessageCount = computed(() => diagnostic.value.zmq_message_count)
+const isSuricataInstalled = computed(() => diagnostic.value.suricata?.version !== null)
+const suricataVersion = computed(() => isSuricataInstalled.value ? diagnostic.value.suricata?.version : 'Not Installed')
 
 function changeSelectionState(state_enabled, exec_uuid) {
   changeExerciseSelection(exec_uuid, state_enabled)
@@ -253,6 +255,30 @@ function showTheModal() {
             </table>
           </div>
         </template>
+
+        <h4 class="font-semibold ml-1 my-3">
+          <div v-if="!diagnosticLoading">
+            <strong>Suricata Status:</strong>
+            <span class="ml-2">
+              <span
+                :class="{
+                  'rounded-lg py-1 px-2 inline-flex': true,
+                  'dark:bg-neutral-800 bg-neutral-400 text-slate-800 dark:text-slate-200':
+                    diagnosticLoading,
+                  'dark:bg-green-700 bg-green-500 text-slate-800 dark:text-slate-200':
+                    !diagnosticLoading && isSuricataInstalled,
+                  'dark:bg-red-700 bg-red-700 text-slate-200 dark:text-slate-200':
+                    !diagnosticLoading && !isSuricataInstalled
+                }"
+              >
+                <Loading v-if="diagnosticLoading" class="inline-block text-xl"></Loading>
+                <span v-else class="font-bold">
+                  {{ !isSuricataInstalled ? suricataVersion : `Installed (${suricataVersion})` }}
+                </span>
+              </span>
+            </span>
+          </div>
+        </h4>
       </div>
     </template>
   </Modal>

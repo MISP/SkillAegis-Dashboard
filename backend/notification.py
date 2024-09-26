@@ -3,7 +3,7 @@
 import json
 import re
 from typing import Union
-import db
+import backend.db as db
 import backend.config as config
 import backend.appConfig as appConfig
 from urllib.parse import parse_qs
@@ -136,7 +136,10 @@ def get_request_post_body(data: dict) -> dict:
     request_content = data['request']
     content_type, post_body = request_content.split('\n\n')
     if content_type == 'application/json':
-        post_body_parsed = json.loads(post_body) if len(post_body) > 0 else {}
+        try:
+            post_body_parsed = json.loads(post_body) if len(post_body) > 0 else {}
+        except:
+            post_body_parsed = {}
         return post_body_parsed
     elif content_type == 'application/x-www-form-urlencoded':
         post_body_parsed = parse_qs(post_body)

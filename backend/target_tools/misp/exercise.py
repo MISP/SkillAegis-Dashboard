@@ -5,23 +5,10 @@ import re
 from typing import Union
 
 from backend.appConfig import logger
-from backend.utils import debounce_check_active_tasks
 import backend.db as db
-from backend.exercise import mark_task_completed, get_available_tasks_for_user
 import backend.misp_api as misp_api
 
 from backend.target_tools.misp.inject_eval import eval_data_filtering, eval_query_mirror, eval_query_search
-
-
-async def check_inject(user_id: int, inject: dict, data: dict, context: dict) -> bool:
-    for inject_evaluation in inject['inject_evaluation']:
-        success = await inject_checker_router(user_id, inject_evaluation, data, context)
-        if not success:
-            logger.info(f"Task not completed[{user_id}]: {inject['uuid']}")
-            return False
-    mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
-    logger.info(f"Task success[{user_id}]: {inject['uuid']}")
-    return True
 
 
 def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
@@ -190,19 +177,4 @@ async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> 
     search_payload = query_context['payload']
     search_data  = await misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
     return search_data
-
-
-@debounce_check_active_tasks(debounce_seconds=2)
-async def check_active_tasks(user_id: int, data: dict, context: dict) -> bool:
-    succeeded_once = False
-    available_tasks = get_available_tasks_for_user(user_id)
-    for task_uuid in available_tasks:
-        inject = db.INJECT_BY_UUID[task_uuid]
-        if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
-            continue
-        logger.debug(f"[{task_uuid}] :: checking: {inject['name']}")
-        completed = await check_inject(user_id, inject, data, context)
-        if completed:
-            succeeded_once = True
-    return succeeded_once
 

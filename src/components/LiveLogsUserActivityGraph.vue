@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue'
 import { userActivity, userActivityConfig } from '../socket'
 import { darkModeEnabled } from '../settings.js'
 
-const props = defineProps(['user_id', 'compact_view', 'ultra_compact_view'])
+const props = defineProps(['user_id', 'compact_view', 'ultra_compact_view', 'no_forced_width'])
 
 const theChart = ref(null)
 const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
@@ -42,7 +42,7 @@ function getPalleteIndexFromValue(value) {
 
 <template>
   <span
-    :class="`${props.ultra_compact_view ? 'w-[120px]' : 'w-60'} ${props.compact_view ? 'h-1.5 inline-flex' : 'h-3'}`"
+    :class="`${props.no_forced_width ? '' : (props.compact_view  ? 'w-[142px]' : 'w-[240px]')} ${props.compact_view ? 'h-1.5 inline-flex' : 'h-3'}`"
     :title="`Activity over ${bufferSizeMin}min`"
   >
     <span
@@ -51,9 +51,10 @@ function getPalleteIndexFromValue(value) {
       :class="[
         `inline-block rounded-[1px] mr-px`,
         props.compact_view ? 'h-1.5' : 'h-3',
+        props.ultra_compact_view ? 'rounded-none' : '',
         `bg-${palleteColor}-${getPalleteIndexFromValue(value)}`
       ]"
-      :style="`width: ${(((props.ultra_compact_view ? 120 : 240) - chartSeries.length) / chartSeries.length).toFixed(1)}px`"
+      :style="`width: ${(((props.ultra_compact_view ? 142 : 240) - chartSeries.length) / chartSeries.length).toFixed(1)}px`"
     ></span>
   </span>
 </template>

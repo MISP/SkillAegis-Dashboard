@@ -1,13 +1,30 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { active_exercises as exercises, progresses, userCount, setCompletedState } from '../../socket'
+import { active_exercises as exercises, progresses, setCompletedState, userActivity } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import { darkModeEnabled } from '../../settings.js'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 
-const props = defineProps(['exercise', 'exercise_index'])
+const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users'])
 const collapsed_panels = ref([])
+
+const taskCount = computed(() => {
+  return props.exercise.tasks.length
+})
+const taskIconSize = computed(() => {
+  if (compactGrid.value && ultraCompactGrid.value) {
+    return (80 / taskCount.value) + 'px'
+  } else if (compactGrid.value) {
+    return (144 / taskCount.value) + 'px'
+  } else {
+    return 'inherit'
+  }
+})
+
+const userCount = computed(() =>
+  props.hide_inactive_users ? sortedInactiveProgress.value.length : sortedProgress.value.length
+)
 
 const chartOptions = computed(() => {
   return {
@@ -95,10 +112,10 @@ function collapse(exercise_index) {
 }
 
 const compactGrid = computed(() => {
-  return userCount.value > 70
+  return userCount.value > 63
 })
 const ultraCompactGrid = computed(() => {
-  return userCount.value > 100
+  return userCount.value > 144
 })
 const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
 const sortedProgress = computed(() =>
@@ -111,6 +128,21 @@ const sortedProgress = computed(() =>
     }
     return 0
   })
+)
+
+const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
+const sortedInactiveProgress = computed(() =>
+  props.hide_inactive_users ?
+    sortedProgress.value.filter((progress) => {
+      const user_id = progress.user_id
+      if (userActivity.value[user_id] !== undefined) {
+        
+        const lastQuarterUserActivity = userActivity.value[user_id].slice(-parseInt(bufferSize.value/4))
+        return lastQuarterUserActivity.some(activity => activity > 0)
+      }
+      return false
+    }) :
+    sortedProgress.value
 )
 
 const taskCompletionPercentages = computed(() => {
@@ -193,23 +225,32 @@ const taskCompletionPercentages = computed(() => {
       <!-- User grid -->
       <div :class="`flex flex-wrap ${compactGrid ? 'gap-1' : 'gap-2'}`">
         <span
-          v-for="progress in sortedProgress"
+          v-for="progress in sortedInactiveProgress"
           :key="progress.user_id"
           :class="[
             'bg-slate-200 dark:bg-slate-900 rounded border drop-shadow-lg',
             progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score ==
             1
               ? 'border-green-700'
-              : 'border-slate-700'
+              : 'border-slate-700',
+            compactGrid ? 'w-[152px]' : ''
           ]"
         >
-          <span class="flex p-2 mb-1 text-slate-600 dark:text-slate-400">
+          <span
+            class="flex text-slate-600 dark:text-slate-400"
+            :class="{
+              'p-2 mb-1': !compactGrid,
+              'p-1': compactGrid && !ultraCompactGrid,
+              'p-0.5': compactGrid && ultraCompactGrid,
+            }"
+          >
             <span
-              :class="`flex flex-col ${compactGrid ? 'w-[120px]' : 'w-60'} ${compactGrid ? '' : 'mb-1'}`"
+              :class="`flex flex-col ${compactGrid ? 'w-[142px]' : 'w-60'} ${compactGrid ? '' : 'mb-1'}`"
             >
               <span
                 :title="progress.user_id"
-                class="text-nowrap inline-block leading-5 truncate mb-1"
+                class="text-nowrap inline-block leading-5 truncate"
+                :class="ultraCompactGrid ? '' : 'mb-1'"
               >
                 <FontAwesomeIcon
                   v-if="
@@ -224,7 +265,9 @@ const taskCompletionPercentages = computed(() => {
                   :class="`${compactGrid ? 'text-base' : 'text-lg'} font-bold font-mono leading-5 tracking-tight`"
                   >{{ progress.email.split('@')[0] }}</span
                 >
-                <span :class="`${compactGrid ? 'text-xs' : 'text-xs'} font-mono tracking-tight`"
+                <span
+                  v-show="!compactGrid"
+                  :class="`${compactGrid ? 'text-xs' : 'text-xs'} font-mono tracking-tight`"
                   >@{{ progress.email.split('@')[1] }}</span
                 >
               </span>
@@ -236,7 +279,10 @@ const taskCompletionPercentages = computed(() => {
             </span>
           </span>
 
-          <span class="flex flex-row justify-between px-2 text-slate-500 dark:text-slate-400">
+          <span 
+            class="flex flex-row justify-between px-2 text-slate-500 dark:text-slate-400"
+            :class="ultraCompactGrid ? 'leading-5' : ''"
+          >
             <span
               v-for="(task, task_index) in exercise.tasks"
               :key="task_index"
@@ -260,8 +306,8 @@ const taskCompletionPercentages = computed(() => {
                       ? faCircleCheck
                       : faCheck
                   "
-                  :class="`${compactGrid ? 'text-xs' : 'text-xl'} dark:text-green-400 text-green-600`"
-                  fixed-width
+                  class="text-xl dark:text-green-400 text-green-600"
+                  :style="{ 'font-size': taskIconSize }"
                 />
                 <FontAwesomeIcon
                   v-else-if="
@@ -272,14 +318,14 @@ const taskCompletionPercentages = computed(() => {
                   "
                   title="All requirements for that task haven't been fullfilled yet"
                   :icon="faHourglassHalf"
-                  :class="`${compactGrid ? 'text-xs' : 'text-lg'} dark:text-slate-500 text-slate-400`"
-                  fixed-width
+                  class="text-lg dark:text-slate-500 text-slate-400"
+                  :style="{ 'font-size': taskIconSize }"
                 />
                 <FontAwesomeIcon
                   v-else
                   :icon="faTimes"
-                  :class="`${compactGrid ? 'text-xs' : 'text-xl'} dark:text-slate-500 text-slate-400`"
-                  fixed-width
+                  class="text-xl dark:text-slate-500 text-slate-400"
+                  :style="{ 'font-size': taskIconSize }"
                 />
               </span>
             </span>

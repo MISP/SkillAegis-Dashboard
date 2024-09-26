@@ -8,11 +8,14 @@ import re
 from typing import Union
 import jq
 
-import db
-
+from backend.utils import debounce_check_active_tasks
 import backend.misp_api as misp_api
 from backend.appConfig import logger
 import backend.config as config
+import backend.db as db
+
+from backend.target_tools.misp.exercise import inject_checker_router as inject_checker_router_misp
+from backend.target_tools.suricata.exercise import inject_checker_router as inject_checker_router_suricata
 
 
 ACTIVE_EXERCISES_DIR = Path(config.exercise_directory)
@@ -78,9 +81,6 @@ def restore_exercices_progress():
 
     if len(db.EXERCISES_STATUS) == 0:
         init_exercises_tasks()
-
-    from backend.server import start_timed_injects
-    start_timed_injects()
 
 
 def resetAll():
@@ -318,6 +318,7 @@ def mark_task_incomplete(user_id: int, exercise_uuid: str , task_uuid: str):
 def get_progress():
     completion_for_users = get_completion_for_users()
     progress = {}
+    selected_exercices = get_selected_exercises()
     for user_id in completion_for_users.keys():
         if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
             print('unknown user id', user_id)
@@ -328,9 +329,120 @@ def get_progress():
             'exercises': {},
         }
         for exec_uuid, tasks_completion in completion_for_users[user_id].items():
-            progress[user_id]['exercises'][exec_uuid] = {
-                'tasks_completion': tasks_completion,
-                'score': get_score_for_task_completion(tasks_completion),
-                'max_score': db.EXERCISES_STATUS[exec_uuid]['max_score'],
-            }
+            if exec_uuid in selected_exercices:
+                progress[user_id]['exercises'][exec_uuid] = {
+                    'tasks_completion': tasks_completion,
+                    'score': get_score_for_task_completion(tasks_completion),
+                    'max_score': db.EXERCISES_STATUS[exec_uuid]['max_score'],
+                }
     return progress
+
+
+@debounce_check_active_tasks(debounce_seconds=2)
+async def check_active_tasks(user_id: int, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
+    succeeded_once = False
+    available_tasks = get_available_tasks_for_user(user_id)
+    for task_uuid in available_tasks:
+        inject = db.INJECT_BY_UUID[task_uuid]
+        if inject['exercise_uuid'] not in db.SELECTED_EXERCISES:
+            continue
+        logger.debug(f"[{task_uuid}] :: checking: {inject['name']}")
+        completed = await check_inject(user_id, inject, data, context, for_target_tool)
+        if completed:
+            succeeded_once = True
+    return succeeded_once
+
+
+async def check_inject(user_id: int, inject: dict, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
+    from backend.server import sendUserInjectCheckInProgress
+
+    inject_evaluation_join_type = inject['inject_evaluation_join_type']
+    for_target_tool = for_target_tool if for_target_tool is not None else inject['target_tool']
+    if inject['target_tool'] == 'MISP' and inject['target_tool'] == for_target_tool:
+        inject_checker_router = inject_checker_router_misp
+    elif inject['target_tool'] == 'suricata' and inject['target_tool'] == for_target_tool:
+        inject_checker_router = inject_checker_router_suricata
+    else:
+        return False
+
+    successCount = 0
+    for inject_evaluation in inject['inject_evaluation']:
+        await sendUserInjectCheckInProgress(user_id, inject['uuid'])
+        success = await inject_checker_router(user_id, inject_evaluation, data, context)
+        if not success and inject_evaluation_join_type == 'AND':
+            logger.info(f"Task not completed[{user_id}]: {inject['uuid']}. failure of one inject and join type is `AND`")
+            return False
+        elif success:
+            successCount += 1
+            if inject_evaluation_join_type == 'OR':
+                mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
+                logger.info(f"Task success[{user_id}]: {inject['uuid']}")
+                return True
+            elif successCount == len(inject['inject_evaluation']):
+                mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
+                logger.info(f"Task success[{user_id}]: {inject['uuid']}")
+                return True
+    logger.info(f"Task not completed[{user_id}]: {inject['uuid']}. failure of all injects")
+    return False
+
+
+async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict) -> bool:
+    from backend.server import sendUserInjectCheckInProgress
+
+    inject_evaluation_join_type = inject['inject_evaluation_join_type']
+
+    inject_evaluation_join_type = inject['inject_evaluation_join_type']
+    if inject['target_tool'] == 'misp':
+        inject_checker_router = inject_checker_router_misp
+    elif inject['target_tool'] == 'suricata':
+        inject_checker_router = inject_checker_router_suricata
+    else:
+        return False
+
+    at_last_one_success = False
+    for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys():
+
+        fullContext = dict(context)
+        fullContext['user_id'] = user_id
+        fullContext['user_email'] = db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None)
+        fullContext['user_authkey'] = db.USER_ID_TO_AUTHKEY_MAPPING.get(user_id, None)
+
+        successCount = 0
+        completed = False
+        available_tasks = get_available_tasks_for_user(user_id)
+        if inject['uuid'] not in available_tasks:
+            continue
+
+        for inject_evaluation in inject['inject_evaluation']:
+
+            if inject_evaluation['evaluation_strategy'] != 'query_search':
+                if inject_evaluation_join_type == 'AND':
+                    logger.info(f"Unsupported evaluation_strategy `{inject_evaluation['evaluation_strategy']}` and evaluation join type `{inject_evaluation_join_type}` for Timed inject")
+                    break
+                elif inject_evaluation_join_type == 'OR':
+                    continue
+
+            await sendUserInjectCheckInProgress(user_id, inject['uuid'])
+            success = await inject_checker_router(user_id, inject_evaluation, data, fullContext)
+            if not success and inject_evaluation_join_type == 'AND':
+                mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
+                logger.info(f"Task success[{user_id}]: {inject['uuid']}")
+                completed = True
+                break
+            elif success:
+                successCount += 1
+                if inject_evaluation_join_type == 'OR':
+                    mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
+                    logger.info(f"Task success[{user_id}]: {inject['uuid']}")
+                    completed = True
+                    break
+                elif successCount == len(inject['inject_evaluation']):
+                    mark_task_completed(user_id, inject['exercise_uuid'], inject['uuid'])
+                    logger.info(f"Task success[{user_id}]: {inject['uuid']}")
+                    completed = True
+                    break
+        if not completed:
+            logger.info(f"Task not completed[{user_id}]: {inject['uuid']}. failure of all injects")
+        else:
+            at_last_one_success = True
+    return at_last_one_success

@@ -17,6 +17,7 @@ const initial_state = {
   exercises: [],
   selected_exercises: [],
   progresses: {},
+  userTaskCheckInProgress: {},
   diagnostic: {}
 }
 
@@ -27,7 +28,7 @@ const connectionState = reactive({
 })
 
 const socket = io(URL, {
-  autoConnect: true
+  autoConnect: true,
 })
 
 /* Public */
@@ -50,6 +51,7 @@ export const userActivity = computed(() => state.userActivity)
 export const userActivityConfig = computed(() => state.userActivityConfig)
 export const socketConnected = computed(() => connectionState.connected)
 export const zmqLastTime = computed(() => connectionState.zmq_last_time)
+export const userTaskCheckInProgress = computed(() => state.userTaskCheckInProgress)
 
 export function resetState() {
   Object.assign(state, initial_state)
@@ -143,6 +145,17 @@ function getNotifications() {
 function getProgress() {
   socket.emit('get_progress', (all_progress) => {
     state.progresses = all_progress
+
+    Object.keys(state.progresses).forEach(user_id => {
+      Object.values(state.progresses[user_id].exercises).forEach(exercise => {
+        Object.keys(exercise.tasks_completion).forEach(inject_uuid => {
+          const key = `${user_id}_${inject_uuid}`
+          if (state.userTaskCheckInProgress[key] === undefined) {
+            state.userTaskCheckInProgress[key] = false
+          }
+        });
+      });
+    });
   })
 }
 
@@ -221,7 +234,6 @@ function sendRemediateSetting(setting, cb) {
 }
 
 /* Event listener */
-
 socket.on('connect', () => {
   connectionState.connected = true
 })
@@ -242,7 +254,7 @@ socket.on('new_user', (new_user) => {
   debouncedGetProgress()
 })
 
-socket.on('refresh_score', (new_user) => {
+socket.on('refresh_score', () => {
   debouncedGetProgress()
 })
 
@@ -258,6 +270,14 @@ socket.on('update_notification_history', (notification_history_bundle) => {
 socket.on('update_users_activity', (user_activity_bundle) => {
   state.userActivity = user_activity_bundle.activity
   state.userActivityConfig = user_activity_bundle.config
+})
+
+
+socket.on('user_task_check_in_progress', ({user_id, inject_uuid}) => {
+  state.userTaskCheckInProgress[`${user_id}_${inject_uuid}`] = true 
+  setTimeout(() => {
+    state.userTaskCheckInProgress[`${user_id}_${inject_uuid}`] = false
+  }, 3000);
 })
 
 function addLimited(target, message, maxCount) {

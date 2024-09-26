@@ -15,6 +15,7 @@ from aiohttp import web
 import zmq.asyncio
 from random import getrandbits
 
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import backend.exercise as exercise_model
@@ -24,10 +25,12 @@ import backend.config as config
 from backend.appConfig import logger
 import backend.misp_api as misp_api
 
-from backend.target_tools.misp.exercise import check_active_tasks as check_active_tasks_misp, is_accepted_query as is_accepted_query_misp
+from backend.target_tools.misp.exercise import is_accepted_query as is_accepted_query_misp
+from backend.target_tools.suricata.exercise import getInstalledSuricataVersion
 
 
 ZMQ_LOG_FILE = None
+ZMQ_START_LINE_NUMBER = 0
 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
@@ -80,7 +83,8 @@ zsocket.connect(zmq_url)
 zsocket.setsockopt_string(zmq.SUBSCRIBE, '')
 
 
-# Initialize Socket.IO server
+# # Initialize Socket.IO server
+# sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True, engineio_logger=True)
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
 app = web.Application()
 sio.attach(app)
@@ -204,7 +208,7 @@ async def handleMessage(topic, s, message):
         if user_id is not None:
             if is_accepted_query_misp(data):
                 context = get_context(topic, user_id, data)
-                checking_task = check_active_tasks_misp(user_id, data, context)
+                checking_task = exercise_model.check_active_tasks(user_id, data, context, 'MISP')
                 if checking_task is not None:  # Make sure check_active_tasks was not debounced
                     succeeded_once = await checking_task
                     if succeeded_once:
@@ -215,6 +219,13 @@ async def handleMessage(topic, s, message):
 @debounce(debounce_seconds=1)
 async def sendRefreshScore():
     await sio.emit('refresh_score')
+
+
+async def sendUserInjectCheckInProgress(user: int, inject_uuid: str):
+    await sio.emit('user_task_check_in_progress', {
+        'user_id': user,
+        'inject_uuid': inject_uuid
+    })
 
 
 def get_context(topic: str, user_id: int, data: dict) -> dict:
@@ -249,6 +260,9 @@ async def getDiagnostic() -> dict:
     misp_settings = await misp_api.getSettings()
     diagnostic['settings'] = misp_settings
     diagnostic['zmq_message_count'] = ZMQ_MESSAGE_COUNT
+    diagnostic['suricata'] = {
+        'version': getInstalledSuricataVersion(),
+    }
     return diagnostic
 
 
@@ -316,7 +330,7 @@ def start_timed_injects():
 
 
 def start_timed_inject(injectF, trigger_type, value):
-    global sio, RUNNING_TIMED_INJECTS
+    global RUNNING_TIMED_INJECTS
     if f'{trigger_type}-{injectF['inject_uuid']}' in RUNNING_TIMED_INJECTS:
         return  # Timed inject already running
     random_bits = getrandbits(32)
@@ -331,7 +345,11 @@ def stop_all_timed_injects():
 
 
 async def timed_inject(injectF, trigger_type, value, random_bits):
-    global sio, RUNNING_TIMED_INJECTS
+    global RUNNING_TIMED_INJECTS
+
+    inject = db.INJECT_BY_UUID.get(injectF['inject_uuid'], None)
+    if inject is None:
+        return
 
     uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
     if trigger_type == 'triggered_at':
@@ -339,7 +357,6 @@ async def timed_inject(injectF, trigger_type, value, random_bits):
         await sio.sleep(seconds)
         if uniq_str not in RUNNING_TIMED_INJECTS:
             return  # Timed inject has been stopped
-        print(trigger_type, injectF['inject_uuid'])
 
     elif trigger_type == 'periodic_run_every':
         seconds = value
@@ -347,7 +364,14 @@ async def timed_inject(injectF, trigger_type, value, random_bits):
             await sio.sleep(seconds)
             if uniq_str not in RUNNING_TIMED_INJECTS:
                 return  # Timed inject has been stopped
-            print(trigger_type, injectF['inject_uuid'])
+
+            data = {}
+            context = {'evaluation_trigger': trigger_type}
+            checking_task = exercise_model.check_inject_for_timed_inject(inject, data, context)
+            if checking_task is not None:  # Make sure check_active_tasks was not debounced
+                succeeded_once = await checking_task
+                if succeeded_once:
+                        await sendRefreshScore()
 
 
 # Function to forward zmq messages to Socket.IO
@@ -368,10 +392,12 @@ async def forward_zmq_to_socketio():
 
 # Function to forward zmq messages to Socket.IO
 async def forward_fake_zmq_to_socketio():
-    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME, ZMQ_LOG_FILE
+    global ZMQ_MESSAGE_COUNT, ZMQ_LAST_TIME, ZMQ_LOG_FILE, ZMQ_START_LINE_NUMBER
     filename = ZMQ_LOG_FILE
+    start_line_number = ZMQ_START_LINE_NUMBER
     line_number = sum(1 for _ in open(filename))
     print(f'Preparing to feed {line_number} lines..')
+    print(f'Starting from line {start_line_number}.')
     await sio.sleep(2)
 
     print('Feeding started')
@@ -380,6 +406,8 @@ async def forward_fake_zmq_to_socketio():
     with open(filename) as f:
         for line in f:
             line_count += 1
+            if line_count-1 < start_line_number:
+                continue
             now = time.time()
             if line_count % (int(line_number/100)) == 0 or (now - last_print >= 5):
                 last_print = now
@@ -403,11 +431,12 @@ async def forward_fake_zmq_to_socketio():
     print('Feeding done.')
 
 
-async def init_app(zmq_log_file=None):
-    global ZMQ_LOG_FILE
+async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0):
+    global ZMQ_LOG_FILE, ZMQ_START_LINE_NUMBER
 
     if zmq_log_file is not None:
         ZMQ_LOG_FILE = zmq_log_file
+        ZMQ_START_LINE_NUMBER = zmq_start_line_number
         sio.start_background_task(forward_fake_zmq_to_socketio)
     else:
         exercise_model.restore_exercices_progress()
@@ -417,38 +446,11 @@ async def init_app(zmq_log_file=None):
     sio.start_background_task(record_users_activity)
     sio.start_background_task(backup_exercises_progress)
 
+    start_timed_injects()
+
     return app
 
 
 app.router.add_static('/assets', '../dist/assets')
 app.router.add_get('/', index)
 app.router.add_get('/favicon.ico', favicon)
-
-def main():
-    parser = argparse.ArgumentParser(description='Parse command-line arguments for SkillAegis Dashboard.')
-
-    parser.add_argument('--host', type=str, required=False, default=config.server_host, help='The host to listen to')
-    parser.add_argument('--port', type=int, required=False, default=config.server_port, help='The port to listen to')
-    parser.add_argument('--exercise_folder', type=str, required=False, default=config.exercise_directory, help='The folder containing all exercises')
-    parser.add_argument('--zmq_log_file', type=str, required=False, default=None, help='A ZMQ log file to replay. Will disable the ZMQ subscription defined in the settings.')
-
-    args = parser.parse_args()
-
-    # Validate exercise_folder
-    if not os.path.isdir(args.exercise_folder):
-        parser.error(f"The specified exercise_folder does not exist or is not a directory: {args.exercise_folder}")
-    else:
-        exercise_model.ACTIVE_EXERCISES_DIR = Path(args.exercise_folder)
-
-    if args.zmq_log_file and not os.path.isfile(args.zmq_log_file):
-        parser.error(f"The specified zmq_log_file does not exist or is not a file: {args.zmq_log_file}")
-
-    exercises_loaded = exercise_model.load_exercises()
-    if not exercises_loaded:
-        logger.critical('Could not load exercises')
-        sys.exit(1)
-
-    web.run_app(init_app(args.zmq_log_file), host=args.host, port=args.port)
-
-if __name__ == "__main__":
-    main()

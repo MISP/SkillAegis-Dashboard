@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import collections
-
+from typing import Union
 
 USER_ID_TO_EMAIL_MAPPING = {}
 USER_ID_TO_AUTHKEY_MAPPING = {}

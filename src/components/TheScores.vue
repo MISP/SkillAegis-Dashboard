@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { active_exercises as exercises } from '../socket'
+import { active_exercises as exercises, userCount, userActivity, userActivityConfig } from '../socket'
 import {
   faGraduationCap,
   faUpRightAndDownLeftFromCenter,
   faDownLeftAndUpRightToCenter,
-  faWarning
+  faWarning,
+  faUsers,
+  faUsersSlash
 } from '@fortawesome/free-solid-svg-icons'
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
@@ -14,6 +16,19 @@ import { fullscreenModeOn } from '../settings.js'
 
 const hasExercises = computed(() => exercises.value.length > 0)
 const fullscreen_panel = ref(false)
+const hide_inactive_users = ref(false)
+
+const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
+const userCountActive = computed(() => {
+  let activeUserCount = 0
+  Object.keys(userActivity.value).forEach(user_id => {
+    const lastQuarterUserActivity = userActivity.value[user_id].slice(-parseInt(bufferSize.value/4))
+    if (lastQuarterUserActivity.some(activity => activity > 0)) {
+      activeUserCount += 1
+    }
+  });
+  return activeUserCount
+})
 
 function toggleFullScreen(exercise_index) {
   if (fullscreen_panel.value === exercise_index) {
@@ -39,6 +54,39 @@ function toggleFullScreen(exercise_index) {
     </Alert>
 
     <ThePlayerGrid></ThePlayerGrid>
+  </div>
+
+  <div class="mb-2 flex flex-wrap gap-x-3">
+    <span
+      class="rounded-lg py-1 px-2 dark:bg-sky-700 bg-sky-400 text-slate-800 dark:text-slate-200"
+    >
+      <span class="mr-1">
+        <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
+        Players:
+      </span>
+      <span class="font-bold">{{ userCount }}</span>
+    </span>
+
+    <span
+      class="rounded-lg py-1 px-2 dark:bg-green-700 bg-green-400 text-slate-800 dark:text-slate-200"
+    >
+      <span class="mr-1">
+        <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
+        Active Players:
+      </span>
+      <span class="font-bold">{{ userCountActive }}</span>
+    </span>
+
+    <label class="mr-1 flex items-center cursor-pointer text-slate-700 dark:text-slate-300">
+      <input
+        type="checkbox"
+        class="toggle toggle-success mr-1"
+        :checked="hide_inactive_users"
+        @change="hide_inactive_users = !hide_inactive_users"
+      />
+      <FontAwesomeIcon :icon="faUsersSlash" size="sm" class="mr-1"></FontAwesomeIcon>
+      Hide inactive users
+    </label>
   </div>
 
   <template v-for="(exercise, exercise_index) in exercises" :key="exercise.name">
@@ -74,6 +122,7 @@ function toggleFullScreen(exercise_index) {
           v-show="fullscreen_panel === false"
           :exercise="exercise"
           :exercise_index="exercise_index"
+          :hide_inactive_users="hide_inactive_users"
         ></TheScoreTable>
       </KeepAlive>
       <KeepAlive>
@@ -81,6 +130,7 @@ function toggleFullScreen(exercise_index) {
           v-if="fullscreen_panel !== false"
           :exercise="exercises[fullscreen_panel]"
           :exercise_index="exercise_index"
+          :hide_inactive_users="hide_inactive_users"
         ></TheFullScreenScoreGrid>
       </KeepAlive>
     </div>

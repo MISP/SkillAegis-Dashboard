@@ -2,26 +2,32 @@
 import { ref, watch, computed } from 'vue'
 import {
   notifications,
-  userCount,
   notificationCounter,
   notificationAPICounter,
   toggleVerboseMode,
   toggleApiQueryMode
 } from '../socket'
-import { faSignal, faCloud, faCog, faUsers, faCircle, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faSignal, faCloud, faCog, faCircle, faUser, faLink } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
 
 const verbose = ref(false)
 const api_query = ref(false)
 const tracked_user = ref(null)
+const tracked_url = ref(null)
 
 const filtered_notifications = computed(() => {
+  let filteredNotif = notifications.value
   if (tracked_user.value !== null && tracked_user.value.length > 0) {
-    return notifications.value.filter((notification) => {
+    filteredNotif = filteredNotif.filter((notification) => {
       return notification.user.startsWith(tracked_user.value)
     })
   }
-  return notifications.value
+  if (tracked_url.value !== null && tracked_url.value.length > 0) {
+    filteredNotif = filteredNotif.filter((notification) => {
+      return notification.url.includes(tracked_url.value)
+    })
+  }
+  return filteredNotif
 })
 
 watch(verbose, (newValue) => {
@@ -41,6 +47,14 @@ function getClassFromResponseCode(response_code) {
     return 'text-amber-600'
   }
 }
+
+function convertToLocalTime(serverTime) {
+  let [hours, minutes, seconds] = serverTime.split(":").map(Number);
+  let now = new Date();
+  let serverDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hours, minutes, seconds));
+  let localDate = new Date(serverDate);
+  return localDate.toLocaleTimeString(undefined, { hour12: false });
+}
 </script>
 
 <template>
@@ -51,15 +65,6 @@ function getClassFromResponseCode(response_code) {
     </h3>
 
     <div class="mb-2 flex flex-wrap gap-x-3">
-      <span
-        class="rounded-lg py-1 px-2 dark:bg-sky-700 bg-sky-400 text-slate-800 dark:text-slate-200"
-      >
-        <span class="mr-1">
-          <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
-          Players:
-        </span>
-        <span class="font-bold">{{ userCount }}</span>
-      </span>
       <span
         class="rounded-lg py-1 px-2 dark:bg-sky-700 bg-sky-400 text-slate-800 dark:text-slate-200"
       >
@@ -112,27 +117,6 @@ function getClassFromResponseCode(response_code) {
           API Queries
         </label>
       </span>
-      <span class="flex items-center">
-        <label class="mr-1 relative flex items-center cursor-pointer">
-          <FontAwesomeIcon
-            :icon="faUser"
-            size="sm"
-            class="absolute left-2 text-slate-400 dark:text-slate-300"
-          ></FontAwesomeIcon>
-          <input
-            type="text"
-            class="
-              shadow border font-mono w-full rounded py-1 pl-7 pr-2 leading-tight
-              bg-slate-50 text-slate-700 border-slate-300
-              dark:bg-slate-500 dark:text-slate-200 dark:border-slate-400
-              focus:outline-none focus:border focus:border-slate-300 focus:dark:border-slate-300
-            "
-            placeholder="Track User"
-            v-model="tracked_user"
-          />
-          
-        </label>
-      </span>
     </div>
 
     <TheLiveLogsActivityGraphVue></TheLiveLogsActivityGraphVue>
@@ -141,9 +125,53 @@ function getClassFromResponseCode(response_code) {
       <thead>
         <tr class="font-medium dark:text-slate-200 text-slate-600">
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left"></th>
-          <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-2 text-left">User</th>
+          <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-2 text-left">
+            User
+            <span class="flex items-center">
+              <label class="mr-1 relative flex items-center cursor-pointer">
+                <FontAwesomeIcon
+                  :icon="faUser"
+                  size="sm"
+                  class="absolute left-2 text-slate-400 dark:text-slate-300"
+                ></FontAwesomeIcon>
+                <input
+                  type="text"
+                  class="
+                    shadow border font-mono w-full rounded py-1 pl-7 pr-2 leading-tight
+                    bg-slate-50 text-slate-700 border-slate-300
+                    dark:bg-slate-500 dark:text-slate-200 dark:border-slate-400
+                    focus:outline-none focus:border focus:border-slate-300 focus:dark:border-slate-300
+                  "
+                  placeholder="Track User"
+                  v-model="tracked_user"
+                />
+              </label>
+            </span>
+          </th>
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Time</th>
-          <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">URL</th>
+          <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">
+            URL
+            <span class="flex items-center">
+              <label class="mr-1 relative flex items-center cursor-pointer">
+                <FontAwesomeIcon
+                  :icon="faLink"
+                  size="sm"
+                  class="absolute left-2 text-slate-400 dark:text-slate-300"
+                ></FontAwesomeIcon>
+                <input
+                  type="text"
+                  class="
+                    shadow border font-mono w-full rounded py-1 pl-7 pr-2 leading-tight
+                    bg-slate-50 text-slate-700 border-slate-300
+                    dark:bg-slate-500 dark:text-slate-200 dark:border-slate-400
+                    focus:outline-none focus:border focus:border-slate-300 focus:dark:border-slate-300
+                  "
+                  placeholder="Track URL"
+                  v-model="tracked_url"
+                />
+              </label>
+            </span>
+          </th>
           <th class="border-b border-slate-100 dark:border-slate-700 p-3 text-left">Payload</th>
         </tr>
       </thead>
@@ -178,7 +206,7 @@ function getClassFromResponseCode(response_code) {
             <td
               class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-1"
             >
-              {{ notification.time }}
+              {{ convertToLocalTime(notification.time) }}
             </td>
             <td
               class="border-b border-slate-100 dark:border-slate-700 text-sky-600 dark:text-sky-400 p-1"
@@ -211,7 +239,7 @@ function getClassFromResponseCode(response_code) {
                   :mask="faCloud"
                   transform="shrink-7 left-1"
                 ></FontAwesomeIcon>
-                <pre class="text-sm inline">{{ notification.url }}</pre>
+                <pre class="text-sm inline max-w-96 overflow-hidden text-ellipsis">{{ notification.url }}</pre>
               </div>
             </td>
             <td
@@ -221,7 +249,7 @@ function getClassFromResponseCode(response_code) {
                 v-if="notification.http_method == 'POST'"
                 class="border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 rounded-md"
               >
-                <pre class="p-1 text-xs">{{ JSON.stringify(notification.payload, null, 2) }}</pre>
+                <pre class="p-1 text-xs max-w-3xl overflow-hidden text-ellipsis">{{ JSON.stringify(notification.payload, null, 2) }}</pre>
               </div>
             </td>
           </tr>
