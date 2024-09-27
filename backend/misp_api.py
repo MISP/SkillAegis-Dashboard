@@ -11,7 +11,7 @@ from requests_cache import CachedSession
 from requests.packages.urllib3.exceptions import InsecureRequestWarning # type: ignore
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-from backend.config import misp_url, misp_apikey, misp_skipssl
+import backend.config as config
 from backend.appConfig import logger, misp_settings
 
 requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
@@ -20,17 +20,18 @@ requestSession.mount('https://', adapterCache)
 requestSession.mount('http://', adapterCache)
 
 
-async def get(url, data={}, api_key=misp_apikey):
+async def get(url, data={}, api_key=None):
+    api_key = api_key if api_key is not None else config.misp_apikey
     headers = {
         'User-Agent': 'SkillAegis',
         "Authorization": api_key,
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    full_url = urljoin(misp_url, url)
+    full_url = urljoin(config.misp_url, url)
     try:
         loop = asyncio.get_event_loop()
-        job = lambda: requestSession.get(full_url, data=data, headers=headers, verify=not misp_skipssl)
+        job = lambda: requestSession.get(full_url, data=data, headers=headers, verify=not config.misp_skipssl)
         runningJob = loop.run_in_executor(None, job)
         response = await runningJob
     except requests.exceptions.ConnectionError as e:
@@ -44,17 +45,18 @@ async def get(url, data={}, api_key=misp_apikey):
         return response.text
 
 
-async def post(url, data={}, api_key=misp_apikey):
+async def post(url, data={}, api_key=None):
+    api_key = api_key if api_key is not None else config.misp_apikey
     headers = {
         'User-Agent': 'SkillAegis',
         "Authorization": api_key,
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    full_url = urljoin(misp_url, url)
+    full_url = urljoin(config.misp_url, url)
     try:
         loop = asyncio.get_event_loop()
-        job = lambda: requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not misp_skipssl)
+        job = lambda: requestSession.post(full_url, data=json.dumps(data), headers=headers, verify=not config.misp_skipssl)
         runningJob = loop.run_in_executor(None, job)
         response = await runningJob
     except requests.exceptions.ConnectionError as e:
