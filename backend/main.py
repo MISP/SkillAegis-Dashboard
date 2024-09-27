@@ -22,9 +22,9 @@ def main():
     parser.add_argument('--exercise_folder', type=str, required=False, default=config.exercise_directory, help='The folder containing all exercises')
     parser.add_argument('--zmq_log_file', type=str, required=False, default=None, help='A ZMQ log file to replay. Will disable the ZMQ subscription defined in the settings.')
     parser.add_argument('--zmq_start_line_number', type=int, required=False, default=0, help='The line at which the ZMQ log file used for replay should start being fed.')
-    parser.add_argument('--misp_url', type=str, required=False, default=None, help='The MISP URL to be used. Overrides what is defined in the config.py setting file.')
-    parser.add_argument('--misp_apikey', type=str, required=False, default=None, help='MISP API KEY to be used. Overrides what is defined in the config.py setting file.')
-    parser.add_argument('--misp_skipssl', type=bool, required=False, default=None, help='MISP skip ssl value to be used. Overrides what is defined in the config.py setting file.')
+    parser.add_argument('--misp_url', type=str, required=False, help='The MISP URL to be used. Overrides what is defined in the config.py setting file.')
+    parser.add_argument('--misp_apikey', type=str, required=False, help='MISP API KEY to be used. Overrides what is defined in the config.py setting file.')
+    parser.add_argument('--misp_skipssl_state', type=str, choices=['1', '0', 'default'], default='default', required=False, help='MISP skip ssl value to be used. Overrides what is defined in the config.py setting file.')
 
     args = parser.parse_args()
 
@@ -34,12 +34,12 @@ def main():
     else:
         exercise_model.ACTIVE_EXERCISES_DIR = Path(args.exercise_folder)
 
-    if args.misp_url is not None:
+    if args.misp_url is not None and len(args.misp_url) > 0:
         config.misp_url = args.misp_url
-    if args.misp_apikey is not None:
+    if args.misp_apikey is not None and len(args.misp_apikey) > 0:
         config.misp_apikey = args.misp_apikey
-    if args.misp_skipssl is not None:
-        config.misp_skipssl = args.misp_skipssl
+    if args.misp_skipssl_state is not None and args.misp_skipssl_state != 'default':
+        config.misp_skipssl = args.misp_skipssl_state == '1'
 
     if args.zmq_log_file and not os.path.isfile(args.zmq_log_file):
         parser.error(f"The specified zmq_log_file does not exist or is not a file: {args.zmq_log_file}")
