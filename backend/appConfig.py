@@ -1,4 +1,6 @@
 
+import sys
+
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
     'attributes': ['add', 'add_attachment', 'edit', 'revise_object', 'delete', 'restSearch',],
@@ -30,7 +32,14 @@ import logging
 logger = logging.getLogger('SkillAegis')
 format = '[%(levelname)s] %(asctime)s - %(message)s'
 formatter = logging.Formatter(format)
-logging.basicConfig(filename='SkillAegis.log', encoding='utf-8', level=logging.DEBUG, format=format)
+
+fh = logging.FileHandler(filename='SkillAegis.log', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+# logging.basicConfig(filename='SkillAegis.log', encoding='utf-8', level=logging.DEBUG, format=format)
+
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)

@@ -13,8 +13,9 @@ import backend.exercise as exercise_model
 from backend.server import init_app
 from backend.appConfig import logger
 
+runners = []
 
-def main():
+async def main():
     parser = argparse.ArgumentParser(description='Parse command-line arguments for SkillAegis Dashboard.')
 
     parser.add_argument('--host', type=str, required=False, default=config.server_host, help='The host to listen to')
@@ -49,8 +50,27 @@ def main():
         logger.critical('Could not load exercises')
         sys.exit(1)
 
-    web.run_app(init_app(args.zmq_log_file, args.zmq_start_line_number), host=args.host, port=args.port)
+    # web.run_app(init_app(args.zmq_log_file, args.zmq_start_line_number), host=args.host, port=args.port)
+    runner = web.AppRunner(await init_app(args.zmq_log_file, args.zmq_start_line_number))
+    runners.append(runner)
+    await runner.setup()
+    site = web.TCPSite(runner, args.host, args.port)
+    await site.start()
 
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(main())
+
+    try:
+        loop.run_forever()
+    except:
+        pass
+    finally:
+        try:
+            for runner in runners:
+                loop.run_until_complete(runner.cleanup())
+        except KeyboardInterrupt:
+            pass
