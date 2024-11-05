@@ -16,4 +16,4 @@ def eval_query_mirror(user_id: int, expected_data, data_to_validate, context: di
 
 ## Query search
 def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> bool:
-    return eval_data_filtering(inject_evaluation, data, context, debug = debug)
+    return eval_data_filtering(user_id, inject_evaluation, data, context, debug = debug)
