@@ -56,9 +56,10 @@ def backup_exercises_progress():
         'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
         'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
     }
-    if toBackup != LAST_BACKUP:
+    toBackup = json.dumps(toBackup, sort_keys=True)
+    if toBackup != LAST_BACKUP: # Easy way to compared these 2 nested dict
         with open('backup.json', 'w') as f:
-            json.dump(toBackup, f)
+            f.write(toBackup)
             LAST_BACKUP = toBackup
 
 
