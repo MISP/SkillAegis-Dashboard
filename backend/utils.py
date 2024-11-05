@@ -140,12 +140,18 @@ def eval_condition_list(evaluation_config: dict, data_to_validate: str, context:
             return len(intersection) == len(values_set)
         elif comparison_type == 'equals':
             return len(intersection) == len(values_set) and len(intersection) == len(data_to_validate_set)
-    if comparison_type == 'contains-regex':
+    if comparison_type == 'equals-regex':
         regex = re.compile(values[0])
         for candidate in data_to_validate:
             if regex.match(candidate) is None:
                 return False
             else:
+                return True
+        return False
+    if comparison_type == 'contains-regex':
+        regex = re.compile(values[0])
+        for candidate in data_to_validate:
+            if regex.match(candidate) is not None:
                 return True
         return False
     elif comparison_type == 'count':
