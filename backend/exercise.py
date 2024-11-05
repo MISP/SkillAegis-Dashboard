@@ -357,7 +357,7 @@ async def check_active_tasks(user_id: int, data: dict, context: dict, for_target
 async def check_inject(user_id: int, inject: dict, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
     from backend.server import sendUserInjectCheckInProgress
 
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
+    inject_evaluation_join_type = inject.get('inject_evaluation_join_type', 'UNDEFINED')
     for_target_tool = for_target_tool if for_target_tool is not None else inject['target_tool']
     if inject['target_tool'] == 'MISP' and inject['target_tool'] == for_target_tool:
         inject_checker_router = inject_checker_router_misp
@@ -390,10 +390,8 @@ async def check_inject(user_id: int, inject: dict, data: dict, context: dict, fo
 async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict) -> bool:
     from backend.server import sendUserInjectCheckInProgress
 
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
-
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
-    if inject['target_tool'] == 'misp':
+    inject_evaluation_join_type = inject.get('inject_evaluation_join_type', 'UNDEFINED')
+    if inject['target_tool'] == 'MISP':
         inject_checker_router = inject_checker_router_misp
     elif inject['target_tool'] == 'suricata':
         inject_checker_router = inject_checker_router_suricata
