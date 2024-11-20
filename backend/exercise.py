@@ -233,6 +233,16 @@ def resetAllCommand():
     backup_exercises_progress()
 
 
+def is_user_email_known(user_id: int):
+    return db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None) is not None
+
+def is_user_authkey_known(user_id: int):
+    return db.USER_ID_TO_AUTHKEY_MAPPING.get(user_id, None) is not None
+
+def is_user_fully_known(user_id: int):
+    return is_user_email_known(user_id) and is_user_authkey_known(user_id)
+
+
 def get_completed_tasks_for_user(user_id: int):
     completion = get_completion_for_users().get(user_id, {})
     completed_tasks = {}
@@ -400,6 +410,10 @@ async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict)
 
     at_last_one_success = False
     for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys():
+
+        if not is_user_email_known(user_id):
+            logger.info(f"User[{user_id}] email is not unknown.")
+            continue
 
         fullContext = dict(context)
         fullContext['user_id'] = user_id

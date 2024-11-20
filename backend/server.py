@@ -218,7 +218,7 @@ async def handleMessage(topic, s, message):
                         await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 
-@debounce(debounce_seconds=1)
+@debounce(debounce_seconds=0)
 async def sendRefreshScore():
     await sio.emit('refresh_score')
 
