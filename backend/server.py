@@ -218,7 +218,7 @@ async def handleMessage(topic, s, message):
                         await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 
-@debounce(debounce_seconds=1)
+@debounce(debounce_seconds=0)
 async def sendRefreshScore():
     await sio.emit('refresh_score')
 
@@ -368,12 +368,15 @@ async def timed_inject(injectF, trigger_type, value, random_bits):
                 return  # Timed inject has been stopped
 
             data = {}
-            context = {'evaluation_trigger': trigger_type}
+            context = {
+                'evaluation_trigger': trigger_type,
+                'request_is_rest': False  # User did not perform the request since we're in timed inject context
+            }
             checking_task = exercise_model.check_inject_for_timed_inject(inject, data, context)
             if checking_task is not None:  # Make sure check_active_tasks was not debounced
                 succeeded_once = await checking_task
                 if succeeded_once:
-                        await sendRefreshScore()
+                    await sendRefreshScore()
 
 
 # Function to forward zmq messages to Socket.IO

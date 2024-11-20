@@ -56,9 +56,10 @@ def backup_exercises_progress():
         'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
         'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
     }
-    if toBackup != LAST_BACKUP:
+    toBackup = json.dumps(toBackup, sort_keys=True)
+    if toBackup != LAST_BACKUP: # Easy way to compared these 2 nested dict
         with open('backup.json', 'w') as f:
-            json.dump(toBackup, f)
+            f.write(toBackup)
             LAST_BACKUP = toBackup
 
 
@@ -232,6 +233,16 @@ def resetAllCommand():
     backup_exercises_progress()
 
 
+def is_user_email_known(user_id: int):
+    return db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None) is not None
+
+def is_user_authkey_known(user_id: int):
+    return db.USER_ID_TO_AUTHKEY_MAPPING.get(user_id, None) is not None
+
+def is_user_fully_known(user_id: int):
+    return is_user_email_known(user_id) and is_user_authkey_known(user_id)
+
+
 def get_completed_tasks_for_user(user_id: int):
     completion = get_completion_for_users().get(user_id, {})
     completed_tasks = {}
@@ -356,7 +367,7 @@ async def check_active_tasks(user_id: int, data: dict, context: dict, for_target
 async def check_inject(user_id: int, inject: dict, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
     from backend.server import sendUserInjectCheckInProgress
 
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
+    inject_evaluation_join_type = inject.get('inject_evaluation_join_type', 'UNDEFINED')
     for_target_tool = for_target_tool if for_target_tool is not None else inject['target_tool']
     if inject['target_tool'] == 'MISP' and inject['target_tool'] == for_target_tool:
         inject_checker_router = inject_checker_router_misp
@@ -389,10 +400,8 @@ async def check_inject(user_id: int, inject: dict, data: dict, context: dict, fo
 async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict) -> bool:
     from backend.server import sendUserInjectCheckInProgress
 
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
-
-    inject_evaluation_join_type = inject['inject_evaluation_join_type']
-    if inject['target_tool'] == 'misp':
+    inject_evaluation_join_type = inject.get('inject_evaluation_join_type', 'UNDEFINED')
+    if inject['target_tool'] == 'MISP':
         inject_checker_router = inject_checker_router_misp
     elif inject['target_tool'] == 'suricata':
         inject_checker_router = inject_checker_router_suricata
@@ -401,6 +410,10 @@ async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict)
 
     at_last_one_success = False
     for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys():
+
+        if not is_user_email_known(user_id):
+            logger.info(f"User[{user_id}] email is not unknown.")
+            continue
 
         fullContext = dict(context)
         fullContext['user_id'] = user_id

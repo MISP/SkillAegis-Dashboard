@@ -39,6 +39,7 @@ async def get(url, data={}, api_key=None):
         return None
     except Exception as e:
         logger.warning('Could not perform request on MISP. %s', e)
+        return None
     try:
         return response.json() if response.headers['content-type'].startswith('application/json') else response.text
     except requests.exceptions.JSONDecodeError:
@@ -64,6 +65,7 @@ async def post(url, data={}, api_key=None):
         return None
     except Exception as e:
         logger.warning('Could not perform request on MISP. %s', e)
+        return None
     try:
         return response.json() if response.headers['content-type'].startswith('application/json') else response.text
     except requests.exceptions.JSONDecodeError:
@@ -108,3 +110,10 @@ async def remediateSetting(setting) ->dict:
             'force': 1,
         }
         return await post(f'/servers/serverSettingsEdit/{setting}', payload)
+
+async def genAPIKey(user_id: int) -> Union[None, str]:
+    url = f'/auth_keys/add/{user_id}'
+    result = await post(url)
+    if result is not None:
+        return result['AuthKey']['authkey_raw']
+    return None

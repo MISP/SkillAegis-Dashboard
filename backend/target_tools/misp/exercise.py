@@ -148,9 +148,19 @@ async def fetch_data_for_data_filtering(event_id=None) -> Union[None, dict]:
     return data
 
 
+async def get_api_key_or_gen_new_one(user_id: int) -> str:
+    authkey = db.USER_ID_TO_AUTHKEY_MAPPING.get(user_id, None)
+    if authkey is None:
+        logger.info(f'User[{user_id}] Authkey unknown. Creating a new one')
+        authkey = await misp_api.genAPIKey(user_id)
+        if authkey is not None:
+            db.USER_ID_TO_AUTHKEY_MAPPING[user_id] = authkey
+    return authkey
+
+
 async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, perfomed_query: dict) -> Union[None, dict]:
     data = None
-    authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
+    authkey = await get_api_key_or_gen_new_one(user_id)
     if perfomed_query is not None:
         if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
             return None
@@ -168,7 +178,7 @@ async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, per
 
 
 async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> Union[None, dict]:
-    authkey = db.USER_ID_TO_AUTHKEY_MAPPING[user_id]
+    authkey = await get_api_key_or_gen_new_one(user_id)
     if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
             return None
     query_context = inject_evaluation['evaluation_context']['query_context']
