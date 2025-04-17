@@ -4,6 +4,7 @@ import collections
 from typing import Union
 
 USER_ID_TO_EMAIL_MAPPING = {}
+EMAIL_TO_USER_ID_MAPPING = {}
 USER_ID_TO_AUTHKEY_MAPPING = {}
 
 ALL_EXERCISES = []

@@ -21,6 +21,10 @@ function collapse(exercise_index) {
   }
 }
 
+function getCompletetionPercentageForUser(progress, exercise_uuid) {
+  return 100 * Object.values(progress.exercises[exercise_uuid].tasks_completion).filter(e => e !== false).length / Object.keys(progress.exercises[exercise_uuid].tasks_completion).length
+}
+
 const compactTable = computed(() => {
   return userCount.value > 20
 })
@@ -91,7 +95,7 @@ const taskCompletionPercentages = computed(() => {
                 'rounded-lg px-1': true,
                 'dark:bg-sky-400 bg-sky-400 text-neutral-950': exercise.level == 'beginner',
                 'dark:bg-orange-400 bg-orange-400 text-neutral-950': exercise.level == 'advanced',
-                'dark:bg-red-600 bg-red-600 text-neutral-950': exercise.level == 'expert'
+                'dark:bg-red-600 bg-red-600 text-neutral-100': exercise.level == 'expert'
               }"
               >{{ exercise.level }}
             </span>
@@ -132,6 +136,7 @@ const taskCompletionPercentages = computed(() => {
             </div>
           </div>
         </th>
+        <th style="width: 75px;"></th>
       </tr>
     </thead>
     <tbody :class="`${collapsed_panels.includes(exercise_index) ? 'hidden' : ''}`">
@@ -274,6 +279,23 @@ const taskCompletionPercentages = computed(() => {
                   </span>
                 </span>
               </span>
+            </td>
+            <td :class="`text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 ${
+                compactTable ? 'p-0' : 'p-2'
+              }`">
+              <div
+                role="progressbar"
+                class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600"
+                :aria-valuenow="25"
+                :aria-valuemin="0"
+                aria-valuemax="100"
+                :title="`${getCompletetionPercentageForUser(progress, exercise.uuid).toFixed(0)}%`"
+              >
+                <div
+                  class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"
+                  :style="`width: ${getCompletetionPercentageForUser(progress, exercise.uuid)}%`"
+                ></div>
+              </div>
             </td>
           </template>
         </tr>

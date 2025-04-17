@@ -76,7 +76,6 @@ def timer():
     return decorator
 
 
-
 # Initialize ZeroMQ context and subscriber socket
 context = zmq.asyncio.Context()
 zsocket = context.socket(zmq.SUB)
@@ -99,6 +98,14 @@ async def index(request):
 async def favicon(request):
     with open(WEB_DIST_DIR + '/favicon.ico', 'rb') as f:
         return web.Response(body=f.read(), content_type='image/x-icon')
+
+async def webhook(request):
+    data = await request.json()
+    response = await handleWebhook(data)
+    if response is not dict:
+        response = {}
+    # return web.Response(body=json.dumps(response), content_type="application/json")
+    return web.json_response(response)
 
 
 @sio.event
@@ -187,6 +194,7 @@ async def handleMessage(topic, s, message):
         if user_id is not None and user_id != 0 and '@' in email:
             if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
                 db.USER_ID_TO_EMAIL_MAPPING[user_id] = email
+                db.EMAIL_TO_USER_ID_MAPPING[email] = user_id
                 await sio.emit('new_user', email)
 
         user_id, authkey = notification_model.get_user_authkey_id_pair(data)
@@ -218,6 +226,50 @@ async def handleMessage(topic, s, message):
                         await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 
+async def handleWebhook(data):
+    global ZMQ_MESSAGE_COUNT_LAST_TIMESPAN
+
+    email = data.get('email', None)
+    user_id = data.get('user_id', None)
+    if email is None:
+        email = db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None)
+    if user_id is None:
+        user_id = db.EMAIL_TO_USER_ID_MAPPING.get(email, None)
+    else:
+        user_id = int(user_id)
+    if user_id is None:
+        logger.info(">> Incomplete data passed to webhook endpoint %s", json.dumps(data)[:100])
+        return False
+
+    target_tool = data["target_tool"]
+    task_data = data['data']
+    custom_message = data.get('dashboard_message', '')
+
+    with open('/tmp/webhook_data.json', 'w') as f:
+        json.dump(task_data, f)
+
+    ### FIXME: Remove this block. This is for a training ###
+    if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
+        custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
+    ### ENDFIXME ###
+
+    notification = notification_model.get_notification_message_for_webhook(user_id, target_tool, task_data, custom_message)
+    notification_model.record_notification(notification)
+    await sio.emit("notification", notification)
+
+    context = get_context('webhook', user_id, data)
+    checking_task = exercise_model.check_active_tasks(user_id, task_data, context, 'webhook')
+    if checking_task is not None:  # Make sure check_active_tasks was not debounced
+        succeeded_once = await checking_task
+        if succeeded_once:
+            sendRefreshScoreTask = sendRefreshScore()
+            (
+                await sendRefreshScoreTask
+                if sendRefreshScoreTask is not None
+                else None
+            )  # Make sure check_active_tasks was not debounced
+
+
 @debounce(debounce_seconds=0)
 async def sendRefreshScore():
     await sio.emit('refresh_score')
@@ -242,6 +294,10 @@ def get_context(topic: str, user_id: int, data: dict) -> dict:
             context['request_is_rest'] = data['Log']['request_is_rest']
     elif 'authkey_id' in data:
         context['request_is_rest'] = True
+
+    context['webhook'] = topic == 'webhook'
+    if topic == 'webhook':
+        context["zmq_topic"] = None
 
     return context
 
@@ -459,3 +515,4 @@ async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0):
 app.router.add_static('/assets', WEB_DIST_DIR + '/assets')
 app.router.add_get('/', index)
 app.router.add_get('/favicon.ico', favicon)
+app.router.add_post('/webhook', webhook)

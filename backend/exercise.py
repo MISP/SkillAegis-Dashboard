@@ -16,6 +16,7 @@ import backend.db as db
 
 from backend.target_tools.misp.exercise import inject_checker_router as inject_checker_router_misp
 from backend.target_tools.suricata.exercise import inject_checker_router as inject_checker_router_suricata
+from backend.target_tools.webhook.exercise import inject_checker_router as inject_checker_router_webhook
 
 
 ACTIVE_EXERCISES_DIR = Path(config.exercise_directory)
@@ -51,10 +52,11 @@ def read_exercise_dir():
 def backup_exercises_progress():
     global LAST_BACKUP
     toBackup = {
-        'EXERCISES_STATUS': db.EXERCISES_STATUS,
-        'SELECTED_EXERCISES': db.SELECTED_EXERCISES,
-        'USER_ID_TO_EMAIL_MAPPING': db.USER_ID_TO_EMAIL_MAPPING,
-        'USER_ID_TO_AUTHKEY_MAPPING': db.USER_ID_TO_AUTHKEY_MAPPING,
+        "EXERCISES_STATUS": db.EXERCISES_STATUS,
+        "SELECTED_EXERCISES": db.SELECTED_EXERCISES,
+        "USER_ID_TO_EMAIL_MAPPING": db.USER_ID_TO_EMAIL_MAPPING,
+        "EMAIL_TO_USER_ID_MAPPING": db.EMAIL_TO_USER_ID_MAPPING,
+        "USER_ID_TO_AUTHKEY_MAPPING": db.USER_ID_TO_AUTHKEY_MAPPING,
     }
     toBackup = json.dumps(toBackup, sort_keys=True)
     if toBackup != LAST_BACKUP: # Easy way to compared these 2 nested dict
@@ -65,7 +67,7 @@ def backup_exercises_progress():
 
 def restore_exercices_progress():
     try:
-        
+
         with open('backup.json', 'r') as f:
             data = json.load(f)
             db.EXERCISES_STATUS = data['EXERCISES_STATUS']
@@ -73,11 +75,14 @@ def restore_exercices_progress():
             db.USER_ID_TO_EMAIL_MAPPING = {}
             for user_id_str, email in data['USER_ID_TO_EMAIL_MAPPING'].items():
                 db.USER_ID_TO_EMAIL_MAPPING[int(user_id_str)] = email
+            db.EMAIL_TO_USER_ID_MAPPING = {}
+            for email, user_id_str in data["EMAIL_TO_USER_ID_MAPPING"].items():
+                db.EMAIL_TO_USER_ID_MAPPING[email] = int(user_id_str)
             db.USER_ID_TO_AUTHKEY_MAPPING = {}
             for user_id_str, authkey in data['USER_ID_TO_AUTHKEY_MAPPING'].items():
                 db.USER_ID_TO_AUTHKEY_MAPPING[int(user_id_str)] = authkey
-    except:
-        logger.info('Could not restore exercise progress')
+    except Exception as e:
+        logger.info(f"Could not restore exercise progress: {str(e)}")
         resetAll()
 
     if len(db.EXERCISES_STATUS) == 0:
@@ -88,6 +93,7 @@ def resetAll():
     db.EXERCISES_STATUS = {}
     db.SELECTED_EXERCISES = []
     db.USER_ID_TO_EMAIL_MAPPING = {}
+    db.EMAIL_TO_USER_ID_MAPPING = {}
     db.USER_ID_TO_AUTHKEY_MAPPING = {}
     init_exercises_tasks()
 
@@ -217,7 +223,6 @@ def change_exercise_selection(exercise_uuid: str, selected: bool):
 
     from backend.server import start_timed_injects
     start_timed_injects()
-
 
 
 def resetAllExerciseProgress():
@@ -373,6 +378,8 @@ async def check_inject(user_id: int, inject: dict, data: dict, context: dict, fo
         inject_checker_router = inject_checker_router_misp
     elif inject['target_tool'] == 'suricata' and inject['target_tool'] == for_target_tool:
         inject_checker_router = inject_checker_router_suricata
+    elif inject['target_tool'] == 'webhook' and inject['target_tool'] == for_target_tool:
+        inject_checker_router = inject_checker_router_webhook
     else:
         return False
 
