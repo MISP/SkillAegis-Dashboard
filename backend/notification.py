@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import json
 import re
 from typing import Union
@@ -168,6 +169,7 @@ def get_notification_message(data: dict) -> dict:
     payload = get_request_post_body(data)
     return {
         'id': id,
+        'notification_origin': 'zmq',
         'user': user,
         'time': time,
         'url': url,
@@ -176,6 +178,28 @@ def get_notification_message(data: dict) -> dict:
         'is_api_request': is_api_request(data),
         'response_code': response_code,
         'payload': payload,
+    }
+
+
+def get_notification_message_for_webhook(user_id: int, target_tool: str, task_data: dict, custom_message = '') -> dict:
+    global NOTIFICATION_COUNT
+    id = NOTIFICATION_COUNT
+    NOTIFICATION_COUNT += 1
+    user = db.USER_ID_TO_EMAIL_MAPPING.get(user_id, "?")
+    time = datetime.datetime.now().strftime("%H:%M:%S")
+    num_keys = len(task_data)
+    json_size_bytes = len(json.dumps(task_data).encode("utf-8"))
+    payload = f"@data - {json_size_bytes} byte(s), {num_keys} key(s).\n"
+    if custom_message:
+        payload += custom_message[:128]
+
+    return {
+        "id": id,
+        "notification_origin": 'webhook',
+        "target_tool": target_tool,
+        "user": user,
+        "time": time,
+        "payload": payload,
     }
 
 
