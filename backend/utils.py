@@ -67,7 +67,7 @@ def apply_replacement_from_context(string: str, context: dict) -> str:
     string = str(string)
     if r'{{' not in string and r'}}' not in string:
         return string
-    matches = re.fullmatch(replacement_regex, string, re.MULTILINE)
+    matches = re.search(replacement_regex, string, re.MULTILINE)
     if not matches:
         return string
     subst_str = matches.groups()[0]

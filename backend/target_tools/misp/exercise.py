@@ -101,8 +101,8 @@ def get_model_action(data: dict):
 
 def is_accepted_query(data: dict) -> bool:
     model, action = get_model_action(data)
-    if model in ['Event', 'Attribute', 'Object', 'Tag',]:
-        if action in ['add', 'edit', 'delete', 'publish', 'tag']:
+    if model in ['Event', 'Attribute', 'Object', 'Tag', ]:
+        if action in ['add', 'edit', 'delete', 'publish', 'tag', ]:
             if 'Log' in data:
                 if data['Log']['change'].startswith('Validation errors:'):
                     return False
@@ -115,6 +115,8 @@ def is_accepted_query(data: dict) -> bool:
         return url in [
             '/attributes/restSearch',
             '/events/restSearch',
+            '/events/index',
+            '/users/view/me',
         ]
     return False
 
@@ -138,6 +140,10 @@ def parse_performed_query_from_log(data: dict) -> Union[dict, None]:
                 pass
         if performed_query['request_method'] is not None and performed_query['url'] is not None:
             return performed_query 
+    else: # No data POSTed
+        performed_query['request_method'] = data.get('request_method', None)
+        performed_query['url'] = data.get('url', None)
+        return performed_query
     return None
 
 
@@ -167,7 +173,7 @@ async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, per
         query_context = inject_evaluation['evaluation_context']['query_context']
         expected_method = query_context['request_method']
         expected_url = query_context['url']
-        expected_payload = inject_evaluation['parameters'][0]
+        expected_payload = inject_evaluation['parameters'][0] if len(inject_evaluation['parameters']) > 0 else {}
         expected_data  = await misp_api.doRestQuery(authkey, expected_method, expected_url, expected_payload)
         data_to_validate  = await misp_api.doRestQuery(authkey, perfomed_query['request_method'], perfomed_query['url'], perfomed_query['payload'])
         data = {

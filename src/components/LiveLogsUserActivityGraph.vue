@@ -42,7 +42,7 @@ function getPalleteIndexFromValue(value) {
 
 <template>
   <span
-    :class="`${props.no_forced_width ? '' : (props.compact_view  ? 'w-[142px]' : 'w-[240px]')} ${props.compact_view ? 'h-1.5 inline-flex' : 'h-3'}`"
+    :class="`${props.no_forced_width ? '' : (props.compact_view  ? 'w-[142px]' : 'w-[240px]')} ${props.compact_view ? 'h-1.5 inline-flex' : 'h-3'} whitespace-nowrap`"
     :title="`Activity over ${bufferSizeMin}min`"
   >
     <span
