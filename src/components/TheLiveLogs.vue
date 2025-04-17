@@ -7,7 +7,7 @@ import {
   toggleVerboseMode,
   toggleApiQueryMode
 } from '../socket'
-import { faSignal, faCloud, faCog, faCircle, faUser, faLink } from '@fortawesome/free-solid-svg-icons'
+import { faSignal, faCloud, faCog, faCircle, faUser, faLink, faBullhorn } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
 
 const verbose = ref(false)
@@ -43,8 +43,10 @@ function getClassFromResponseCode(response_code) {
     return 'text-green-500'
   } else if (String(response_code).startsWith('5')) {
     return 'text-red-600'
-  } else {
+  } else if (String(response_code).startsWith('4')) {
     return 'text-amber-600'
+  } else {
+    return 'text-blue-600'
   }
 }
 
@@ -212,44 +214,61 @@ function convertToLocalTime(serverTime) {
               class="border-b border-slate-100 dark:border-slate-700 text-sky-600 dark:text-sky-400 p-1"
             >
               <div class="flex items-center">
-                <span
-                  v-if="notification.http_method == 'POST'"
-                  class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
-                  >POST</span
-                >
-                <span
-                  v-else-if="notification.http_method == 'PUT'"
-                  class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
-                  >PUT</span
-                >
-                <span
-                  v-else-if="notification.http_method == 'DELETE'"
-                  class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-red-600 dark:text-neutral-100 bg-red-600 text-neutral-100"
-                  >DEL</span
-                >
-                <span
-                  v-else
-                  class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-blue-600 dark:text-neutral-100 bg-blue-600 text-neutral-100"
-                  >{{ notification.http_method }}</span
-                >
-                <FontAwesomeIcon
-                  v-if="notification.is_api_request"
-                  class="text-slate-800 dark:text-slate-100 mr-1 inline-block"
-                  :icon="faCog"
-                  :mask="faCloud"
-                  transform="shrink-7 left-1"
-                ></FontAwesomeIcon>
-                <pre class="text-sm inline max-w-96 overflow-hidden text-ellipsis">{{ notification.url }}</pre>
+                <template v-if="notification.notification_origin == 'zmq'">
+                  <span
+                    v-if="notification.http_method == 'POST'"
+                    class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
+                    >POST</span
+                  >
+                  <span
+                    v-else-if="notification.http_method == 'PUT'"
+                    class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100"
+                    >PUT</span
+                  >
+                  <span
+                    v-else-if="notification.http_method == 'DELETE'"
+                    class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-red-600 dark:text-neutral-100 bg-red-600 text-neutral-100"
+                    >DEL</span
+                  >
+                  <span
+                    v-else
+                    class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-blue-600 dark:text-neutral-100 bg-blue-600 text-neutral-100"
+                    >{{ notification.http_method }}</span
+                  >
+                  <FontAwesomeIcon
+                    v-if="notification.is_api_request"
+                    class="text-slate-800 dark:text-slate-100 mr-1 inline-block"
+                    :icon="faCog"
+                    :mask="faCloud"
+                    transform="shrink-7 left-1"
+                  ></FontAwesomeIcon>
+                  <pre class="text-sm inline max-w-96 overflow-hidden text-ellipsis">{{ notification.url }}</pre>
+                </template>
+                <template v-else-if="notification.notification_origin == 'webhook'">
+                  <FontAwesomeIcon
+                    class="text-slate-800 dark:text-slate-100 mr-1 inline-block"
+                    :icon="faBullhorn"
+                  ></FontAwesomeIcon>
+                  <pre class="text-sm inline max-w-96 overflow-hidden text-ellipsis">Webhook for {{ notification.target_tool }}</pre>
+                </template>
               </div>
             </td>
             <td
               class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-1"
             >
               <div
-                v-if="notification.http_method == 'POST'"
+                v-if="notification.http_method == 'POST' || notification.notification_origin == 'webhook'"
                 class="border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 rounded-md"
               >
-                <pre class="p-1 text-xs max-w-3xl overflow-hidden text-ellipsis">{{ JSON.stringify(notification.payload, null, 2) }}</pre>
+                <pre
+                  v-if="!notification.payload.includes('trying to cheat')"
+                  class="p-1 text-xs max-w-3xl overflow-hidden text-ellipsis"
+                >{{ typeof(notification.payload) === "string" ? notification.payload : JSON.stringify(notification.payload, null, 2) }}</pre>
+                <!-- FIXME: Make that part more generic -->
+                 <Alert variant="danger" class="mx-2 mt-2" v-else>
+                  <strong>User {{ notification.user }} is trying to cheat</strong>
+                  <div class="text-sm"><span class="">User {{ notification.user }} is trying to cheat or hasn't reset their Event before sending it for validation.</span></div>
+                </Alert>
               </div>
             </td>
           </tr>
