@@ -389,10 +389,10 @@ def start_timed_injects():
 
 def start_timed_inject(injectF, trigger_type, value):
     global RUNNING_TIMED_INJECTS
-    if f'{trigger_type}-{injectF['inject_uuid']}' in RUNNING_TIMED_INJECTS:
+    if f"{trigger_type}-{injectF['inject_uuid']}" in RUNNING_TIMED_INJECTS:
         return  # Timed inject already running
     random_bits = getrandbits(32)
-    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    uniq_str = f"{trigger_type}-{injectF['inject_uuid']}_{random_bits}"
     RUNNING_TIMED_INJECTS.append(uniq_str)
     sio.start_background_task(timed_inject, injectF, trigger_type, value, random_bits)
 
@@ -409,7 +409,7 @@ async def timed_inject(injectF, trigger_type, value, random_bits):
     if inject is None:
         return
 
-    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    uniq_str = f"{trigger_type}-{injectF['inject_uuid']}_{random_bits}"
     if trigger_type == 'triggered_at':
         seconds = value
         await sio.sleep(seconds)
