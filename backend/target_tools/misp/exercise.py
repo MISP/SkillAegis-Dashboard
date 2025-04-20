@@ -186,11 +186,11 @@ async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, per
 async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> Union[None, dict]:
     authkey = await get_api_key_or_gen_new_one(user_id)
     if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
-            return None
+        return None
     query_context = inject_evaluation['evaluation_context']['query_context']
     search_method = query_context['request_method']
     search_url = query_context['url']
-    search_payload = query_context['payload']
+    search_payload = query_context.get('payload', {})
     search_data  = await misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
     return search_data
 

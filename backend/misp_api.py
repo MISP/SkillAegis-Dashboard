@@ -89,7 +89,8 @@ async def getVersion() -> Union[None, dict]:
 
 async def getSettings() -> Union[None, dict]:
     settings = await get(f'/servers/serverSettings.json')
-    if not settings:
+    if not settings and type(settings) is not dict:
+        logger.error(f"Could not get settings. Got {settings}")
         return None
     data = {}
     for settingName, expectedSettingValue in misp_settings.items():
