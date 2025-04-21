@@ -259,19 +259,20 @@ function convertToLocalTime(serverTime) {
               <div
                 v-if="notification.http_method == 'POST' || notification.notification_origin == 'webhook'"
               >
+              <!-- FIXME: Make that part more generic -->
+              <Alert variant="danger" class="mx-2 mt-2"
+                v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')"
+              >
+                <strong>User  {{ notification.user }} is trying to cheat <FontAwesomeIcon :icon="faUserNinja"></FontAwesomeIcon></strong>
+                <div class="text-sm"><span class="">User {{ notification.user }} is trying to cheat or hasn't reset their Event before sending it for validation.</span></div>
+              </Alert>
                 <div
-                  v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')"
                   class="border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 rounded-md"
                 >
                   <pre
                     class="p-1 text-xs max-w-3xl overflow-hidden text-ellipsis"
                   >{{ typeof(notification.payload) === "string" ? notification.payload : JSON.stringify(notification.payload, null, 2) }}</pre>
                 </div>
-                <!-- FIXME: Make that part more generic -->
-                <Alert variant="danger" class="mx-2 mt-2" v-else>
-                  <strong>User  {{ notification.user }} is trying to cheat <FontAwesomeIcon :icon="faUserNinja"></FontAwesomeIcon></strong>
-                  <div class="text-sm"><span class="">User {{ notification.user }} is trying to cheat or hasn't reset their Event before sending it for validation.</span></div>
-                </Alert>
               </div>
             </td>
           </tr>
