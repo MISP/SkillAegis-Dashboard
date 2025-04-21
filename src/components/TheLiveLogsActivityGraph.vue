@@ -24,7 +24,7 @@ onUnmounted(() => {
 
 const debouncedSetSVGSize = debounce(setSVGSize, 400, { leading: true })
 function setSVGSize() {
-  if (theSvg.value.width) {
+  if (theSvg.value !== null && theSvg.value.width) {
     svgSize.value = theSvg.value.width.baseVal.value
   }
 }

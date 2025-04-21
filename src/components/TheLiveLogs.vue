@@ -260,7 +260,7 @@ function convertToLocalTime(serverTime) {
                 v-if="notification.http_method == 'POST' || notification.notification_origin == 'webhook'"
               >
                 <div
-                  v-if="!notification.payload.includes('trying to cheat')"
+                  v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')"
                   class="border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 rounded-md"
                 >
                   <pre
