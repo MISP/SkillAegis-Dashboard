@@ -218,7 +218,7 @@ async def handleMessage(topic, s, message):
         if user_id is not None:
             if is_accepted_query_misp(data):
                 context = get_context(topic, user_id, data)
-                checking_task = exercise_model.check_active_tasks(user_id, data, context, 'MISP')
+                checking_task = exercise_model.check_active_tasks_debounced(user_id, data, context, 'MISP')
                 if checking_task is not None:  # Make sure check_active_tasks was not debounced
                     succeeded_once = await checking_task
                     if succeeded_once:
@@ -259,7 +259,7 @@ async def handleWebhook(data):
 
     context = get_context('webhook', user_id, data)
     checking_task = exercise_model.check_active_tasks(user_id, task_data, context, 'webhook')
-    if checking_task is not None:  # Make sure check_active_tasks was not debounced
+    if checking_task is not None:  # Make sure check_active_tasks was not debounced. FIXME: This might not be necessary anymore.
         succeeded_once = await checking_task
         if succeeded_once:
             sendRefreshScoreTask = sendRefreshScore()
