@@ -356,7 +356,7 @@ def get_progress():
 
 @debounce_check_active_tasks(debounce_seconds=2)
 async def check_active_tasks_debounced(user_id: int, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
-    return check_active_tasks(user_id, data, context, for_target_tool)
+    return await check_active_tasks(user_id, data, context, for_target_tool)
 
 
 async def check_active_tasks(user_id: int, data: dict, context: dict, for_target_tool: Union[str, None] = None) -> bool:
