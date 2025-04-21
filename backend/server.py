@@ -249,8 +249,9 @@ async def handleWebhook(data):
         json.dump(task_data, f)
 
     ### FIXME: Remove this block. This is for a training ###
-    if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
-        custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
+    if target_tool == 'webhook':
+        if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
+            custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
     ### ENDFIXME ###
 
     notification = notification_model.get_notification_message_for_webhook(user_id, target_tool, task_data, custom_message)
