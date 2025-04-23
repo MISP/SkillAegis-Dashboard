@@ -8,8 +8,8 @@ from typing import Union
 headers = {"Content-Type": "application/json"}
 port = 9573
 
-VALIDATION_TRUE = 'validation_true'
-VALIDATION_FALSE = 'validation_false'
+VALIDATION_TRUE = "__validation_true__"
+VALIDATION_FALSE = "__validation_false__"
 
 
 def run(inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> Union[bool, tuple]:
@@ -39,14 +39,16 @@ else:
     print('{VALIDATION_FALSE}')
 """
     result = sendScriptToAgent(script, context)
+    eval_returned_true = VALIDATION_TRUE in result["stdout"]
+    result["stdout"] = result["stdout"].replace(VALIDATION_TRUE, '').replace(VALIDATION_FALSE, '')
 
     if debug:
         if result['status'] == 'success':
-            return (True, [[result]],) if VALIDATION_TRUE in result['stdout'] else (False, [[result]],)
+            return (True, [[result]],) if eval_returned_true else (False, [[result]],)
         return (False, [[result]],)
     else:
         if result['status'] == 'success':
-            return VALIDATION_TRUE in result['stdout']
+            return eval_returned_true
         return False
 
 
