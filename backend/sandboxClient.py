@@ -42,8 +42,8 @@ else:
 
     if debug:
         if result['status'] == 'success':
-            return (True, result,) if VALIDATION_TRUE in result['stdout'] else (False, result,)
-        return (False, result,)
+            return (True, [result],) if VALIDATION_TRUE in result['stdout'] else (False, [result],)
+        return (False, [result],)
     else:
         if result['status'] == 'success':
             return VALIDATION_TRUE in result['stdout']
