@@ -6,7 +6,7 @@ from typing import Union
 import jq
 import re
 import operator
-import sandboxClient
+import backend.sandboxClient as sandboxClient
 
 from backend.appConfig import logger
 
