@@ -2,7 +2,7 @@
 
 
 from typing import Union
-from backend.utils import eval_data_filtering as eval_data_filtering_util, eval_python
+from backend.utils import eval_data_filtering as eval_data_filtering_util, eval_python as eval_python_util
 
 
 ## Data filtering
@@ -21,4 +21,4 @@ def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context
 
 ## Python
 def eval_python(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> bool:
-    return eval_python(user_id, inject_evaluation, data, context, debug=debug)
+    return eval_python_util(inject_evaluation, data, context, debug=debug)
