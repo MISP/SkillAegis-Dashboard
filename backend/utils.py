@@ -6,6 +6,7 @@ from typing import Union
 import jq
 import re
 import operator
+import backend.sandboxClient as sandboxClient
 
 from backend.appConfig import logger
 
@@ -79,7 +80,6 @@ def apply_replacement_from_context(string: str, context: dict) -> str:
     return re.sub(replacement_regex, str(subst), string)
 
 
-
 def jq_extract(path: str, data: dict, extract_type='first'):
     query = jq.compile(path).input_value(data)
     try:
@@ -88,6 +88,10 @@ def jq_extract(path: str, data: dict, extract_type='first'):
         return None
     except ValueError:
         return None
+
+
+def eval_python(inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> Union[bool, tuple]:
+    return sandboxClient.run(inject_evaluation, data, context, debug)
 
 
 def condition_satisfied(evaluation_config: dict, data_to_validate: Union[dict, list, str], context: dict) -> bool:

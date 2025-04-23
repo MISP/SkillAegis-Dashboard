@@ -3,7 +3,7 @@ import json
 from typing import Union
 import jq
 
-from backend.utils import apply_replacement_from_context, eval_data_filtering
+from backend.utils import apply_replacement_from_context, eval_data_filtering, eval_python
 from backend.appConfig import logger
 import backend.db as db
 from backend.target_tools.misp.exercise import fetch_data_for_query_search
@@ -21,7 +21,9 @@ async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dic
             logger.debug('Could not fetch data to validate')
             return False
         outcome, d = eval_data_filtering(inject_evaluation, data_to_validate, context, True)
-        print(d)
+        return outcome
+    elif inject_evaluation["evaluation_strategy"] == "python":
+        outcome, d = eval_python(inject_evaluation, data_to_validate, context, True)
         return outcome
     return False
 
