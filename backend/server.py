@@ -218,7 +218,7 @@ async def handleMessage(topic, s, message):
         if user_id is not None:
             if is_accepted_query_misp(data):
                 context = get_context(topic, user_id, data)
-                checking_task = exercise_model.check_active_tasks(user_id, data, context, 'MISP')
+                checking_task = exercise_model.check_active_tasks_debounced(user_id, data, context, 'MISP')
                 if checking_task is not None:  # Make sure check_active_tasks was not debounced
                     succeeded_once = await checking_task
                     if succeeded_once:
@@ -249,8 +249,9 @@ async def handleWebhook(data):
         json.dump(task_data, f)
 
     ### FIXME: Remove this block. This is for a training ###
-    if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
-        custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
+    if target_tool == 'webhook':
+        if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
+            custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
     ### ENDFIXME ###
 
     notification = notification_model.get_notification_message_for_webhook(user_id, target_tool, task_data, custom_message)
@@ -259,7 +260,7 @@ async def handleWebhook(data):
 
     context = get_context('webhook', user_id, data)
     checking_task = exercise_model.check_active_tasks(user_id, task_data, context, 'webhook')
-    if checking_task is not None:  # Make sure check_active_tasks was not debounced
+    if checking_task is not None:  # Make sure check_active_tasks was not debounced. FIXME: This might not be necessary anymore.
         succeeded_once = await checking_task
         if succeeded_once:
             sendRefreshScoreTask = sendRefreshScore()
@@ -389,10 +390,10 @@ def start_timed_injects():
 
 def start_timed_inject(injectF, trigger_type, value):
     global RUNNING_TIMED_INJECTS
-    if f'{trigger_type}-{injectF['inject_uuid']}' in RUNNING_TIMED_INJECTS:
+    if f"{trigger_type}-{injectF['inject_uuid']}" in RUNNING_TIMED_INJECTS:
         return  # Timed inject already running
     random_bits = getrandbits(32)
-    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    uniq_str = f"{trigger_type}-{injectF['inject_uuid']}_{random_bits}"
     RUNNING_TIMED_INJECTS.append(uniq_str)
     sio.start_background_task(timed_inject, injectF, trigger_type, value, random_bits)
 
@@ -409,7 +410,7 @@ async def timed_inject(injectF, trigger_type, value, random_bits):
     if inject is None:
         return
 
-    uniq_str = f'{trigger_type}-{injectF['inject_uuid']}_{random_bits}'
+    uniq_str = f"{trigger_type}-{injectF['inject_uuid']}_{random_bits}"
     if trigger_type == 'triggered_at':
         seconds = value
         await sio.sleep(seconds)

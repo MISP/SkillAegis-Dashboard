@@ -8,7 +8,7 @@ from backend.appConfig import logger
 import backend.db as db
 import backend.misp_api as misp_api
 
-from backend.target_tools.misp.inject_eval import eval_data_filtering, eval_query_mirror, eval_query_search
+from backend.target_tools.misp.inject_eval import eval_data_filtering, eval_query_mirror, eval_query_search, eval_python
 
 
 def is_valid_evaluation_context(user_id: int, inject_evaluation: dict, data: dict, context: dict) -> bool:
@@ -48,6 +48,8 @@ async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dic
         return eval_query_mirror(user_id, expected_data, data_to_validate, context)
     elif inject_evaluation['evaluation_strategy'] == 'query_search':
         return eval_query_search(user_id, inject_evaluation, data_to_validate, context)
+    elif inject_evaluation['evaluation_strategy'] == 'python':
+        return eval_python(user_id, inject_evaluation, data_to_validate, context)
     return False
 
 
@@ -186,11 +188,11 @@ async def fetch_data_for_query_mirror(user_id: int, inject_evaluation: dict, per
 async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> Union[None, dict]:
     authkey = await get_api_key_or_gen_new_one(user_id)
     if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
-            return None
+        return None
     query_context = inject_evaluation['evaluation_context']['query_context']
     search_method = query_context['request_method']
     search_url = query_context['url']
-    search_payload = query_context['payload']
+    search_payload = query_context.get('payload', {})
     search_data  = await misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
     return search_data
 
