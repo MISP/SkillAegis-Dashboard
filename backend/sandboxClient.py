@@ -42,8 +42,8 @@ else:
 
     if debug:
         if result['status'] == 'success':
-            return (True, [result],) if VALIDATION_TRUE in result['stdout'] else (False, [result],)
-        return (False, [result],)
+            return (True, [[result]],) if VALIDATION_TRUE in result['stdout'] else (False, [[result]],)
+        return (False, [[result]],)
     else:
         if result['status'] == 'success':
             return VALIDATION_TRUE in result['stdout']
@@ -59,13 +59,3 @@ def sendScriptToAgent(script, context) -> dict:
     result = json.loads(response.read().decode())
     conn.close()
     return result
-
-
-# inject_eval = {
-#     "parameters": [
-#         "print(data['foo'])\nreturn False"
-#     ]
-# }
-# data = {'foo': 'bar'}
-# context = {}
-# print(run(inject_eval, data, context))
