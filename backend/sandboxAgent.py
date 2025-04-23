@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
+
 import epicbox
 
 PYTHON_DOCKER_IMAGE = "python:3.13-alpine"
-
-import json
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -46,19 +45,12 @@ def doSandboxedExecution(script):
     result = epicbox.run("python", "python3 main.py", files=files, limits=limits)
     return result
 
+def startAgent():
+    port = 9573
+    server_address = ("", port)
+    httpd = HTTPServer(server_address, SimpleJSONHandler)
+    httpd.serve_forever()
 
-port = 9573
-server_address = ("", port)
-httpd = HTTPServer(server_address, SimpleJSONHandler)
-print(f"Starting agent on port {port}...")
-httpd.serve_forever()
 
-
-def setupDocker():
-    pass
-
-def teardownDocker():
-    pass
-
-def run(script):
-    pass
+if __name__ == '__main__':
+    startAgent()

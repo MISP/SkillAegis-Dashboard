@@ -5,6 +5,9 @@ import functools
 import json
 import argparse
 import os
+import signal
+import subprocess
+import atexit
 from pathlib import Path
 import sys
 import time
@@ -368,6 +371,19 @@ async def backup_exercises_progress():
         exercise_model.backup_exercises_progress()
 
 
+def start_sandbox_agent():
+    bin_path = os.path.abspath("./venv/bin/python3")
+    script_path = os.path.abspath("./backend/sandboxAgent.py")
+    process = subprocess.Popen(
+        [bin_path, script_path],
+        preexec_fn=os.setsid,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    atexit.register(lambda: os.killpg(os.getpgid(process.pid), signal.SIGTERM))
+    return process
+
+
 def start_timed_injects():
     global RUNNING_TIMED_INJECTS
 
@@ -507,6 +523,7 @@ async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0):
     sio.start_background_task(notification_history)
     sio.start_background_task(record_users_activity)
     sio.start_background_task(backup_exercises_progress)
+    start_sandbox_agent()
 
     start_timed_injects()
 
