@@ -10,14 +10,16 @@ port = 9573
 
 VALIDATION_TRUE = "__validation_true__"
 VALIDATION_FALSE = "__validation_false__"
+PYTHON_INDENT = ' '*4
 
 
 def run(inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> Union[bool, tuple]:
     evaluation_params = inject_evaluation["parameters"]
     evaluation_script = evaluation_params[0]
     lines = evaluation_script.splitlines()
-    indentedLines = [f"    {l}" for l in lines]
+    indentedLines = [f"{PYTHON_INDENT}{l}" for l in lines]
     indentedScript = "\n".join(indentedLines)
+    indentedScript = f'{PYTHON_INDENT}return False' if len(indentedScript) == 0 else indentedScript
     data_str = json.dumps(data)
     context_str = json.dumps(context)
     script = f"""
