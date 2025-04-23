@@ -21,4 +21,4 @@ def eval_query_search(user_id: int, inject_evaluation: dict, data: dict, context
 
 ## Python
 def eval_python(user_id: int, inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> bool:
-    return eval_python(inject_evaluation, data, context, debug=debug)
+    return eval_python(user_id, inject_evaluation, data, context, debug=debug)
