@@ -13,17 +13,13 @@ VALIDATION_FALSE = "__validation_false__"
 
 
 def run(inject_evaluation: dict, data: dict, context: dict, debug: bool = False) -> Union[bool, tuple]:
-    context_for_script = {
-        'data': data,
-        'context': context,
-    }
     evaluation_params = inject_evaluation["parameters"]
     evaluation_script = evaluation_params[0]
     lines = evaluation_script.splitlines()
     indentedLines = [f"    {l}" for l in lines]
     indentedScript = "\n".join(indentedLines)
     data_str = json.dumps(data)
-    context_str = json.dumps(context_for_script)
+    context_str = json.dumps(context)
     script = f"""
 import json
 
