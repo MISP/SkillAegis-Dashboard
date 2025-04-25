@@ -245,7 +245,9 @@ async def handleWebhook(data):
         return False
 
     target_tool = data["target_tool"]
-    task_data = data['data']
+    if target_tool is None:
+        target_tool = 'webhook'
+    task_data = data.get('data', {})
     custom_message = data.get('dashboard_message', '')
 
     with open('/tmp/webhook_data.json', 'w') as f:
@@ -396,7 +398,8 @@ def start_timed_injects():
     stop_all_timed_injects()
 
     for injectF in selected_inject_flows:
-        if 'timing' in injectF:
+        triggers = injectF.get("sequence", {}).get("trigger", [])
+        if ('periodic' in triggers or 'triggered_at' in triggers) and "timing" in injectF:
             for trigger_type, value in injectF['timing'].items():
                 if trigger_type == 'triggered_at' and value is not None:
                     start_timed_inject(injectF, trigger_type, value)

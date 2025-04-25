@@ -23,6 +23,7 @@ async def inject_checker_router(user_id: int, inject_evaluation: dict, data: dic
         outcome, d = eval_data_filtering(inject_evaluation, data_to_validate, context, True)
         return outcome
     elif inject_evaluation["evaluation_strategy"] == "python":
+        data_to_validate = data
         outcome, d = eval_python(inject_evaluation, data_to_validate, context, True)
         return outcome
     return False

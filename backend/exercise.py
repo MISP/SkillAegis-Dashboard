@@ -416,6 +416,8 @@ async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict)
         inject_checker_router = inject_checker_router_misp
     elif inject['target_tool'] == 'suricata':
         inject_checker_router = inject_checker_router_suricata
+    elif inject["target_tool"] == "webhook":
+        inject_checker_router = inject_checker_router_webhook
     else:
         return False
 
