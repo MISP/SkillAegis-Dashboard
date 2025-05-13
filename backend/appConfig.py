@@ -1,4 +1,3 @@
-
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
     'attributes': ['add', 'add_attachment', 'edit', 'revise_object', 'delete', 'restSearch',],
@@ -35,4 +34,4 @@ logging.basicConfig(filename='SkillAegis.log', encoding='utf-8', level=logging.D
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
-logger.addHandler(ch)
+logging.getLogger().addHandler(ch)
