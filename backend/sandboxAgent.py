@@ -8,6 +8,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 
 
+sandbox = None
+epicbox.configure(profiles=[epicbox.Profile("python", PYTHON_DOCKER_IMAGE)])
+sandbox_limits = {"cputime": 1, "memory": 64}
+
+
 class SimpleJSONHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers.get("Content-Length", 0))
@@ -38,11 +43,10 @@ class SimpleJSONHandler(BaseHTTPRequestHandler):
 
 
 def doSandboxedExecution(script):
-    '''FIXME: Start the docker once and reuse it accross executions'''
-    epicbox.configure(profiles=[epicbox.Profile("python", PYTHON_DOCKER_IMAGE)])
-    files = [{"name": "main.py", "content": script.encode('utf-8')}]
-    limits = {"cputime": 1, "memory": 64}
-    result = epicbox.run("python", "python3 main.py", files=files, limits=limits)
+    global sandbox
+    files = [{"name": "main.py", "content": script.encode("utf-8")}]
+    epicbox.sandboxes._write_files(sandbox.container, files)
+    result = epicbox.start(sandbox)
     return result
 
 def startAgent():
@@ -53,4 +57,6 @@ def startAgent():
 
 
 if __name__ == '__main__':
-    startAgent()
+    with epicbox.create('python', command="python3 main.py", limits=sandbox_limits) as agentSandbox:
+        sandbox = agentSandbox
+        startAgent()
