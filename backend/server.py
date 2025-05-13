@@ -40,6 +40,7 @@ ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
 ZMQ_MESSAGE_COUNT = 0
 ZMQ_LAST_TIME = None
 USER_ACTIVITY = collections.defaultdict(int)
+ALLOWED_TARGET_TOOLS = ["MISP", 'suricata', 'webhook']
 
 # Each running timed injects will look in this list if they should be still running.
 # If it's not, it will stop. (Based on inject_uuid, trigger_type and random ID)
@@ -103,11 +104,13 @@ async def favicon(request):
         return web.Response(body=f.read(), content_type='image/x-icon')
 
 async def webhook(request):
-    data = await request.json()
-    response = await handleWebhook(data)
-    if response is not dict:
-        response = {}
-    # return web.Response(body=json.dumps(response), content_type="application/json")
+    try:
+        data = await request.json()
+        response = await handleWebhook(data)
+        if response is None:
+            response = {}
+    except json.decoder.JSONDecodeError as e:
+        response = {"error": f"JSON Decode Error: {e}"}
     return web.json_response(response)
 
 
@@ -241,12 +244,20 @@ async def handleWebhook(data):
     else:
         user_id = int(user_id)
     if user_id is None:
-        logger.info(">> Incomplete data passed to webhook endpoint %s", json.dumps(data)[:100])
-        return False
+        error_message = 'Incomplete data passed to webhook endpoint. Could not get associated user'
+        logger.warning(">> %s %s", error_message, json.dumps(data)[:100])
+        return {"error": error_message}
+
+    if 'target_tool' not in data:
+        error_message = "Incomplete data passed to webhook endpoint. Could not get target_tool"
+        logger.warning(">> %s %s", error_message, json.dumps(data)[:100])
+        return {"error": error_message}
 
     target_tool = data["target_tool"]
-    if target_tool is None:
-        target_tool = 'webhook'
+    if target_tool is None or target_tool not in ALLOWED_TARGET_TOOLS:
+        error_message = f"Incomplete data passed to webhook endpoint. target_tool `{target_tool}` is not a valid tool"
+        logger.warning(">> %s %s", error_message, json.dumps(data)[:100])
+        return {"error": error_message}
     task_data = data.get('data', {})
     custom_message = data.get('dashboard_message', '')
 
