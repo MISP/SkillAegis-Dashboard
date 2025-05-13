@@ -14,6 +14,8 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 import backend.config as config
 from backend.appConfig import logger, misp_settings
 
+BASE_TIMEOUT = 10
+
 requestSession = CachedSession(cache_name='misp_cache', expire_after=timedelta(seconds=5))
 adapterCache = requests.adapters.HTTPAdapter(pool_connections=50, pool_maxsize=50)
 requestSession.mount('https://', adapterCache)
@@ -31,12 +33,22 @@ async def get(url, data={}, api_key=None):
     full_url = urljoin(config.misp_url, url)
     try:
         loop = asyncio.get_event_loop()
-        job = lambda: requestSession.get(full_url, data=data, headers=headers, verify=not config.misp_skipssl)
+        job = lambda: requestSession.get(
+            full_url,
+            data=data,
+            headers=headers,
+            verify=not config.misp_skipssl,
+            timeout=BASE_TIMEOUT,
+        )
         runningJob = loop.run_in_executor(None, job)
         response = await runningJob
     except requests.exceptions.ConnectionError as e:
         logger.info('Could not perform request on MISP. %s', e)
         return None
+    except requests.exceptions.Timeout as e:
+        error_message = f"Timeout after {BASE_TIMEOUT}sec"
+        logger.info(error_message)
+        return error_message
     except Exception as e:
         logger.warning('Could not perform request on MISP. %s', e)
         return None
