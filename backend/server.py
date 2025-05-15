@@ -261,15 +261,16 @@ async def handleWebhook(data):
     task_data = data.get('data', {})
     custom_message = data.get('dashboard_message', '')
 
+    ### FIXME: Remove this block. This is for a training ###
     with open('/tmp/webhook_data.json', 'w') as f:
         json.dump(task_data, f)
-
-    ### FIXME: Remove this block. This is for a training ###
     if target_tool == 'webhook':
         if 'Event' in task_data and task_data.get('_secret', None) != '__secret_key__':
             custom_message = f"⚠ {email} is trying to cheat or hasn't reset their Event before sending it for validation ⚠"
     ### ENDFIXME ###
 
+    if user_id is not None:
+        USER_ACTIVITY[user_id] += 1
     notification = notification_model.get_notification_message_for_webhook(user_id, target_tool, task_data, custom_message)
     notification_model.record_notification(notification)
     await sio.emit("notification", notification)
