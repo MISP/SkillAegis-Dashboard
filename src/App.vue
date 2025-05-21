@@ -1,8 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import TheThemeButton from './components/TheThemeButton.vue'
 import TheAdminPanel from './components/TheAdminPanel.vue'
-import TheSocketConnectionState from './components/TheSocketConnectionState.vue'
 import TheDahboard from './TheDahboard.vue'
 import Toaster from '@/components/elements/Toaster.vue'
 import { socketConnected } from './socket'
@@ -17,20 +15,11 @@ onMounted(() => {
 
 <template>
   <main>
-    <h1 class="text-xl text-center text-slate-500 dark:text-slate-400 absolute inset-x-0 top-0">
-      <div class="flex flex-col items-center mt-2">
-        <span id="logo" class="hover:cursor-pointer"></span>
-        <span id="logo-text"></span>
-      </div>
-    </h1>
+    <div class="background-logo"></div>
     <div class="absolute top-1 right-1">
-      <div class="flex gap-2">
-        <TheThemeButton></TheThemeButton>
-        <TheAdminPanel></TheAdminPanel>
-        <TheSocketConnectionState></TheSocketConnectionState>
-      </div>
+      <TheAdminPanel></TheAdminPanel>
     </div>
-    <div class="mt-12">
+    <div>
       <TheDahboard></TheDahboard>
     </div>
     <Toaster></Toaster>
@@ -39,40 +28,35 @@ onMounted(() => {
 
 <style>
 body {
-  @apply flex;
   @apply bg-slate-200;
   @apply dark:bg-gray-700;
   @apply text-slate-400;
   @apply dark:text-slate-300;
 }
 
-#app {
-  @apply 3xl:container mx-auto;
-  @apply mx-auto;
-  @apply mt-4;
-  @apply lg:w-11/12;
-  @apply 3xl:w-5/6;
+@font-face {
+  font-family: retrogaming;
+  src: url('@/assets/fonts/Retro Gaming.ttf');
 }
 
-#logo {
+@font-face {
+  font-family: Xolonium-Bold;
+  src: url('@/assets/fonts/Xolonium-Bold.otf');
+}
+
+.background-logo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background-image: url(@/assets/skillaegis-logo.svg);
-  width: 64px;
-  height: 64px;
-  display: block;
-  background-size: 64px;
-  /* cyan-400 */
-  /* filter: invert(71%) sepia(97%) saturate(1333%) hue-rotate(147deg) brightness(95%) contrast(96%); */
-}
-
-#logo-text {
-  margin-top: 0.6rem;
-  width: 92px;
-  height: 20px;
-  display: block;
+  background-size: 90vh;
   background-repeat: no-repeat;
-  background-size: initial;
-  background-image: url(@/assets/skillaegis-text.svg);
-  /* Forces color #94a3b8 */
-  filter: invert(72%) sepia(6%) saturate(998%) hue-rotate(176deg) brightness(90%) contrast(84%);
+  background-position-x: center;
+  background-position-y: center;
+  filter: grayscale(80%);
+  opacity: 0.1;
+  z-index: -1;
 }
 </style>

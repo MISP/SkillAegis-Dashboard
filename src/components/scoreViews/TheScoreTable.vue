@@ -1,24 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig } from '../../socket'
-import { faCheck, faTimes, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
+import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
+import RelativeTimeFormatter from '@/components/elements/RelativeTimeFormatter.vue'
 
 const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users'])
-const collapsed_panels = ref([])
 
 function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
   setCompletedState(completed, user_id, exec_uuid, task_uuid)
-}
-
-function collapse(exercise_index) {
-  const index = collapsed_panels.value.indexOf(exercise_index)
-  if (index >= 0) {
-    collapsed_panels.value.splice(index, 1)
-  } else {
-    collapsed_panels.value.push(exercise_index)
-  }
 }
 
 function getCompletetionPercentageForUser(progress, exercise_uuid) {
@@ -26,7 +18,7 @@ function getCompletetionPercentageForUser(progress, exercise_uuid) {
 }
 
 const compactTable = computed(() => {
-  return userCount.value > 20
+  return userCount.value > 17
 })
 const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
 const sortedProgress = computed(() =>
@@ -82,64 +74,23 @@ const taskCompletionPercentages = computed(() => {
 </script>
 
 <template>
-  <table class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full mb-4">
+  <table class="bg-white dark:bg-slate-800 shadow-xl w-full mb-4">
     <thead>
-      <tr @click="collapse(exercise_index)" class="cursor-pointer">
-        <th
-          :colspan="2 + exercise.tasks.length"
-          class="rounded-tl-lg border-b border-slate-100 dark:border-slate-700 text-md p-3 pl-6 text-center dark:bg-blue-800 bg-blue-500 dark:text-slate-300 text-slate-100"
-        >
-          <div class="flex justify-centerx items-center">
-            <span
-              :class="{
-                'rounded-lg px-1': true,
-                'dark:bg-sky-400 bg-sky-400 text-neutral-950': exercise.level == 'beginner',
-                'dark:bg-orange-400 bg-orange-400 text-neutral-950': exercise.level == 'advanced',
-                'dark:bg-red-600 bg-red-600 text-neutral-100': exercise.level == 'expert'
-              }"
-              >{{ exercise.level }}
-            </span>
-            <span class="text-lg grow">{{ exercise.name }}</span>
-          </div>
-        </th>
-      </tr>
       <tr
-        :class="`font-medium text-slate-600 dark:text-slate-200 ${
-          collapsed_panels.includes(exercise_index) ? 'hidden' : ''
-        }`"
+        :class="`font-medium text-slate-600 dark:text-slate-200`"
       >
-        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left">User</th>
+        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left"></th>
         <th
-          v-for="(task, task_index) in exercise.tasks"
+          v-for="task in exercise.tasks"
           :key="task.name"
-          class="border-b border-slate-100 dark:border-slate-700 p-3 align-top"
+          class="border-b border-slate-100 dark:border-slate-700 p-3 align-middle leading-5"
           :title="task.description"
         >
-          <div class="flex flex-col">
-            <span
-              class="text-center font-normal text-sm dark:text-blue-200 text-slate-500 text-nowrap"
-              >Task {{ task_index + 1 }}</span
-            >
-            <i class="text-center">{{ task.name }}</i>
-            <div
-              role="progressbar"
-              class="flex w-full h-1 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600"
-              :aria-valuenow="taskCompletionPercentages[task.uuid]"
-              :aria-valuemin="0"
-              aria-valuemax="100"
-              :title="`${taskCompletionPercentages[task.uuid].toFixed(0)}%`"
-            >
-              <div
-                class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-blue-500 transition-width transition-slowest ease"
-                :style="`width: ${taskCompletionPercentages[task.uuid]}%`"
-              ></div>
-            </div>
-          </div>
+          <i class="text-center">{{ task.name }}</i>
         </th>
-        <th style="width: 75px;"></th>
       </tr>
     </thead>
-    <tbody :class="`${collapsed_panels.includes(exercise_index) ? 'hidden' : ''}`">
+    <tbody>
       <tr v-if="!hasProgress">
         <td
           :colspan="2 + exercise.tasks.length"
@@ -156,10 +107,10 @@ const taskCompletionPercentages = computed(() => {
         >
           <template v-if="progress.exercises[exercise.uuid] !== undefined">
             <td
-              class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative"
+              class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative max-w-64"
             >
               <span class="flex flex-col max-w-60">
-                <span :title="progress.user_id" class="text-nowrap inline-block leading-5 truncate">
+                <span :title="progress.user_id" class="text-nowrap inline-flex flex-row flex-nowrap items-center leading-5 truncate">
                   <FontAwesomeIcon
                     v-if="
                       progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1
@@ -167,14 +118,11 @@ const taskCompletionPercentages = computed(() => {
                     :icon="faMedal"
                     class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
-                  <span class="text-lg font-bold font-mono leading-5 tracking-tight">{{
-                    progress.email.split('@')[0]
-                  }}</span>
-                  <span class="text-xs font-mono tracking-tight"
-                    >@{{ progress.email.split('@')[1] }}</span
-                  >
+                  <UsernameFormatter :username="progress.email"></UsernameFormatter>
+                  <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
                 </span>
                 <LiveLogsUserActivityGraph
+                  v-if="!compactTable"
                   :user_id="progress.user_id"
                   :compact_view="compactTable"
                   :no_forced_width="true"
@@ -248,17 +196,8 @@ const taskCompletionPercentages = computed(() => {
                       }`"
                       :spin="userTaskCheckInProgress[`${progress.user_id}_${task.uuid}`]"
                     />
-                    <small
-                      :class="
-                        progress.exercises[exercise.uuid].tasks_completion[task.uuid]
-                          ? 'dark:text-green-400 text-green-600'
-                          : 'dark:text-slate-500 text-slate-400'
-                      "
-                    >
-                      (+{{ task.score }})</small
-                    >
                   </span>
-                  <span :class="['leading-3', !compactTable ? 'text-sm' : 'text-xs']">
+                  <span :class="['leading-3', !compactTable ? 'text-xs' : 'text-[0.65rem]']">
                     <span
                       v-if="progress.exercises[exercise.uuid].tasks_completion[task.uuid].timestamp"
                       :class="
@@ -267,35 +206,11 @@ const taskCompletionPercentages = computed(() => {
                           : 'font-extralight'
                       "
                     >
-                      {{
-                        new Date(
-                          progress.exercises[exercise.uuid].tasks_completion[task.uuid].timestamp *
-                            1000
-                        )
-                          .toTimeString()
-                          .split(' ', 1)[0]
-                      }}
+                      <RelativeTimeFormatter :timestamp="parseInt(progress.exercises[exercise.uuid].tasks_completion[task.uuid].timestamp * 1000)"></RelativeTimeFormatter>
                     </span>
                   </span>
                 </span>
               </span>
-            </td>
-            <td :class="`text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 ${
-                compactTable ? 'p-0' : 'p-2'
-              }`">
-              <div
-                role="progressbar"
-                class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-neutral-600"
-                :aria-valuenow="25"
-                :aria-valuemin="0"
-                aria-valuemax="100"
-                :title="`${getCompletetionPercentageForUser(progress, exercise.uuid).toFixed(0)}%`"
-              >
-                <div
-                  class="flex flex-col justify-center rounded-full overflow-hidden bg-green-600 text-xs text-white text-center whitespace-nowrap transition duration-500 dark:bg-green-500 transition-width transition-slowest ease"
-                  :style="`width: ${getCompletetionPercentageForUser(progress, exercise.uuid)}%`"
-                ></div>
-              </div>
             </td>
           </template>
         </tr>

@@ -3,7 +3,7 @@ import { io } from 'socket.io-client'
 import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000'
+const URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4001'
 const MAX_LIVE_LOG = 30
 
 const initial_state = {
@@ -144,6 +144,7 @@ function getNotifications() {
 
 function getProgress() {
   socket.emit('get_progress', (all_progress) => {
+    // all_progress = Array(20).fill().map(item => (all_progress[1]))
     state.progresses = all_progress
 
     Object.keys(state.progresses).forEach(user_id => {

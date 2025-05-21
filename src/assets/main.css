@@ -5,3 +5,36 @@
 @import './styled-components/toggle.css';
 @import './styled-components/button.css';
 @import './styled-components/transitions.css';
+
+.shadow-strong {
+    @apply shadow-md;
+    --tw-shadow: 2px 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.font-title {
+    font-family: Xolonium-Bold;
+}
+
+.font-retrogaming {
+    font-family: retrogaming;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    @apply bg-slate-400;
+    @apply rounded-md;
+    @apply border-2 border-transparent border-solid;
+    @apply bg-clip-content;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+    @apply bg-slate-500;
+}

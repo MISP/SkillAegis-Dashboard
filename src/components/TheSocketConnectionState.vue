@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { socketConnected, zmqLastTime } from '../socket'
+import { faCircle } from '@fortawesome/free-solid-svg-icons'
 
 const zmqLastTimeSecond = ref('?')
 
@@ -20,23 +21,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <span class="flex flex-col justify-center mt-1">
+  <span class="inline-flex flex-row items-center">
     <span
       :class="{
-        'px-2 rounded-md inline-block w-48 leading-4': true,
+        'inline-flex leading-4': true,
         'text-slate-900 dark:text-slate-400': socketConnected,
-        'text-slate-50 bg-red-600 px-2 py-1': !socketConnected
+        'text-red-600 px-2 py-1': !socketConnected
       }"
     >
-      <span class="mr-1">Socket.IO:</span>
-      <span v-show="socketConnected" class="font-semibold text-green-600 dark:text-green-400"
-        >Connected</span
-      >
-      <span v-show="!socketConnected" class="font-semibold text-slate-50">Disconnected</span>
+      <span v-show="socketConnected" class="text-sm text-green-600 dark:text-green-500 justify-content-end leading-4">
+        <FontAwesomeIcon :icon="faCircle" size="sm"></FontAwesomeIcon>
+        Connected
+      </span>
+      <span v-show="!socketConnected" class="text-sm leading-4">
+        <FontAwesomeIcon :icon="faCircle" size="sm"></FontAwesomeIcon>
+        Disconnected
+      </span>
     </span>
-    <span v-if="socketConnected" class="text-xs font-thin leading-3 inline-block text-center">
-      <template v-if="zmqLastTimeSecond == 0"> online </template>
-      <template v-else> Last keep-alive: {{ zmqLastTimeSecond }}s ago </template>
+    <span v-if="socketConnected" class="ml-1 text-xs leading-3 inline-block text-center">
+      <span v-show="zmqLastTimeSecond > 10"> Last ZMQ message: {{ zmqLastTimeSecond }}s ago</span>
     </span>
   </span>
 </template>
