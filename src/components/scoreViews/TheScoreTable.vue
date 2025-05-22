@@ -74,10 +74,10 @@ const taskCompletionPercentages = computed(() => {
 </script>
 
 <template>
-  <table class="bg-white dark:bg-slate-800 shadow-xl w-full mb-4">
+  <table class="shadow-xl w-full mb-1">
     <thead>
       <tr
-        :class="`font-medium text-slate-600 dark:text-slate-200`"
+        class="font-medium text-slate-600 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80"
       >
         <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left"></th>
         <th
@@ -86,7 +86,7 @@ const taskCompletionPercentages = computed(() => {
           class="border-b border-slate-100 dark:border-slate-700 p-3 align-middle leading-5"
           :title="task.description"
         >
-          <i class="text-center">{{ task.name }}</i>
+          <span class="text-center font-title">{{ task.name }}</span>
         </th>
       </tr>
     </thead>
@@ -103,7 +103,7 @@ const taskCompletionPercentages = computed(() => {
         <tr
           v-for="progress in sortedInactiveProgress"
           :key="progress.user_id"
-          class="bg-slate-50 dark:bg-slate-900"
+          class="bg-slate-50/80 dark:bg-slate-900/80"
         >
           <template v-if="progress.exercises[exercise.uuid] !== undefined">
             <td

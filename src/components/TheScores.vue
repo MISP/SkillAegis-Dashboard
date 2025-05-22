@@ -45,28 +45,30 @@ function selectectExercise(exercise_index) {
       <ThePlayerGrid></ThePlayerGrid>
     </div>
 
-    <div class="rounded-lg bg-slate-600 pt-2">
+    <div class="pt-2 shadow-lg">
 
-      <div class="flex gap-2 flex-row mx-2 mb-2 items-center">
-        <span v-for="(exercise, exercise_index) in exercises" :key="exercise.name"
-          @click="selectectExercise(exercise_index)"
-          :class="['px-4 py-1 rounded-md btn btn-lg',
-              selectectedExercise == exercise_index ? 'btn-primary' : 'btn-outline dark:btn-outline !font-normal'
-          ]"
-        >
-          {{ exercise.name }}
-        </span>
-        <span class="ml-auto">
-          <label
-              class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300"
-              title="Hide users that haven't been active in the past minutes"
-            >
-            <input type="checkbox" class="toggle toggle-success mr-1" :checked="hide_inactive_users"
-              @change="hide_inactive_users = !hide_inactive_users" />
-            <FontAwesomeIcon :icon="faUsersSlash" size="sm" class="mr-1"></FontAwesomeIcon>
-            Hide inactive
-          </label>
-        </span>
+      <div class="bg-slate-400 dark:bg-slate-600 border-slate-600 rounded-t-lg p-2">
+        <div class="flex gap-2 flex-row items-center">
+          <span v-for="(exercise, exercise_index) in exercises" :key="exercise.name"
+            @click="selectectExercise(exercise_index)"
+            :class="['px-4 py-1 rounded-md btn btn-lg',
+                selectectedExercise == exercise_index ? 'btn-primary' : 'btn-outline dark:btn-outline !font-normal'
+            ]"
+          >
+            {{ exercise.name }}
+          </span>
+          <span class="ml-auto">
+            <label
+                class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300"
+                title="Hide users that haven't been active in the past minutes"
+              >
+              <input type="checkbox" class="toggle toggle-success mr-1" :checked="hide_inactive_users"
+                @change="hide_inactive_users = !hide_inactive_users" />
+              <FontAwesomeIcon :icon="faUsersSlash" size="sm" class="mr-1"></FontAwesomeIcon>
+              Hide inactive
+            </label>
+          </span>
+        </div>
       </div>
 
       <KeepAlive>

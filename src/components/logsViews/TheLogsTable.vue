@@ -49,11 +49,21 @@ function convertToEpoch(serverTime) {
     let localDate = new Date(serverDate);
     return localDate.getTime();
 }
+
+function isDisplayablePayload(payload) {
+    if (typeof payload === 'string') {
+        return true
+    }
+    if (payload === null || payload === undefined || (typeof payload === 'object' && Object.keys(payload).length === 0)) {
+        return false
+    }
+    return true
+}
 </script>
 
 <template>
     <div class="overflow-auto grow">
-        <table class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full table-fixed">
+        <table class="bg-white/80 dark:bg-slate-900/80 rounded-lg shadow-xl w-full table-fixed">
             <thead>
                 <tr class="font-medium dark:text-slate-200 text-slate-600">
                     <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-2 text-left w-3/12">
@@ -106,17 +116,17 @@ function convertToEpoch(serverTime) {
                                 <UsernameFormatter :username="notification.user"></UsernameFormatter>
                             </span>
                         </td>
-                        <td class="border-b border-slate-100 dark:border-slate-700 p-1">
+                        <td class="border-b border-slate-100 dark:border-slate-700 p-1" :colspan="isDisplayablePayload(notification.payload) ? 1 : 2">
                             <div class="flex items-center group-hover:hidden inline-block">
                                 <template v-if="notification.notification_origin == 'zmq'">
                                     <span v-if="notification.http_method == 'POST'"
-                                        class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100">POST</span>
+                                        class="p-1 rounded-md font-bold text-xs mr-2 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100">POST</span>
                                     <span v-else-if="notification.http_method == 'PUT'"
-                                        class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100">PUT</span>
+                                        class="p-1 rounded-md font-bold text-xs mr-2 inline-block text-center dark:bg-amber-600 dark:text-neutral-100 bg-amber-600 text-neutral-100">PUT</span>
                                     <span v-else-if="notification.http_method == 'DELETE'"
-                                        class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-red-600 dark:text-neutral-100 bg-red-600 text-neutral-100">DEL</span>
+                                        class="p-1 rounded-md font-bold text-xs mr-2 inline-block text-center dark:bg-red-600 dark:text-neutral-100 bg-red-600 text-neutral-100">DEL</span>
                                     <span v-else
-                                        class="p-1 rounded-md font-bold text-xs mr-2 w-10 inline-block text-center dark:bg-blue-600 dark:text-neutral-100 bg-blue-600 text-neutral-100">{{
+                                        class="p-1 rounded-md font-bold text-xs mr-2 inline-block text-center dark:bg-blue-600 dark:text-neutral-100 bg-blue-600 text-neutral-100">{{
                                         notification.http_method }}</span>
                                     <FontAwesomeIcon v-if="notification.is_api_request"
                                         class="text-slate-800 dark:text-slate-100 mr-1 inline-block" :icon="faCog"
@@ -145,9 +155,10 @@ function convertToEpoch(serverTime) {
                             </span>
                         </td>
                         <td
+                            v-if="isDisplayablePayload(notification.payload)"
                             class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-1">
                             <div
-                                v-if="notification.http_method == 'POST' || notification.notification_origin == 'webhook'">
+                                v-if="notification.http_method == 'POST' || notification.http_method == 'PUT' || notification.notification_origin == 'webhook'">
                                 <!-- FIXME: Make that part more generic -->
                                 <Alert variant="danger" class="mx-2 mt-2"
                                     v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')">

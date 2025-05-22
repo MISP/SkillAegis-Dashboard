@@ -55,8 +55,8 @@ body {
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: center;
-  filter: grayscale(80%);
-  opacity: 0.1;
+  filter: grayscale(50%);
+  opacity: 0.25;
   z-index: -1;
 }
 </style>

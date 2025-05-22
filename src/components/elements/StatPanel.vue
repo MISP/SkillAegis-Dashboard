@@ -14,7 +14,7 @@ const top3Items = computed(() => props.list.slice(0, 3))
 </script>
 
 <template>
-  <span class="bg-slate-800 px-4 py-2 rounded-md min-w-72 grow shadow-strong">
+  <span class="dark:bg-slate-800/80 bg-slate-300/80 px-4 py-2 rounded-md min-w-72 grow shadow-strong">
     <div class="flex flex-col flex-nowrap">
       <span class="font-title text-xl uppercase text-nowrap mb-1" :style="`color: ${props.color}`">
         <FontAwesomeIcon :icon="props.icon" fixed-width style="--fa-fw-width: 1em"></FontAwesomeIcon>

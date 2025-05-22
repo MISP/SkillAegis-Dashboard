@@ -8,7 +8,7 @@ const hasActivity = computed(() => notificationHistory.value.length > 0)
 const rawNotificationHistory = computed(() => Array.from(notificationHistory.value))
 const activityMaxValue = 15
 
-const theSvg = ref()
+const theSvg = ref(null)
 const svgSize = ref(100)
 const svgXPadding = 20
 const rectWidth = computed(() => {
@@ -24,20 +24,20 @@ onUnmounted(() => {
 
 const debouncedSetSVGSize = debounce(setSVGSize, 400, { leading: true })
 function setSVGSize() {
-  if (theSvg.value !== null && theSvg.value.width) {
+  if (theSvg.value !== null && theSvg.value.width && theSvg.value.width.baseVal) {
     svgSize.value = theSvg.value.width.baseVal.value
   }
 }
 </script>
 
 <template>
-  <div class="my-2 relative">
+  <div class="relative">
     <svg
       ref="theSvg"
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
       height="40px"
-      class="bg-slate-50 dark:bg-slate-600 rounded-md relative overflow-hidden"
+      class="bg-slate-50 dark:bg-slate-600 rounded-md relative overflow-hidden shadow-lg"
     >
       <text 
         v-if="!hasActivity"

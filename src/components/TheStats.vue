@@ -10,7 +10,7 @@ import { faCheck, faCheckCircle, faGaugeHigh, faMedal, faTrophy } from '@fortawe
 
 <template>
   <div class="flex flex-row gap-2 justify-center">
-    <div class="grow-0 inline-flex flex-col justify-center gap-2">
+    <div class="grow-0 inline-flex flex-col justify-center gap-2 dark:text-slate-300 text-slate-700">
       <StatPanel
         title="Hall of Fame"
         color="#FFD700"
