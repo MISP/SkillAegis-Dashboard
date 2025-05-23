@@ -10,7 +10,7 @@ import {
   userActivityConfig
 } from '../socket'
 import {
-  faSignal, faCloud, faCog, faUser, faUsers,
+  faSignal, faCloud, faCog, faUser, 
   faCogs,
 } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
@@ -31,16 +31,6 @@ watch(api_query, (newValue) => {
   toggleApiQueryMode(newValue == true)
 })
 
-const userCountActive = computed(() => {
-  let activeUserCount = 0
-  Object.keys(userActivity.value).forEach(user_id => {
-    const lastQuarterUserActivity = userActivity.value[user_id].slice(-parseInt(bufferSize.value/4))
-    if (lastQuarterUserActivity.some(activity => activity > 0)) {
-      activeUserCount += 1
-    }
-  });
-  return activeUserCount
-})
 </script>
 
 <template>
@@ -52,16 +42,6 @@ const userCountActive = computed(() => {
     </h3>
 
     <div class="mb-2 flex flex-wrap gap-x-2">
-      <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
-        <span class="mr-1 font-title">
-          <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
-          Active Players
-        </span>
-        <span class="font-retrogaming">
-          {{ userCountActive }}
-        </span>
-        <span class="font-retrogaming text-[0.62rem]"> / {{ userCount }}</span>
-      </span>
       <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
         <span class="mr-1 font-title">
           <FontAwesomeIcon :icon="faSignal" size="sm"></FontAwesomeIcon>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig } from '../../socket'
-import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons'
+import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, } from '../../socket'
+import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
@@ -94,6 +94,17 @@ const taskCompletionPercentages = computed(() => {
   return completions
 })
 
+const userCountActive = computed(() => {
+  let activeUserCount = 0
+  Object.keys(userActivity.value).forEach(user_id => {
+    const lastQuarterUserActivity = userActivity.value[user_id].slice(-parseInt(bufferSize.value / 4))
+    if (lastQuarterUserActivity.some(activity => activity > 0)) {
+      activeUserCount += 1
+    }
+  });
+  return activeUserCount
+})
+
 onMounted(() => {
   timerID = registerTimerCallback(updatePage)
 })
@@ -110,26 +121,38 @@ onUnmounted(() => {
         class="font-medium text-slate-600 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80"
       >
         <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-left">
-          <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="!props.pause_automatic_pagination">
-              <FontAwesomeIcon
-                @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
-                :icon="faCaretLeft"
-                class="cursor-pointer"
-                size="lg"
-              ></FontAwesomeIcon>
-              <FontAwesomeIcon
-                v-for="i in pageTotal"
-                :key="i"
-                @click="currentPage = i - 1"
-                :icon="i-1 == currentPage ? faCircle : faCircleHole"
-                class="cursor-pointer"
-              ></FontAwesomeIcon>
-              <FontAwesomeIcon
-                @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / compactTableThreshold)"
-                :icon="faCaretRight"
-                class="cursor-pointer"
-                size="lg"
-              ></FontAwesomeIcon>
+          <span class="flex flex-col gap-2 items-center">
+            <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
+              <span class="mr-1 font-title">
+                <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
+                Active Players
+              </span>
+              <span class="font-retrogaming">
+                {{ userCountActive }}
+              </span>
+              <span class="font-retrogaming text-[0.62rem]"> / {{ userCount }}</span>
+            </span>
+            <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="!props.pause_automatic_pagination">
+                <FontAwesomeIcon
+                  @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
+                  :icon="faCaretLeft"
+                  class="cursor-pointer"
+                  size="lg"
+                ></FontAwesomeIcon>
+                <FontAwesomeIcon
+                  v-for="i in pageTotal"
+                  :key="i"
+                  @click="currentPage = i - 1"
+                  :icon="i-1 == currentPage ? faCircle : faCircleHole"
+                  class="cursor-pointer"
+                ></FontAwesomeIcon>
+                <FontAwesomeIcon
+                  @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / compactTableThreshold)"
+                  :icon="faCaretRight"
+                  class="cursor-pointer"
+                  size="lg"
+                ></FontAwesomeIcon>
+              </span>
             </span>
         </th>
         <th
