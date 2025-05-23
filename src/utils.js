@@ -18,3 +18,29 @@ export function ajaxFeedback(response) {
     title: response.title
   })
 }
+
+let timer = null
+const timerInterval = 7000
+const timerCallbacks = {}
+
+if (timer === null) {
+  timer = setInterval(() => {
+    Object.values(timerCallbacks).forEach(callback => {
+      callback()
+    });
+  }, timerInterval)
+}
+
+export function registerTimerCallback(callback) {
+  const id = Math.random().toString(36).substring(2, 15)
+  if (!timerCallbacks[id]) {
+    timerCallbacks[id] = callback
+    return id
+  }
+  return null
+}
+export function unregisterTimerCallback(id) {
+  if (timerCallbacks[id]) {
+    delete timerCallbacks[id]
+  }
+}

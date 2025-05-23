@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { darkModeEnabled } from '../settings.js'
 import StatPanel from './elements/StatPanel.vue';
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue';
+import RotatingList from '@/components/elements/RotatingList.vue';
 import { faCheck, faCheckCircle, faGaugeHigh, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
 
 
@@ -16,35 +17,29 @@ import { faCheck, faCheckCircle, faGaugeHigh, faMedal, faTrophy } from '@fortawe
         color="#FFD700"
         :icon="faMedal"
       >
-        <ul>
-          <li v-for="(item, i) in ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test']" :key="i" class="leading-4">
-            <span :style="`color: #FFD700`" class="font-title mr-2">{{ i+1 }}.</span>
-            <UsernameFormatter :username="item"></UsernameFormatter>
-          </li>
-        </ul>
+        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+          <span :style="`color: #FFD700`" class="font-title mr-2">{{ index+1 }}.</span>
+          <UsernameFormatter :username="item"></UsernameFormatter>
+        </RotatingList>
       </StatPanel>
       <StatPanel
         title="Fastest Finisher"
         color="#00CFFF"
         :icon="faGaugeHigh"
       >
-        <ul>
-          <li v-for="(item, i) in ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test']" :key="i" class="leading-4">
-            <span :style="`color: #00CFFF`" class="font-title mr-2">{{ i+1 }}.</span>
-            <UsernameFormatter :username="item"></UsernameFormatter>
-          </li>
-        </ul>
+        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+          <span :style="`color: #00CFFF`" class="font-title mr-2">{{ index+1 }}.</span>
+          <UsernameFormatter :username="item"></UsernameFormatter>
+        </RotatingList>
       </StatPanel>
       <StatPanel
         title="Recent Completion"
         color="#7041fd"
         :icon="faCheckCircle"
       >
-        <ul>
-          <li v-for="(item, i) in ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test']" :key="i" class="leading-4">
-            <UsernameFormatter :username="item"></UsernameFormatter>
-          </li>
-        </ul>
+        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+          <UsernameFormatter :username="item"></UsernameFormatter>
+        </RotatingList>
       </StatPanel>
     </div>
     <div class="grow flex">

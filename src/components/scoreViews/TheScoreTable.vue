@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig } from '../../socket'
-import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight } from '@fortawesome/free-solid-svg-icons'
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
+import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons'
+import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
 import RelativeTimeFormatter from '@/components/elements/RelativeTimeFormatter.vue'
+import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
-const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users'])
+const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'pause_automatic_pagination'])
 
 function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
   setCompletedState(completed, user_id, exec_uuid, task_uuid)
@@ -17,8 +18,10 @@ function getCompletetionPercentageForUser(progress, exercise_uuid) {
   return 100 * Object.values(progress.exercises[exercise_uuid].tasks_completion).filter(e => e !== false).length / Object.keys(progress.exercises[exercise_uuid].tasks_completion).length
 }
 
+const compactTableThreshold = 17
+
 const compactTable = computed(() => {
-  return userCount.value > 17
+  return sortedInactiveProgress.value.length > compactTableThreshold && props.pause_automatic_pagination === true
 })
 const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
 const sortedProgress = computed(() =>
@@ -48,6 +51,25 @@ const sortedInactiveProgress = computed(() =>
     sortedProgress.value
 )
 
+let timerID = null
+const currentPage = ref(0)
+const paginatedScoreTable = computed(() => {
+  if (props.pause_automatic_pagination === true) {
+    return sortedInactiveProgress.value
+  } else {
+    if (sortedInactiveProgress.value.length > 0) {
+      return sortedInactiveProgress.value.slice(currentPage.value * compactTableThreshold, (currentPage.value + 1) * compactTableThreshold)
+    }
+    return []
+  }
+})
+function updatePage() {
+  currentPage.value = (currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / compactTableThreshold)
+}
+const pageTotal = computed(() => {
+  return Math.ceil(sortedInactiveProgress.value.length / compactTableThreshold)
+})
+
 const taskCompletionPercentages = computed(() => {
   const completions = {}
   Object.values(props.exercise.tasks).forEach((task) => {
@@ -71,6 +93,14 @@ const taskCompletionPercentages = computed(() => {
   }
   return completions
 })
+
+onMounted(() => {
+  timerID = registerTimerCallback(updatePage)
+})
+onUnmounted(() => {
+  unregisterTimerCallback(timerID)
+})
+
 </script>
 
 <template>
@@ -79,29 +109,52 @@ const taskCompletionPercentages = computed(() => {
       <tr
         class="font-medium text-slate-600 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80"
       >
-        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-6 text-left"></th>
+        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-left">
+          <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="!props.pause_automatic_pagination">
+              <FontAwesomeIcon
+                @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
+                :icon="faCaretLeft"
+                class="cursor-pointer"
+                size="lg"
+              ></FontAwesomeIcon>
+              <FontAwesomeIcon
+                v-for="i in pageTotal"
+                :key="i"
+                @click="currentPage = i - 1"
+                :icon="i-1 == currentPage ? faCircle : faCircleHole"
+                class="cursor-pointer"
+              ></FontAwesomeIcon>
+              <FontAwesomeIcon
+                @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / compactTableThreshold)"
+                :icon="faCaretRight"
+                class="cursor-pointer"
+                size="lg"
+              ></FontAwesomeIcon>
+            </span>
+        </th>
         <th
           v-for="task in exercise.tasks"
           :key="task.name"
           class="border-b border-slate-100 dark:border-slate-700 p-3 align-middle leading-5"
           :title="task.description"
         >
-          <span class="text-center font-title">{{ task.name }}</span>
+          <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis">{{ task.name }}</span>
         </th>
       </tr>
     </thead>
     <tbody>
-      <tr v-if="!hasProgress">
+      <tr v-if="!hasProgress || sortedInactiveProgress.length == 0">
         <td
           :colspan="2 + exercise.tasks.length"
-          class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6"
+          class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-3 pl-6"
         >
-          <i>- No user yet -</i>
+          <i v-if="sortedInactiveProgress.length == 0">- No user with recent activity -</i>
+          <i v-else>- No user yet -</i>
         </td>
       </tr>
       <template v-else>
         <tr
-          v-for="progress in sortedInactiveProgress"
+          v-for="progress in paginatedScoreTable"
           :key="progress.user_id"
           class="bg-slate-50/80 dark:bg-slate-900/80"
         >
@@ -110,7 +163,7 @@ const taskCompletionPercentages = computed(() => {
               class="border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-0 pl-2 relative max-w-64"
             >
               <span class="flex flex-col max-w-60">
-                <span :title="progress.user_id" class="text-nowrap inline-flex flex-row flex-nowrap items-center leading-5 truncate">
+                <span :title="progress.user_id" class="text-nowrap inline-flex flex-row flex-nowrap items-center leading-5 truncate select-none">
                   <FontAwesomeIcon
                     v-if="
                       progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1

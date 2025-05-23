@@ -6,7 +6,8 @@ import {
   faUpRightAndDownLeftFromCenter,
   faDownLeftAndUpRightToCenter,
   faWarning,
-  faUsersSlash
+  faUsersSlash,
+  faPause,
 } from '@fortawesome/free-solid-svg-icons'
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
@@ -16,6 +17,7 @@ import { fullscreenModeOn } from '../settings.js'
 const hasExercises = computed(() => exercises.value.length > 0)
 const fullscreen_panel = ref(false)
 const hide_inactive_users = ref(false)
+const pause_automatic_pagination = ref(false)
 const selectectedExercise = ref(0)
 
 
@@ -58,15 +60,26 @@ function selectectExercise(exercise_index) {
             {{ exercise.name }}
           </span>
           <span class="ml-auto">
-            <label
-                class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300"
-                title="Hide users that haven't been active in the past minutes"
-              >
-              <input type="checkbox" class="toggle toggle-success mr-1" :checked="hide_inactive_users"
-                @change="hide_inactive_users = !hide_inactive_users" />
-              <FontAwesomeIcon :icon="faUsersSlash" size="sm" class="mr-1"></FontAwesomeIcon>
-              Hide inactive
-            </label>
+            <span class="flex flex-row gap-2">
+              <label
+                  class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 font-title"
+                  title="Hide users that haven't been active in the past minutes"
+                >
+                <input type="checkbox" class="toggle toggle-success mr-1" :checked="hide_inactive_users"
+                  @change="hide_inactive_users = !hide_inactive_users" />
+                <FontAwesomeIcon :icon="faUsersSlash" size="sm" class="mr-1"></FontAwesomeIcon>
+                Hide inactive
+              </label>
+              <label
+                  class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 font-title"
+                  title="Disable automatic pagination and allow to scroll the table"
+                >
+                <input type="checkbox" class="toggle toggle-info mr-1" :checked="pause_automatic_pagination"
+                  @change="pause_automatic_pagination = !pause_automatic_pagination" />
+                <FontAwesomeIcon :icon="faPause" size="sm" class="mr-1"></FontAwesomeIcon>
+                Pause pagination
+              </label>
+            </span>
           </span>
         </div>
       </div>
@@ -77,6 +90,7 @@ function selectectExercise(exercise_index) {
           :exercise="exercise"
           :exercise_index="exercise_index"
           :hide_inactive_users="hide_inactive_users"
+          :pause_automatic_pagination="pause_automatic_pagination"
         ></TheScoreTable>
       </KeepAlive>
       <KeepAlive>
