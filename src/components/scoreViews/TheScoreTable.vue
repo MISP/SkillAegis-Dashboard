@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
@@ -18,10 +18,27 @@ function getCompletetionPercentageForUser(progress, exercise_uuid) {
   return 100 * Object.values(progress.exercises[exercise_uuid].tasks_completion).filter(e => e !== false).length / Object.keys(progress.exercises[exercise_uuid].tasks_completion).length
 }
 
-const compactTableThreshold = 17
+const tbodyRef = ref(null);
+const visibleRowCount = ref(17)
+
+const updateVisibleRowCount = () => {
+  nextTick(() => {
+    if (window.getComputedStyle(tbodyRef.value.parentElement).display === 'none') {
+      return
+    }
+    const tableBodyTop = tbodyRef.value?.getBoundingClientRect().top || 0;
+    const windowHeight = window.innerHeight;
+    const availableHeight = windowHeight - tableBodyTop;
+    const firstRow = tbodyRef.value.children[0];
+    if (firstRow) {
+      const rowHeight = firstRow.getBoundingClientRect().height;
+      visibleRowCount.value = Math.floor(availableHeight / rowHeight);
+    }
+  });
+};
 
 const compactTable = computed(() => {
-  return sortedInactiveProgress.value.length > compactTableThreshold && props.pause_automatic_pagination === true
+  return sortedInactiveProgress.value.length > visibleRowCount.value && props.pause_automatic_pagination === true
 })
 const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
 const sortedProgress = computed(() =>
@@ -58,16 +75,16 @@ const paginatedScoreTable = computed(() => {
     return sortedInactiveProgress.value
   } else {
     if (sortedInactiveProgress.value.length > 0) {
-      return sortedInactiveProgress.value.slice(currentPage.value * compactTableThreshold, (currentPage.value + 1) * compactTableThreshold)
+      return sortedInactiveProgress.value.slice(currentPage.value * visibleRowCount.value, (currentPage.value + 1) * visibleRowCount.value)
     }
     return []
   }
 })
 function updatePage() {
-  currentPage.value = (currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / compactTableThreshold)
+  currentPage.value = (currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
 }
 const pageTotal = computed(() => {
-  return Math.ceil(sortedInactiveProgress.value.length / compactTableThreshold)
+  return Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
 })
 
 const taskCompletionPercentages = computed(() => {
@@ -106,9 +123,15 @@ const userCountActive = computed(() => {
 })
 
 onMounted(() => {
+  updateVisibleRowCount()
+  setTimeout(() => {
+    updateVisibleRowCount()
+  }, 200);
+  window.addEventListener('resize', updateVisibleRowCount)
   timerID = registerTimerCallback(updatePage)
 })
 onUnmounted(() => {
+  window.removeEventListener('resize', updateVisibleRowCount)
   unregisterTimerCallback(timerID)
 })
 
@@ -147,7 +170,7 @@ onUnmounted(() => {
                   class="cursor-pointer"
                 ></FontAwesomeIcon>
                 <FontAwesomeIcon
-                  @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / compactTableThreshold)"
+                  @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / visibleRowCount)"
                   :icon="faCaretRight"
                   class="cursor-pointer"
                   size="lg"
@@ -165,7 +188,7 @@ onUnmounted(() => {
         </th>
       </tr>
     </thead>
-    <tbody>
+    <tbody ref="tbodyRef">
       <tr v-if="!hasProgress || sortedInactiveProgress.length == 0">
         <td
           :colspan="2 + exercise.tasks.length"
@@ -194,6 +217,9 @@ onUnmounted(() => {
                     :icon="faMedal"
                     class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
+                  <img
+                    v-if="progress?.state?.on_fire"
+                    src="@/assets/fire.gif" alt="User is on fire" class="mr-1" />
                   <UsernameFormatter :username="progress.email"></UsernameFormatter>
                   <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
                 </span>
