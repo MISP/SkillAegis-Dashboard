@@ -7,6 +7,7 @@ import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
 import RelativeTimeFormatter from '@/components/elements/RelativeTimeFormatter.vue'
 import UserScore from '@/components/elements/UserScore.vue'
+import FireBadge from '@/components/elements/FireBadge.vue'
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
 const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'enable_automatic_pagination', 'sort_by_score'])
@@ -262,9 +263,8 @@ onUnmounted(() => {
                     :icon="faMedal"
                     class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
-                  <img
-                    v-if="progress?.state?.on_fire"
-                    src="@/assets/fire.gif" alt="User is on fire" class="mr-1" />
+                  <FireBadge
+                    v-if="progress?.state?.on_fire" class="mr-1"></FireBadge>
                   <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
                 </span>

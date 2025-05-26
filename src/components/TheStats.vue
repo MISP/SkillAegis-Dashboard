@@ -7,6 +7,7 @@ import RotatingList from '@/components/elements/RotatingList.vue';
 import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
 import TextWithSparkles from '@/components/elements/TextWithSparkles.vue';
 import TextWithPulse from '@/components/elements/TextWithPulse.vue';
+import FireBadge from '@/components/elements/FireBadge.vue';
 
 </script>
 
@@ -31,11 +32,9 @@ import TextWithPulse from '@/components/elements/TextWithPulse.vue';
         color="#FF5722"
         :icon="faFire"
       >
-        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="6" :pagination_rate_sec="5">
           <span :style="`color: #FF5722`" class="font-title mr-2">{{ index+1 }}.</span>
-          <img
-            v-if="index === 0"
-            src="@/assets/fire.gif" alt="User is on fire" class="inline-block" style="height: 1rem; position:relative; top: -3px;" />
+          <FireBadge v-if="index === 0" class="inline-block" style="height: 1rem; position:relative; top: -3px;"></FireBadge>
           <UsernameFormatter :username="item"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
