@@ -10,7 +10,7 @@ import {
   resetAll,
   resetLiveLogs,
   changeExerciseSelection,
-  debouncedGetDiangostic,
+  debouncedGetDiagnostic,
   remediateSetting,
   reloadFromDisk
 } from '../socket'
@@ -48,7 +48,7 @@ const showModal = ref(false)
 function showTheModal() {
   showModal.value = true
   clickedButtons.value = []
-  debouncedGetDiangostic()
+  debouncedGetDiagnostic()
 }
 </script>
 

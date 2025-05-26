@@ -9,6 +9,14 @@ import TextWithSparkles from '@/components/elements/TextWithSparkles.vue';
 import TextWithPulse from '@/components/elements/TextWithPulse.vue';
 import FireBadge from '@/components/elements/FireBadge.vue';
 
+import { userStats } from '@/socket.js';
+
+const hallOfFame = computed(() => userStats.value?.hall_of_fame || []);
+const timeOnFire = computed(() => userStats.value?.time_on_fire || []);
+const speedRunner = computed(() => userStats.value?.speed_runner || []);
+const achievements = computed(() => userStats.value?.achievements || []);
+
+const test_data = ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']
 </script>
 
 <template>
@@ -19,7 +27,7 @@ import FireBadge from '@/components/elements/FireBadge.vue';
         color="#FFD700"
         :icon="faMedal"
       >
-        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+        <RotatingList v-slot="{ item, index }" :list="hallOfFame" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FFD700`" class="font-title mr-2">{{ index+1 }}.</span>
           <TextWithSparkles v-if="index === 0" :sparkleCount="5">
             <UsernameFormatter :username="item"></UsernameFormatter>
@@ -32,7 +40,7 @@ import FireBadge from '@/components/elements/FireBadge.vue';
         color="#FF5722"
         :icon="faFire"
       >
-        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+        <RotatingList v-slot="{ item, index }" :list="timeOnFire" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FF5722`" class="font-title mr-2">{{ index+1 }}.</span>
           <FireBadge v-if="index === 0" class="inline-block" style="height: 1rem; position:relative; top: -3px;"></FireBadge>
           <UsernameFormatter :username="item"></UsernameFormatter>
@@ -43,7 +51,7 @@ import FireBadge from '@/components/elements/FireBadge.vue';
         color="#4287ff"
         :icon="faBolt"
       >
-        <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
+        <RotatingList v-slot="{ item, index }" :list="speedRunner" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #4287ff`" class="font-title mr-2">{{ index+1 }}.</span>
           <TextWithPulse v-if="index === 0">
             <UsernameFormatter :username="item"></UsernameFormatter>
@@ -58,7 +66,7 @@ import FireBadge from '@/components/elements/FireBadge.vue';
         color="#ff40ff"
         :icon="faTrophy"
       >
-        <span class="text-center font-retrogaming">There are no achievements for this exercise</span>
+        <span class="text-center font-retrogaming text-slate-400">There are no achievements for this exercise</span>
       </StatPanel>
     </div>
   </div>

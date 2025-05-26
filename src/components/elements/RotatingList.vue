@@ -14,8 +14,9 @@ let timerID = null
 const currentPage = ref(0)
 const rotatingListRef = ref(null)
 const firstPageHeight = ref(null)
+const listHasItems = computed(() => props.list.length > 0)
 const currentList = computed(() => {
-  if (props.list.length > 0) {
+  if (listHasItems.value) {
     return props.list.slice(currentPage.value * props.limit, (currentPage.value + 1) * props.limit)
   }
   return []
@@ -40,11 +41,14 @@ onUnmounted(() => {
 
 <template>
     <div ref="rotatingListRef" :style="{ height: firstPageHeight ? firstPageHeight + 'px' : 'auto' }">
-        <TransitionGroup name="slide-up" tag="ul" class="relative overflow-hidden">
+        <TransitionGroup v-if="listHasItems" name="slide-up" tag="ul" class="relative overflow-hidden">
             <li v-for="(item, i) in currentList" :key="i+currentPage*props.limit" class="leading-4">
                 <slot :item="item" :index="i+currentPage*props.limit"></slot>
             </li>
         </TransitionGroup>
+        <div v-else class="text-center font-retrogaming text-slate-400">
+            No data so far
+        </div>
     </div>
 </template>
 

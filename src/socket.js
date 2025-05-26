@@ -18,7 +18,8 @@ const initial_state = {
   selected_exercises: [],
   progresses: {},
   userTaskCheckInProgress: {},
-  diagnostic: {}
+  userStats: {},
+  diagnostic: {},
 }
 
 const state = reactive({ ...initial_state })
@@ -52,6 +53,7 @@ export const userActivityConfig = computed(() => state.userActivityConfig)
 export const socketConnected = computed(() => connectionState.connected)
 export const zmqLastTime = computed(() => connectionState.zmq_last_time)
 export const userTaskCheckInProgress = computed(() => state.userTaskCheckInProgress)
+export const userStats = computed(() => state.userStats)
 
 export function resetState() {
   Object.assign(state, initial_state)
@@ -62,6 +64,7 @@ export function fullReload() {
   getSelectedExercises()
   getNotifications()
   getProgress()
+  getUsersStats()
   getUsersActivity()
 }
 
@@ -119,7 +122,7 @@ export function remediateSetting(setting) {
 }
 
 export const debouncedGetProgress = debounce(getProgress, 200, { leading: true })
-export const debouncedGetDiangostic = debounce(getDiangostic, 1000, { leading: true })
+export const debouncedGetDiagnostic = debounce(getDiagnostic, 1000, { leading: true })
 
 /* Private */
 /* ------- */
@@ -167,7 +170,13 @@ function getUsersActivity() {
   })
 }
 
-function getDiangostic() {
+function getUsersStats() {
+  socket.emit('get_users_stats', (user_stats) => {
+    state.userStats = user_stats
+  })
+}
+
+function getDiagnostic() {
   state.diagnostic = {}
   socket.emit('get_diagnostic', (diagnostic) => {
     state.diagnostic = diagnostic
