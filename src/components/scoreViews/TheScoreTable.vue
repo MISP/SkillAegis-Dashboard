@@ -110,7 +110,7 @@ const paginatedScoreTable = computed(() => {
   }
 })
 function updatePage() {
-  currentPage.value = (currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
+  currentPage.value = ((currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)) || 0
 }
 const pageTotal = computed(() => {
   return Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
@@ -186,7 +186,7 @@ onUnmounted(() => {
       >
         <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-left">
           <span class="flex flex-col gap-2 items-center">
-            <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
+            <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200 text-nowrap">
               <span class="mr-1 font-title">
                 <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
                 Active Players
