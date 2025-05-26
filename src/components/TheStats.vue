@@ -5,7 +5,8 @@ import StatPanel from './elements/StatPanel.vue';
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue';
 import RotatingList from '@/components/elements/RotatingList.vue';
 import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
-
+import TextWithSparkles from '@/components/elements/TextWithSparkles.vue';
+import TextWithPulse from '@/components/elements/TextWithPulse.vue';
 
 </script>
 
@@ -19,7 +20,10 @@ import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-so
       >
         <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FFD700`" class="font-title mr-2">{{ index+1 }}.</span>
-          <UsernameFormatter :username="item"></UsernameFormatter>
+          <TextWithSparkles v-if="index === 0" :sparkleCount="5">
+            <UsernameFormatter :username="item"></UsernameFormatter>
+          </TextWithSparkles>
+          <UsernameFormatter v-else :username="item"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
       <StatPanel
@@ -29,6 +33,9 @@ import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-so
       >
         <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FF5722`" class="font-title mr-2">{{ index+1 }}.</span>
+          <img
+            v-if="index === 0"
+            src="@/assets/fire.gif" alt="User is on fire" class="inline-block" style="height: 1rem; position:relative; top: -3px;" />
           <UsernameFormatter :username="item"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
@@ -39,7 +46,10 @@ import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-so
       >
         <RotatingList v-slot="{item, index }" :list="['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #4287ff`" class="font-title mr-2">{{ index+1 }}.</span>
-          <UsernameFormatter :username="item"></UsernameFormatter>
+          <TextWithPulse v-if="index === 0">
+            <UsernameFormatter :username="item"></UsernameFormatter>
+          </TextWithPulse>
+          <UsernameFormatter v-else :username="item"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
     </div>

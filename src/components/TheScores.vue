@@ -8,6 +8,7 @@ import {
   faWarning,
   faUsersSlash,
   faPause,
+  faRankingStar,
 } from '@fortawesome/free-solid-svg-icons'
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
@@ -17,7 +18,8 @@ import { fullscreenModeOn } from '../settings.js'
 const hasExercises = computed(() => exercises.value.length > 0)
 const fullscreen_panel = ref(false)
 const hide_inactive_users = ref(false)
-const pause_automatic_pagination = ref(false)
+const enable_automatic_pagination = ref(true)
+const sort_by_score = ref(false)
 const selectectedExercise = ref(0)
 
 
@@ -74,10 +76,19 @@ function selectectExercise(exercise_index) {
                   class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 font-title"
                   title="Disable automatic pagination and allow to scroll the table"
                 >
-                <input type="checkbox" class="toggle toggle-info mr-1" :checked="pause_automatic_pagination"
-                  @change="pause_automatic_pagination = !pause_automatic_pagination" />
+                <input type="checkbox" class="toggle toggle-info mr-1" :checked="enable_automatic_pagination"
+                  @change="enable_automatic_pagination = !enable_automatic_pagination" />
                 <FontAwesomeIcon :icon="faPause" size="sm" class="mr-1"></FontAwesomeIcon>
-                Pause pagination
+                Auto paginate
+              </label>
+              <label
+                  class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 font-title"
+                  title="Sort by Highest score"
+                >
+                <input type="checkbox" class="toggle toggle-info mr-1" :checked="sort_by_score"
+                  @change="sort_by_score = !sort_by_score" />
+                <FontAwesomeIcon :icon="faRankingStar" size="sm" class="mr-1"></FontAwesomeIcon>
+                Sort by Score
               </label>
             </span>
           </span>
@@ -90,7 +101,8 @@ function selectectExercise(exercise_index) {
           :exercise="exercise"
           :exercise_index="exercise_index"
           :hide_inactive_users="hide_inactive_users"
-          :pause_automatic_pagination="pause_automatic_pagination"
+          :enable_automatic_pagination="enable_automatic_pagination"
+          :sort_by_score="sort_by_score"
         ></TheScoreTable>
       </KeepAlive>
       <KeepAlive>

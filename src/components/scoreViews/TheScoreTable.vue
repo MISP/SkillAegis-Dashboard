@@ -6,9 +6,10 @@ import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regul
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
 import RelativeTimeFormatter from '@/components/elements/RelativeTimeFormatter.vue'
+import UserScore from '@/components/elements/UserScore.vue'
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
-const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'pause_automatic_pagination'])
+const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'enable_automatic_pagination', 'sort_by_score'])
 
 function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
   setCompletedState(completed, user_id, exec_uuid, task_uuid)
@@ -17,6 +18,32 @@ function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
 function getCompletetionPercentageForUser(progress, exercise_uuid) {
   return 100 * Object.values(progress.exercises[exercise_uuid].tasks_completion).filter(e => e !== false).length / Object.keys(progress.exercises[exercise_uuid].tasks_completion).length
 }
+
+const sortedProgressByScore = computed(() => {
+  const allProgress = {}
+  for (const exercise of Object.values(exercises.value)) {
+    allProgress[exercise.uuid] = []
+  }
+
+  for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+    for (const [uuid, progress] of Object.entries(userExercises)) {
+      allProgress[uuid]?.push({
+        email,
+        exercises: { [uuid]: progress }
+      })
+    }
+  }
+
+  for (const [uuid, progresses] of Object.entries(allProgress)) {
+    progresses.sort((a, b) => {
+      const scoreA = a.exercises[uuid]?.score ?? 0
+      const scoreB = b.exercises[uuid]?.score ?? 0
+      return scoreA - scoreB
+    })
+  }
+
+  return allProgress
+})
 
 const tbodyRef = ref(null);
 const visibleRowCount = ref(17)
@@ -38,10 +65,10 @@ const updateVisibleRowCount = () => {
 };
 
 const compactTable = computed(() => {
-  return sortedInactiveProgress.value.length > visibleRowCount.value && props.pause_automatic_pagination === true
+  return sortedInactiveProgress.value.length > visibleRowCount.value && props.enable_automatic_pagination === false
 })
 const hasProgress = computed(() => Object.keys(progresses.value).length > 0)
-const sortedProgress = computed(() =>
+const sortedProgressByEmail = computed(() =>
   Object.values(progresses.value).sort((a, b) => {
     if (a.email < b.email) {
       return -1
@@ -56,7 +83,7 @@ const sortedProgress = computed(() =>
 const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
 const sortedInactiveProgress = computed(() =>
   props.hide_inactive_users ?
-    sortedProgress.value.filter((progress) => {
+    sortedProgressByEmail.value.filter((progress) => {
       const user_id = progress.user_id
       if (userActivity.value[user_id] !== undefined) {
         
@@ -65,13 +92,14 @@ const sortedInactiveProgress = computed(() =>
       }
       return false
     }) :
-    sortedProgress.value
+    sortedProgressByEmail.value
 )
 
 let timerID = null
+let visibleRowUpdater = null
 const currentPage = ref(0)
 const paginatedScoreTable = computed(() => {
-  if (props.pause_automatic_pagination === true) {
+  if (props.enable_automatic_pagination === false) {
     return sortedInactiveProgress.value
   } else {
     if (sortedInactiveProgress.value.length > 0) {
@@ -87,13 +115,21 @@ const pageTotal = computed(() => {
   return Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
 })
 
+function paginatedScoreTableRouter(exercise_uuid) {
+  if (props.sort_by_score === true) {
+    return sortedProgressByScore.value[exercise_uuid]
+  } else {
+    return  paginatedScoreTable.value
+  }
+}
+
 const taskCompletionPercentages = computed(() => {
   const completions = {}
   Object.values(props.exercise.tasks).forEach((task) => {
     completions[task.uuid] = 0
   })
 
-  sortedProgress.value.forEach((progress) => {
+  sortedProgressByEmail.value.forEach((progress) => {
     if (progress.exercises[props.exercise.uuid] !== undefined) {
       for (const [taskUuid, taskCompletion] of Object.entries(
         progress.exercises[props.exercise.uuid].tasks_completion
@@ -127,12 +163,16 @@ onMounted(() => {
   setTimeout(() => {
     updateVisibleRowCount()
   }, 200);
+  visibleRowUpdater = setInterval(() => {
+    updateVisibleRowCount()
+  }, 5000);
   window.addEventListener('resize', updateVisibleRowCount)
   timerID = registerTimerCallback(updatePage)
 })
 onUnmounted(() => {
   window.removeEventListener('resize', updateVisibleRowCount)
   unregisterTimerCallback(timerID)
+  clearInterval(visibleRowUpdater)
 })
 
 </script>
@@ -155,7 +195,7 @@ onUnmounted(() => {
               </span>
               <span class="font-retrogaming text-[0.62rem]"> / {{ userCount }}</span>
             </span>
-            <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="!props.pause_automatic_pagination">
+            <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="props.enable_automatic_pagination">
                 <FontAwesomeIcon
                   v-if="pageTotal > 1"
                   @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
@@ -188,6 +228,7 @@ onUnmounted(() => {
         >
           <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis">{{ task.name }}</span>
         </th>
+        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-right"></th>
       </tr>
     </thead>
     <tbody ref="tbodyRef">
@@ -204,7 +245,7 @@ onUnmounted(() => {
       </tr>
       <template v-else>
         <tr
-          v-for="progress in paginatedScoreTable"
+          v-for="progress in paginatedScoreTableRouter(exercise.uuid)"
           :key="progress.user_id"
           class="bg-slate-50/80 dark:bg-slate-900/80"
         >
@@ -224,7 +265,7 @@ onUnmounted(() => {
                   <img
                     v-if="progress?.state?.on_fire"
                     src="@/assets/fire.gif" alt="User is on fire" class="mr-1" />
-                  <UsernameFormatter :username="progress.email"></UsernameFormatter>
+                  <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
                 </span>
                 <LiveLogsUserActivityGraph
@@ -317,6 +358,14 @@ onUnmounted(() => {
                   </span>
                 </span>
               </span>
+            </td>
+            <td :class="`text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 ${
+                compactTable ? 'p-1' : 'p-2'
+              }`">
+              <UserScore
+                :score="progress.exercises[exercise.uuid].score"
+                :max_score="progress.exercises[exercise.uuid].max_score"
+              ></UserScore>
             </td>
           </template>
         </tr>
