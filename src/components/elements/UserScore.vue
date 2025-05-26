@@ -26,6 +26,8 @@ const color = computed(() => {
         return 'text-amber-500';
     } else if (percentage.value >= 0.5) {
         return 'text-orange-500';
+    } else if (percentage.value >= 0.3) {
+        return 'text-cyan-500';
     } else {
         return '';
     }

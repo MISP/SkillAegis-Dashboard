@@ -185,7 +185,7 @@ onUnmounted(() => {
         class="font-medium text-slate-600 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80"
       >
         <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-left">
-          <span class="flex flex-col gap-2 items-center">
+          <span class="flex flex-col gap-2 items-start">
             <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200 text-nowrap">
               <span class="mr-1 font-title">
                 <FontAwesomeIcon :icon="faUsers" size="sm"></FontAwesomeIcon>
@@ -196,7 +196,7 @@ onUnmounted(() => {
               </span>
               <span class="font-retrogaming text-[0.62rem]"> / {{ userCount }}</span>
             </span>
-            <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="props.enable_automatic_pagination">
+            <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="props.enable_automatic_pagination && pageTotal > 1">
                 <FontAwesomeIcon
                   v-if="pageTotal > 1"
                   @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
