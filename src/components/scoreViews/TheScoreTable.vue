@@ -157,6 +157,7 @@ onUnmounted(() => {
             </span>
             <span class="flex flex-row flex-nowrap items-center gap-1 text-cyan-600" v-if="!props.pause_automatic_pagination">
                 <FontAwesomeIcon
+                  v-if="pageTotal > 1"
                   @click="currentPage = currentPage - 1 < 0 ? pageTotal - 1 : currentPage - 1"
                   :icon="faCaretLeft"
                   class="cursor-pointer"
@@ -170,6 +171,7 @@ onUnmounted(() => {
                   class="cursor-pointer"
                 ></FontAwesomeIcon>
                 <FontAwesomeIcon
+                  v-if="pageTotal > 1"
                   @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / visibleRowCount)"
                   :icon="faCaretRight"
                   class="cursor-pointer"
@@ -194,8 +196,10 @@ onUnmounted(() => {
           :colspan="2 + exercise.tasks.length"
           class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-3 pl-6"
         >
-          <i v-if="sortedInactiveProgress.length == 0">- No user with recent activity -</i>
-          <i v-else>- No user yet -</i>
+          <Alert v-if="sortedInactiveProgress.length == 0" variant="warning">
+            No user with recent activity
+          </Alert>
+          <Alert v-else variant="warning">No user yet</Alert>
         </td>
       </tr>
       <template v-else>
