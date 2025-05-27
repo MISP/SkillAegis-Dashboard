@@ -49,6 +49,17 @@ const sortedProgressByScore = computed(() => {
 const tbodyRef = ref(null);
 const visibleRowCount = ref(17)
 
+const updateTableSizes = () => {
+  updateVisibleRowCount()
+  updateTableCompactColumnValues()
+  setTimeout(() => {
+    updateVisibleRowCount()
+  }, 200);
+  visibleRowUpdater = setInterval(() => {
+    updateVisibleRowCount()
+  }, 5000);
+  window.addEventListener('resize', updateVisibleRowCount)
+}
 const updateVisibleRowCount = () => {
   nextTick(() => {
     if (window.getComputedStyle(tbodyRef.value.parentElement).display === 'none') {
@@ -64,6 +75,60 @@ const updateVisibleRowCount = () => {
     }
   });
 };
+
+const shouldUseCompactColumn = ref(false)
+const shouldUseUltraCompactColumn = ref(false)
+const updateTableCompactColumnValues = () => {
+  let change = false
+  const overflowing = isTableOverflowingX()
+
+  if (isTableOverflowingX()) {
+    if (!shouldUseCompactColumn.value) {
+      shouldUseCompactColumn.value = true;
+      change = true
+    } else if (!shouldUseUltraCompactColumn.value) {
+      shouldUseUltraCompactColumn.value = true;
+      change = true
+    } else {
+      return; // Already in ultra compact mode
+    }
+  }
+  if (change) {
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        updateTableCompactColumnValues()
+      })
+    })
+  }
+}
+
+function isTableOverflowingX() {
+  if (tbodyRef.value) {
+    if (window.getComputedStyle(tbodyRef.value.parentElement).display === 'none') {
+      return false
+    }
+    const tableBodyWidth = tbodyRef.value?.getBoundingClientRect().width || 0
+    const parentContainerWidth = tbodyRef.value.parentElement.parentElement.getBoundingClientRect().width || 0
+    return tableBodyWidth - parentContainerWidth > 8
+  }
+  return false
+}
+
+const smartTasks = computed(() => {
+  const smartTasks = props.exercise.tasks.map((task, i) => {
+    let smart_name = task.name
+    if (shouldUseUltraCompactColumn.value) {
+      smart_name = `${i}`
+    } else if (shouldUseCompactColumn.value) {
+      smart_name = `Task ${i}`
+    }
+    return {
+      ...task,
+      smart_name: smart_name,
+    }
+  })
+  return smartTasks
+})
 
 const compactTable = computed(() => {
   return sortedInactiveProgress.value.length > visibleRowCount.value && props.enable_automatic_pagination === false
@@ -160,14 +225,7 @@ const userCountActive = computed(() => {
 })
 
 onMounted(() => {
-  updateVisibleRowCount()
-  setTimeout(() => {
-    updateVisibleRowCount()
-  }, 200);
-  visibleRowUpdater = setInterval(() => {
-    updateVisibleRowCount()
-  }, 5000);
-  window.addEventListener('resize', updateVisibleRowCount)
+  updateTableSizes()
   timerID = registerTimerCallback(updatePage)
 })
 onUnmounted(() => {
@@ -179,7 +237,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <table class="shadow-xl w-full mb-1">
+  <table class="shadow-xl w-full mb-1 table-container">
     <thead>
       <tr
         class="font-medium text-slate-600 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80"
@@ -222,12 +280,12 @@ onUnmounted(() => {
             </span>
         </th>
         <th
-          v-for="task in exercise.tasks"
+          v-for="task in smartTasks"
           :key="task.name"
           class="border-b border-slate-100 dark:border-slate-700 p-3 align-middle leading-5"
           :title="task.description"
         >
-          <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis">{{ task.name }}</span>
+          <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis" :title="task.name">{{ task.smart_name }}</span>
         </th>
         <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-right"></th>
       </tr>
@@ -277,7 +335,7 @@ onUnmounted(() => {
               </span>
             </td>
             <td
-              v-for="(task, task_index) in exercise.tasks"
+              v-for="(task, task_index) in smartTasks"
               :key="task_index"
               :class="`text-center border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 ${
                 compactTable ? 'p-0' : 'p-2'

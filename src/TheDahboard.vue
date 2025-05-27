@@ -20,7 +20,7 @@ onMounted(() => {
 
 <template>
   <div class="main-grid h-screen w-screen overflow-hidden p-2">
-    <div class="mt-9" style="grid-area: stats;">
+    <div style="grid-area: stats;">
       <TheStats></TheStats>
     </div>
     <div style="grid-area: scores;" class="overflow-x-hidden overflow-y-auto">

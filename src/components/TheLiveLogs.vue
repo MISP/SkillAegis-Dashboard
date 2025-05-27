@@ -42,14 +42,14 @@ watch(api_query, (newValue) => {
     </h3>
 
     <div class="mb-2 flex flex-wrap gap-x-2">
-      <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
+      <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200 shadow-strong">
         <span class="mr-1 font-title">
           <FontAwesomeIcon :icon="faSignal" size="sm"></FontAwesomeIcon>
           Messages
         </span>
         <span class="font-retrogaming">{{ notificationCounter }}</span>
       </span>
-      <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200">
+      <span class="rounded-lg py-1 px-2 dark:bg-cyan-800 bg-cyan-400 text-slate-800 dark:text-slate-200 shadow-strong">
         <span class="mr-1 font-title">
           <FontAwesomeIcon :icon="faCog" size="sm" :mask="faCloud" transform="shrink-7 left-1"></FontAwesomeIcon>
           API Messages
@@ -65,11 +65,12 @@ watch(api_query, (newValue) => {
             <FontAwesomeIcon :icon="faCogs"></FontAwesomeIcon>
           </button>
         </template>
-  
+
         <div class="flex flex-col gap-1">
           <span class="flex items-center">
             <label class="mr-1 flex items-center cursor-pointer text-slate-900 dark:text-slate-300 text-nowrap">
-              <input type="checkbox" class="toggle toggle-warning mr-2" :checked="verbose" @change="verbose = !verbose" />
+              <input type="checkbox" class="toggle toggle-warning mr-2" :checked="verbose"
+                @change="verbose = !verbose" />
               Verbose Mode
             </label>
           </span>

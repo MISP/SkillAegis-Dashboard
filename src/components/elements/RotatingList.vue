@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue';
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
 
@@ -23,17 +23,25 @@ const currentList = computed(() => {
 })
 
 function updatePage() {
-    currentPage.value = (currentPage.value + 1) % Math.ceil(props.list.length / props.limit)
+  currentPage.value = (currentPage.value + 1) % Math.ceil(props.list.length / props.limit)
+}
+
+function updateHeight() {
+  const rotatingListRefEl = rotatingListRef.value
+  firstPageHeight.value = rotatingListRefEl.offsetHeight
 }
 
 onMounted(() => {
     timerID = registerTimerCallback(updatePage)
-    const rotatingListRefEl = rotatingListRef.value
-    firstPageHeight.value = rotatingListRefEl.offsetHeight
+    updateHeight()
 })
 
 onUnmounted(() => {
     unregisterTimerCallback(timerID)
+})
+
+onUpdated(() => {
+  updateHeight()
 })
 
 

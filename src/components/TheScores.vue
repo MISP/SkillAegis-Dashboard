@@ -56,7 +56,7 @@ function selectectExercise(exercise_index) {
           <span v-for="(exercise, exercise_index) in exercises" :key="exercise.name"
             @click="selectectExercise(exercise_index)"
             :class="['px-4 py-1 rounded-md btn btn-lg',
-                selectectedExercise == exercise_index ? 'btn-primary' : 'btn-outline dark:btn-outline !font-normal'
+                selectectedExercise == exercise_index ? 'btn-info' : 'btn-outline dark:btn-outline !font-normal'
             ]"
           >
             {{ exercise.name }}
