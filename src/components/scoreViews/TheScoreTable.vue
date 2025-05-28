@@ -7,7 +7,8 @@ import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
 import RelativeTimeFormatter from '@/components/elements/RelativeTimeFormatter.vue'
 import UserScore from '@/components/elements/UserScore.vue'
-import FireBadge from '@/components/elements/FireBadge.vue'
+import FireBadge from '@/components/elements/TextEffects/FireBadge.vue'
+import GenericTextEffect from '@/components/elements/TextEffects/GenericTextEffect.vue'
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
 const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'enable_automatic_pagination', 'sort_by_score'])
@@ -80,8 +81,6 @@ const shouldUseCompactColumn = ref(false)
 const shouldUseUltraCompactColumn = ref(false)
 const updateTableCompactColumnValues = () => {
   let change = false
-  const overflowing = isTableOverflowingX()
-
   if (isTableOverflowingX()) {
     if (!shouldUseCompactColumn.value) {
       shouldUseCompactColumn.value = true;
@@ -322,8 +321,13 @@ onUnmounted(() => {
                     class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
                   <FireBadge
-                    v-if="progress?.state?.on_fire" class="mr-1"></FireBadge>
-                  <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
+                    v-if="progress?.state?.on_fire" class="mr-1">
+                    <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
+                  </FireBadge>
+                  <UsernameFormatter v-else-if="false" :username="progress.email" class="text-2xl"></UsernameFormatter>
+                  <GenericTextEffect v-else :userProgress="progress">
+                    <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
+                  </GenericTextEffect>
                   <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
                 </span>
                 <LiveLogsUserActivityGraph

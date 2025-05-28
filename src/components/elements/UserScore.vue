@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive } from 'vue';
-import TextWithSparkles from '@/components/elements/TextWithSparkles.vue';
+import TextWithSparkles from '@/components/elements/TextEffects/TextWithSparkles.vue';
 
 const props = defineProps({
     'score': {

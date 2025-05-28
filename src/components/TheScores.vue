@@ -49,7 +49,7 @@ function selectectExercise(exercise_index) {
       <ThePlayerGrid></ThePlayerGrid>
     </div>
 
-    <div class="pt-2 shadow-lg">
+    <div class="shadow-lg">
 
       <div class="bg-slate-400 dark:bg-slate-600 border-slate-600 rounded-t-lg p-2">
         <div class="flex gap-2 flex-row items-center">

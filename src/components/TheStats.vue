@@ -5,9 +5,9 @@ import StatPanel from './elements/StatPanel.vue';
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue';
 import RotatingList from '@/components/elements/RotatingList.vue';
 import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
-import TextWithSparkles from '@/components/elements/TextWithSparkles.vue';
-import TextWithPulse from '@/components/elements/TextWithPulse.vue';
-import FireBadge from '@/components/elements/FireBadge.vue';
+import TextWithSparkles from '@/components/elements/TextEffects/TextWithSparkles.vue';
+import TextWithPulse from '@/components/elements/TextEffects/TextWithPulse.vue';
+import FireBadge from '@/components/elements/TextEffects/FireBadge.vue';
 
 import { userStats } from '@/socket.js';
 
@@ -30,9 +30,9 @@ const test_data = ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test'
         <RotatingList v-slot="{ item, index }" :list="hallOfFame" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FFD700`" class="font-title mr-2">{{ index+1 }}.</span>
           <TextWithSparkles v-if="index === 0" :sparkleCount="5">
-            <UsernameFormatter :username="item"></UsernameFormatter>
+            <UsernameFormatter :username="item.email"></UsernameFormatter>
           </TextWithSparkles>
-          <UsernameFormatter v-else :username="item"></UsernameFormatter>
+          <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
       <StatPanel
@@ -42,8 +42,10 @@ const test_data = ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test'
       >
         <RotatingList v-slot="{ item, index }" :list="timeOnFire" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #FF5722`" class="font-title mr-2">{{ index+1 }}.</span>
-          <FireBadge v-if="index === 0" class="inline-block" style="height: 1rem; position:relative; top: -3px;"></FireBadge>
-          <UsernameFormatter :username="item"></UsernameFormatter>
+            <FireBadge v-if="index === 0">
+              <UsernameFormatter :username="item.email"></UsernameFormatter>
+            </FireBadge>
+            <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
       <StatPanel
@@ -54,9 +56,9 @@ const test_data = ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test'
         <RotatingList v-slot="{ item, index }" :list="speedRunner" :limit="3" :pagination_rate_sec="5">
           <span :style="`color: #4287ff`" class="font-title mr-2">{{ index+1 }}.</span>
           <TextWithPulse v-if="index === 0">
-            <UsernameFormatter :username="item"></UsernameFormatter>
+            <UsernameFormatter :username="item.email"></UsernameFormatter>
           </TextWithPulse>
-          <UsernameFormatter v-else :username="item"></UsernameFormatter>
+          <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
         </RotatingList>
       </StatPanel>
     </div>

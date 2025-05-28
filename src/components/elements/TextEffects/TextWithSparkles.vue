@@ -15,7 +15,7 @@
     const positions = [
         {x: '75%', y: '10%'},
         {x: '5%', y: '5%'},
-        {x: '50%', y: '50%'},
+        {x: '50%', y: '40%'},
     ]
 
     if (props.sparkleCount - 3 > 0) {

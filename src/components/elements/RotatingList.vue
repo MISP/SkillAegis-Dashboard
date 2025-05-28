@@ -27,8 +27,9 @@ function updatePage() {
 }
 
 function updateHeight() {
+  
   const rotatingListRefEl = rotatingListRef.value
-  firstPageHeight.value = rotatingListRefEl.offsetHeight
+  firstPageHeight.value = rotatingListRefEl.children[0].offsetHeight
 }
 
 onMounted(() => {
