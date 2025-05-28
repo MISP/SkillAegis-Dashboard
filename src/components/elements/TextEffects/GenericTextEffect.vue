@@ -5,7 +5,7 @@
     import FireBadge from '@/components/elements/TextEffects/FireBadge.vue';
 
     const props = defineProps({
-        'userProgress': {
+        'status': {
             type: Object,
             required: true,
         },
@@ -15,19 +15,22 @@
         props.condition ? props.wrapper(slots.default()) : slots.default();
 
     const isOnFire = computed(() => {
-        return props.userProgress?.is_on_fire || false
+        return props.status?.is_on_fire || false
+    })
+    const isOnFireLeaderboard = computed(() => {
+        return props.status?.is_on_fire_leaderboard || false
     })
     const isOnHallOfFame = computed(() => {
-        return props.userProgress?.is_on_all_house_fame || false
+        return props.status?.is_on_all_house_fame || false
     })
     const isSpeedRunner = computed(() => {
-        return props.userProgress?.is_speed_runner || false
+        return props.status?.is_speed_runner || false
     })
 
 </script>
 
 <template>
-    <ConditionalWrapper :condition="isOnFire" :wrapper="(c) => h(FireBadge, null, () => c)">
+    <ConditionalWrapper :condition="isOnFire || isOnFireLeaderboard" :wrapper="(c) => h(FireBadge, { is_blue: isOnFire && !isOnFireLeaderboard }, () => c)">
         <ConditionalWrapper :condition="isSpeedRunner" :wrapper="(c) => h(TextWithPulse, null, () => c)">
             <ConditionalWrapper :condition="isOnHallOfFame" :wrapper="(c) => h(TextWithSparkles, null, () => c)">
                 <slot />

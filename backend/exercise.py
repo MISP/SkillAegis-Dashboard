@@ -13,6 +13,7 @@ import backend.misp_api as misp_api
 from backend.appConfig import logger
 import backend.config as config
 import backend.db as db
+import backend.leaderboard as leadboard
 
 from backend.target_tools.misp.exercise import inject_checker_router as inject_checker_router_misp
 from backend.target_tools.suricata.exercise import inject_checker_router as inject_checker_router_suricata
@@ -205,11 +206,11 @@ def get_exercises():
     return exercises
 
 
-def get_selected_exercises():
+def get_selected_exercises() -> list:
     return db.SELECTED_EXERCISES
 
 
-def get_all_exercises():
+def get_all_exercises() -> list:
     return db.ALL_EXERCISES
 
 
@@ -276,7 +277,7 @@ def get_available_tasks_for_user(user_id: int) -> list[str]:
     return available_tasks
 
 
-def get_completion_for_users():
+def get_completion_for_users() -> dict:
     completion_per_user = {int(user_id): {} for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys()}
     for exercise_status in db.EXERCISES_STATUS.values():
         for user_id in completion_per_user.keys():
@@ -291,20 +292,6 @@ def get_completion_for_users():
                     completion_per_user[user_id][exercise_status['uuid']][task['uuid']] = entry
 
     return completion_per_user
-
-
-def get_score_for_task_completion(tasks_completion: dict) -> int:
-    score = 0
-    for inject_uuid, completed in tasks_completion.items():
-        if not completed:
-            continue
-        inject = db.INJECT_BY_UUID[inject_uuid]
-        try:
-            for inject_eval in inject['inject_evaluation']:
-                score += inject_eval['score_range'][1]
-        except KeyError:
-            pass
-    return score
 
 
 def mark_task_completed(user_id: int, exercise_uuid: str , task_uuid: str):
@@ -343,15 +330,22 @@ def get_progress():
             'email': db.USER_ID_TO_EMAIL_MAPPING[user_id],
             'user_id': user_id,
             'exercises': {},
+            'status': leadboard.get_user_status(user_id, selected_exercices, get_completion_for_users())
         }
         for exec_uuid, tasks_completion in completion_for_users[user_id].items():
             if exec_uuid in selected_exercices:
                 progress[user_id]['exercises'][exec_uuid] = {
                     'tasks_completion': tasks_completion,
-                    'score': get_score_for_task_completion(tasks_completion),
+                    'score': leadboard.get_score_for_task_completion(tasks_completion),
                     'max_score': db.EXERCISES_STATUS[exec_uuid]['max_score'],
                 }
     return progress
+
+
+def get_users_stats() -> dict:
+    selected_exercices = get_selected_exercises()
+    completion_for_users = get_completion_for_users()
+    return leadboard.get_user_stats(selected_exercices, completion_for_users)
 
 
 @debounce_check_active_tasks(debounce_seconds=2)

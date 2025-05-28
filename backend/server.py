@@ -139,16 +139,24 @@ async def get_progress(sid):
     return exercise_model.get_progress()
 
 @sio.event
+async def get_users_stats(sid):
+    return exercise_model.get_users_stats()
+
+@sio.event
 async def get_notifications(sid):
     return notification_model.get_notifications()
 
 @sio.event
 async def mark_task_completed(sid, payload):
-    return exercise_model.mark_task_completed(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
+    exercise_model.mark_task_completed(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
+    sendRefreshScoreTask = sendRefreshScore()
+    await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 @sio.event
 async def mark_task_incomplete(sid, payload):
-    return exercise_model.mark_task_incomplete(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
+    exercise_model.mark_task_incomplete(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
+    sendRefreshScoreTask = sendRefreshScore()
+    await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 @sio.event
 async def reset_all_exercise_progress(sid):
@@ -290,7 +298,10 @@ async def handleWebhook(data):
 
 @debounce(debounce_seconds=0)
 async def sendRefreshScore():
-    await sio.emit('refresh_score')
+    progress = exercise_model.get_progress()
+    await sio.emit('update_progress', progress)
+    users_stats = exercise_model.get_users_stats()
+    await sio.emit("update_statistics", users_stats)
 
 
 async def sendUserInjectCheckInProgress(user: int, inject_uuid: str):

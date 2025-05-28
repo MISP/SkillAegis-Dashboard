@@ -149,18 +149,21 @@ function getProgress() {
   socket.emit('get_progress', (all_progress) => {
     // all_progress = Array(20).fill().map(item => (all_progress[1]))
     state.progresses = all_progress
+    updateTaskCheckInProgress()
+  })
+}
 
-    Object.keys(state.progresses).forEach(user_id => {
-      Object.values(state.progresses[user_id].exercises).forEach(exercise => {
-        Object.keys(exercise.tasks_completion).forEach(inject_uuid => {
-          const key = `${user_id}_${inject_uuid}`
-          if (state.userTaskCheckInProgress[key] === undefined) {
-            state.userTaskCheckInProgress[key] = false
-          }
-        });
+function updateTaskCheckInProgress() {
+  Object.keys(state.progresses).forEach(user_id => {
+    Object.values(state.progresses[user_id].exercises).forEach(exercise => {
+      Object.keys(exercise.tasks_completion).forEach(inject_uuid => {
+        const key = `${user_id}_${inject_uuid}`
+        if (state.userTaskCheckInProgress[key] === undefined) {
+          state.userTaskCheckInProgress[key] = false
+        }
       });
     });
-  })
+  });
 }
 
 function getUsersActivity() {
@@ -280,6 +283,15 @@ socket.on('update_notification_history', (notification_history_bundle) => {
 socket.on('update_users_activity', (user_activity_bundle) => {
   state.userActivity = user_activity_bundle.activity
   state.userActivityConfig = user_activity_bundle.config
+})
+
+socket.on('update_progress', (all_progress) => {
+  state.progresses = all_progress
+  updateTaskCheckInProgress()
+})
+
+socket.on('update_statistics', (user_stats) => {
+  state.userStats = user_stats
 })
 
 

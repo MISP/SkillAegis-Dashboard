@@ -103,7 +103,7 @@ function isDisplayablePayload(payload) {
             </thead>
             <tbody>
                 <tr v-if="notifications.length == 0">
-                    <td colspan="5"
+                    <td colspan="3"
                         class="text-center border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 p-3 pl-6">
                         <i>- No logs yet -</i>
                     </td>

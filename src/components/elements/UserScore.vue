@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive } from 'vue';
 import TextWithSparkles from '@/components/elements/TextEffects/TextWithSparkles.vue';
+import NumberEffect from '@/components/elements/TextEffects/NumberEffect.vue';
 
 const props = defineProps({
     'score': {
@@ -39,10 +40,14 @@ const color = computed(() => {
         v-if="percentage != 1"
         class="font-title"
         :class="color"
-    >{{ score }}</span>
+    >
+    <NumberEffect :value="score"></NumberEffect>
+    </span>
 
     <TextWithSparkles v-else>
-        <span class="text-yellow-400">{{ score }}</span>
+        <span class="text-yellow-400">
+            <NumberEffect :value="score"></NumberEffect>
+        </span>
     </TextWithSparkles>
 </template>
 

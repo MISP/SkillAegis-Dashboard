@@ -325,7 +325,7 @@ onUnmounted(() => {
                     <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   </FireBadge>
                   <UsernameFormatter v-else-if="false" :username="progress.email" class="text-2xl"></UsernameFormatter>
-                  <GenericTextEffect v-else :userProgress="progress">
+                  <GenericTextEffect v-else :status="progress?.status">
                     <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   </GenericTextEffect>
                   <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
