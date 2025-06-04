@@ -20,7 +20,7 @@ onMounted(() => {
 
 <template>
   <div class="main-grid h-screen w-screen overflow-hidden p-2">
-    <div style="grid-area: stats;">
+    <div style="grid-area: stats;" class="overflow-hidden">
       <TheStats></TheStats>
     </div>
     <div style="grid-area: scores;" class="overflow-x-hidden overflow-y-auto">
@@ -36,8 +36,11 @@ onMounted(() => {
 <style>
 .main-grid {
   display: grid;
-  grid-template-columns: 5fr 2fr;
-  grid-template-rows: 2fr 5fr;
+  grid-template-columns: 7fr 3fr;
+  /* grid-template-rows: 2fr 5fr; */
+  /* grid-template-rows: minmax(200px, max-content) 5fr; */
+  /* grid-template-rows: min(fit-content, minmax(200px, 40%)) 5fr; */
+  grid-template-rows: auto 1fr;
   gap: 1rem;
   grid-template-areas:
     'scores stats'

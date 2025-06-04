@@ -26,7 +26,7 @@ misp_settings = {
 }
 
 leaderboard_settings = {
-    "time_one_fire_window_sec": 60 * 2,
+    "time_one_fire_window_sec": 60 * 4,
     "speedrunner_volume_boost": 1.5,
     "speedrunner_speed_boost": 0.7,
 }

@@ -168,16 +168,17 @@ def get_notification_message(data: dict) -> dict:
     http_method = 'DELETE' if (http_method == 'POST' or http_method == 'PUT') and action == 'delete' else http_method  # small override for UI
     payload = get_request_post_body(data)
     return {
-        'id': id,
-        'notification_origin': 'zmq',
-        'user': user,
-        'time': time,
-        'url': url,
-        'http_method': http_method,
-        'user_agent': user_agent,
-        'is_api_request': is_api_request(data),
-        'response_code': response_code,
-        'payload': payload,
+        "id": id,
+        "notification_origin": "zmq",
+        "user_id": int(data["user_id"]),
+        "user": user,
+        "time": time,
+        "url": url,
+        "http_method": http_method,
+        "user_agent": user_agent,
+        "is_api_request": is_api_request(data),
+        "response_code": response_code,
+        "payload": payload,
     }
 
 
@@ -195,8 +196,9 @@ def get_notification_message_for_webhook(user_id: int, target_tool: str, task_da
 
     return {
         "id": id,
-        "notification_origin": 'webhook',
+        "notification_origin": "webhook",
         "target_tool": target_tool,
+        "user_id": user_id,
         "user": user,
         "time": time,
         "payload": payload,

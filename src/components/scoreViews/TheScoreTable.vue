@@ -10,6 +10,7 @@ import UserScore from '@/components/elements/UserScore.vue'
 import FireBadge from '@/components/elements/TextEffects/FireBadge.vue'
 import GenericTextEffect from '@/components/elements/TextEffects/GenericTextEffect.vue'
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
+import PlayerTrophies from '@/components/elements/TextEffects/PlayerTrophies.vue'
 
 const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'enable_automatic_pagination', 'sort_by_score'])
 
@@ -37,10 +38,10 @@ const sortedProgressByScore = computed(() => {
   }
 
   for (const [uuid, progresses] of Object.entries(allProgress)) {
-    progresses.sort((a, b) => {
+    allProgress[uuid] = progresses.sort((a, b) => {
       const scoreA = a.exercises[uuid]?.score ?? 0
       const scoreB = b.exercises[uuid]?.score ?? 0
-      return scoreA - scoreB
+      return scoreB - scoreA
     })
   }
 
@@ -320,15 +321,12 @@ onUnmounted(() => {
                     :icon="faMedal"
                     class="mr-1 text-amber-300"
                   ></FontAwesomeIcon>
-                  <FireBadge
-                    v-if="progress?.state?.on_fire" class="mr-1">
-                    <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
-                  </FireBadge>
-                  <UsernameFormatter v-else-if="false" :username="progress.email" class="text-2xl"></UsernameFormatter>
-                  <GenericTextEffect v-else :status="progress?.status">
+                  <PlayerTrophies  v-if="progress?.status" :trophies="progress?.status.trophies" :user_id="progress.user_id"></PlayerTrophies>
+                  <GenericTextEffect v-if="progress?.status" :status="progress?.status" :user_id="progress.user_id">
                     <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   </GenericTextEffect>
-                  <FontAwesomeIcon :icon="faAngleRight" class="ml-2"></FontAwesomeIcon>
+                  <UsernameFormatter v-else :username="progress.email" class="text-2xl"></UsernameFormatter>
+                  <FontAwesomeIcon :icon="faAngleRight" class="ml-auto"></FontAwesomeIcon>
                 </span>
                 <LiveLogsUserActivityGraph
                   v-if="!compactTable"

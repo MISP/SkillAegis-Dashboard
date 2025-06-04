@@ -4,88 +4,199 @@ import { darkModeEnabled } from '../settings.js'
 import StatPanel from './elements/StatPanel.vue';
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue';
 import RotatingList from '@/components/elements/RotatingList.vue';
-import { faCheck, faBolt, faFire, faMedal, faTrophy } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faBolt, faFire, faMedal, faTrophy, faPeopleGroup, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import TextWithSparkles from '@/components/elements/TextEffects/TextWithSparkles.vue';
 import TextWithPulse from '@/components/elements/TextEffects/TextWithPulse.vue';
 import FireBadge from '@/components/elements/TextEffects/FireBadge.vue';
+import NumberEffect from '@/components/elements/TextEffects/NumberEffect.vue';
+import ProgressBar from '@/components/elements/ProgressBar.vue';
 
-import { userStats } from '@/socket.js';
-import NumberEffect from './elements/TextEffects/NumberEffect.vue';
+import { userStats, active_exercises as exercises, progresses } from '@/socket.js';
+import TrophyDescription from '@/components/elements/TrophyDescription.vue';
 
 const hallOfFame = computed(() => userStats.value?.hall_of_fame || []);
 const timeOnFire = computed(() => userStats.value?.time_on_fire || []);
 const speedRunner = computed(() => userStats.value?.speed_runner || []);
 const trophies = computed(() => userStats.value?.trophies || []);
 
-const test_data = ['admin1@admin.test', 'admin2@admin.test', 'admin3@admin.test', 'admin4@admin.test', 'admin5@admin.test', 'admin6@admin.test']
+const trophyList = computed(() => Object.values(trophies.value).map(t => {
+  return { ...t.metadata, users: t.users }
+}))
+
+
+const overallProgressForEligiblePlayers = computed(() => {
+  let taskCount = 0
+  for (const exercise of exercises.value) {
+    taskCount += exercise.tasks.length
+  }
+  const completionThreshold = 0.2 * taskCount
+  
+  let taskCompletedCount = 0
+  let taskCompletedCountUnderThreshold = 0
+  let userWithEnoughCompletionCount = 0
+  let userCount = 0
+
+  for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+    const completedTaskCount = getCompletedTaskCount(userExercises)
+    taskCompletedCount += completedTaskCount
+    userCount += 1
+    if (completedTaskCount >= completionThreshold) {
+      userWithEnoughCompletionCount += 1
+      taskCompletedCountUnderThreshold += completedTaskCount
+    }
+  }
+
+  if (taskCount * userWithEnoughCompletionCount == 0) {
+    return 0
+  }
+
+  const completionPercentage = 100 * (taskCompletedCount / (taskCount * userCount)) 
+  if (completionPercentage < 10) { // Not enough completion done to show with threshold
+    return completionPercentage
+  }
+  return 100 * (taskCompletedCountUnderThreshold / (taskCount * userWithEnoughCompletionCount))
+
+})
+
+function getCompletedTaskCount(userExercises) {
+  let completedTaskCount = 0
+  for (const [uuid, userProgress] of Object.entries(userExercises)) {
+    for (const [taskUuid, completionStatus] of Object.entries(userProgress.tasks_completion)) {
+      if (completionStatus !== false) {
+        completedTaskCount += 1
+      }
+    }
+  }
+  return completedTaskCount
+}
+
+const collectiveScore = computed(() => {
+  let score = 0
+  for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+    for (const [uuid, userProgress] of Object.entries(userExercises)) {
+      score += userProgress.score
+    }
+  }
+  return score
+})
+
+const collectiveTaskDone = computed(() => {
+  let taskCompletedCount = 0
+  for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+    const completedTaskCount = getCompletedTaskCount(userExercises)
+    taskCompletedCount += completedTaskCount
+  }
+  return taskCompletedCount
+})
 </script>
 
 <template>
-  <div class="flex flex-row gap-2 justify-center">
-    <div class="grow-0 inline-flex flex-col justify-center gap-2 dark:text-slate-300 text-slate-700">
-      <StatPanel
-        title="Hall of Fame"
-        info="Top players having the highest score"
-        color="#FFD700"
-        :icon="faMedal"
-      >
-        <RotatingList v-slot="{ item, index }" :list="hallOfFame" :limit="3" :pagination_rate_sec="5">
-          <span class="flex flex-row items-center">
-            <TextWithSparkles v-if="index === 0" :sparkleCount="5">
-              <UsernameFormatter :username="item.email"></UsernameFormatter>
-            </TextWithSparkles>
-            <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
-            <span :style="`color: #FFD700`" class="font-title ml-auto">
-              <NumberEffect :value="item.score"></NumberEffect>
-            </span>
-          </span>
-        </RotatingList>
-      </StatPanel>
-      <StatPanel
-        title="Time On Fire"
-        info="Top players with the most time spent on fire"
-        color="#FF5722"
-        :icon="faFire"
-      >
-        <RotatingList v-slot="{ item, index }" :list="timeOnFire" :limit="3" :pagination_rate_sec="5">
-          <span class="flex flex-row items-center">
-            <FireBadge v-if="index === 0">
-              <UsernameFormatter :username="item.email"></UsernameFormatter>
-            </FireBadge>
-            <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
-            <span :style="`color: #FF5722`" class="font-title ml-auto">
-              <NumberEffect :value="item.time_on_fire / 60"></NumberEffect>
-            </span>
-          </span>
-        </RotatingList>
-      </StatPanel>
-      <StatPanel
-        title="Speed Runner"
-        info="Top players with the fastest time based on tasks completed"
-        color="#4287ff"
-        :icon="faBolt"
-      >
-        <RotatingList v-slot="{ item, index }" :list="speedRunner" :limit="3" :pagination_rate_sec="5">
-          <span class="flex flex-row items-center">
-            <TextWithPulse v-if="index === 0">
-              <UsernameFormatter :username="item.email"></UsernameFormatter>
-            </TextWithPulse>
-            <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
-            <span :style="`color: #4287ff`" class="font-title ml-auto">
-              <NumberEffect :value="item.speedrunner_score"></NumberEffect>
-            </span>
-          </span>
-        </RotatingList>
-      </StatPanel>
+  <div class="flex flex-col gap-2">
+    <div>
+      <div class="flex flex-row gap-2">
+        <div class="grow-0 inline-flex flex-col gap-2 dark:text-slate-300 text-slate-700 min-w-72">
+          <StatPanel
+            title="Hall of Fame"
+            info="Top players having the highest score"
+            color="#FFD700"
+            :icon="faMedal"
+          >
+            <RotatingList v-slot="{ item, index }" :list="hallOfFame" :limit="3" :pagination_rate_sec="5">
+              <span class="flex flex-row items-center">
+                <TextWithSparkles v-if="index === 0" :sparkleCount="5">
+                  <UsernameFormatter :username="item.email"></UsernameFormatter>
+                </TextWithSparkles>
+                <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
+                <span :style="`color: #FFD700`" class="font-title ml-auto">
+                  <NumberEffect :value="item.score"></NumberEffect>
+                </span>
+              </span>
+            </RotatingList>
+          </StatPanel>
+          <StatPanel
+            title="Time On Fire"
+            info="Top players with the most time spent on fire"
+            color="#FF5722"
+            :icon="faFire"
+          >
+            <RotatingList v-slot="{ item, index }" :list="timeOnFire" :limit="3" :pagination_rate_sec="5">
+              <span class="flex flex-row items-center">
+                <FireBadge v-if="index === 0" :is_blue="true">
+                  <UsernameFormatter :username="item.email"></UsernameFormatter>
+                </FireBadge>
+                <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
+                <span :style="`color: #FF5722`" class="font-title ml-auto">
+                  <NumberEffect :value="item.time_on_fire / 60"></NumberEffect>
+                </span>
+              </span>
+            </RotatingList>
+          </StatPanel>
+          <StatPanel
+            title="Speed Runner"
+            info="Top players with the fastest time based on tasks completed"
+            color="#4287ff"
+            :icon="faBolt"
+          >
+            <RotatingList v-slot="{ item, index }" :list="speedRunner" :limit="3" :pagination_rate_sec="5">
+              <span class="flex flex-row items-center">
+                <TextWithPulse v-if="index === 0">
+                  <UsernameFormatter :username="item.email"></UsernameFormatter>
+                </TextWithPulse>
+                <UsernameFormatter v-else :username="item.email"></UsernameFormatter>
+                <span :style="`color: #4287ff`" class="font-title ml-auto">
+                  <NumberEffect :value="item.speedrunner_score"></NumberEffect>
+                </span>
+              </span>
+            </RotatingList>
+          </StatPanel>
+        </div>
+        <div class="grow flex">
+          <StatPanel
+            title="Trophies"
+            color="#ff40ff"
+            :icon="faTrophy"
+            class="overflow-hidden max-h-[292px]"
+          >
+          <span v-if="trophyList.length == 0" class="text-center font-retrogaming text-slate-400">There are no trophies for this
+            exercise</span>
+          <RotatingList v-slot="{ item }" :list="trophyList" :limit="5" :pagination_rate_sec="5">
+            <TrophyDescription :trophy="item"></TrophyDescription>
+          </RotatingList>
+
+          </StatPanel>
+        </div>
+      </div>
     </div>
-    <div class="grow flex">
-      <StatPanel
-        title="Trophies"
-        color="#ff40ff"
-        :icon="faTrophy"
-      >
-        <span class="text-center font-retrogaming text-slate-400">There are no trophies for this exercise</span>
-      </StatPanel>
+    <div>
+      <div class="flex">
+        <StatPanel
+            title="Global Progress"
+            info="Overall progress of all players who have completed at least 20% of the tasks"
+            color="#4CAF50"
+            :icon="faPeopleGroup"
+          >
+            <div class="flex flex-col gap-1">
+              <ProgressBar :progress="overallProgressForEligiblePlayers" from_color="#FFA500" to_color="#4CAF50" class="h-2"></ProgressBar>
+              <span :style="`color: #FFD700`" class="font-title flex leading-4 mt-1">
+                <span>Collective Score</span>
+                <NumberEffect :value="collectiveScore" class="ml-auto"></NumberEffect>
+              </span>
+              <span :style="`color: #FFD700`" class="font-title flex leading-4">
+                <span>Total Tasks Completed</span>
+                <NumberEffect :value="collectiveTaskDone" class="ml-auto"></NumberEffect>
+              </span>
+            </div>
+          </StatPanel>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+img.trophy {
+  width: 32px;
+  max-width: unset;
+  height: 32px;
+  max-height: unset;
+}
+</style>

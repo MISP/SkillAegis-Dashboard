@@ -388,6 +388,7 @@ async def keepalive():
             'zmq_last_time': ZMQ_LAST_TIME,
         }
         await sio.emit('keep_alive', payload)
+        await sendRefreshScore()
 
 
 async def backup_exercises_progress():

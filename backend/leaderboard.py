@@ -3,6 +3,15 @@ from collections import defaultdict
 import time
 import backend.db as db
 from backend.appConfig import leaderboard_settings
+from backend.trophies import GrinderTrophy, BounceBackTrophy, MessengerTrophy, SpammerTrophy
+
+ALL_TROPHIES = [
+    GrinderTrophy.GrinderTrophy(),
+    BounceBackTrophy.BounceBackTrophy(),
+    MessengerTrophy.MessengerTrophy(),
+    SpammerTrophy.SpammerTrophy(),
+    # Other trophies can be defined in individual scenarios
+]
 
 
 def get_score_for_task_completion(tasks_completion: dict) -> int:
@@ -29,19 +38,37 @@ def get_completed_task_count(tasks_completion: dict) -> int:
 
 def get_hall_of_fame(selected_exercices: list, completion_for_users: dict) -> list:
     total_score = get_total_score_for_users(selected_exercices, completion_for_users)
-    hall_of_fame = sorted(total_score, key=lambda x: x['score'], reverse=True)
+    sorted_by_score = sorted(total_score, key=lambda x: x['score'], reverse=True)
+    elligible_score = get_elligible_score_for_leaderboard(selected_exercices)
+    hall_of_fame = [x for x in sorted_by_score if x["score"] >= elligible_score]
     return hall_of_fame[:9]
 
 
 def get_time_on_fire(selected_exercices, completion_for_users) -> list:
     time_on_fire = get_time_on_fire_for_users(selected_exercices, completion_for_users)
-    time_on_fire = sorted(time_on_fire, key=lambda x: x["time_on_fire"], reverse=True)
+    sorted_by_time_on_fire = sorted(time_on_fire, key=lambda x: x["time_on_fire"], reverse=True)
+
+    total_score = get_total_score_for_users(selected_exercices, completion_for_users)
+    score_by_user = {entry["user_id"]: entry["score"] for entry in total_score}
+    elligible_score = get_elligible_score_for_leaderboard(selected_exercices)
+
+    task_amount = 0
+    for exec_uuid in selected_exercices:
+        task_amount += len(db.EXERCISES_STATUS[exec_uuid]["tasks"])
+    min_elligible_time = leaderboard_settings["time_one_fire_window_sec"] * task_amount
+
+    time_on_fire = [x for x in sorted_by_time_on_fire if x['time_on_fire'] >= min_elligible_time or score_by_user[x["user_id"]] >= elligible_score]
+
     return time_on_fire[:9]
 
 
 def get_speed_runner(selected_exercices: list, completion_for_users: dict) -> list:
     speedrunner_scores = get_speedrunner_score_for_users(selected_exercices, completion_for_users)
-    speedrunner_scores = sorted(speedrunner_scores, key=lambda x: x["speedrunner_score"], reverse=True)
+    sorted_by_speedrunner_score = sorted(speedrunner_scores, key=lambda x: x["speedrunner_score"], reverse=True)
+    total_score = get_total_score_for_users(selected_exercices, completion_for_users)
+    score_by_user = { entry["user_id"]: entry["score"] for entry in total_score }
+    elligible_score = get_elligible_score_for_leaderboard(selected_exercices)
+    speedrunner_scores = [x for x in sorted_by_speedrunner_score if score_by_user[x["user_id"]] >= elligible_score]
     return speedrunner_scores[:9]
 
 
@@ -56,19 +83,44 @@ def get_user_stats(selected_exercices: list, completion_for_users: dict) -> dict
 
 def get_user_status(user_id: int, selected_exercices: list, completion_for_users: dict) -> dict:
     user_stats = get_user_stats(selected_exercices, completion_for_users)
+    users_on_fire = get_users_on_fire(selected_exercices, completion_for_users)
+    users_trophies = get_trophies(selected_exercices, completion_for_users)
+    collected_trophies = []
+    for trophy in users_trophies.values():
+        for user in trophy['users']:
+            if user['user_id'] == user_id:
+                collected_trophies.append(trophy['metadata'])
+
     status = {
-        "is_on_fire": user_id in [entry['user_id'] for entry in get_users_on_fire(selected_exercices, completion_for_users)],
+        "is_on_fire": user_id in [entry['user_id'] for entry in users_on_fire],
+        "on_fire_last_interval": next((entry['time_on_fire_interval'] for entry in users_on_fire if entry['user_id'] == user_id), None),
         "is_on_fire_leaderboard": user_id in [entry['user_id'] for entry in user_stats["time_on_fire"]],
         "is_on_all_house_fame": user_id in [entry['user_id'] for entry in user_stats["hall_of_fame"]],
         "is_speed_runner": user_id in [entry['user_id'] for entry in user_stats["speed_runner"]],
-        "trophies": [],
+        "trophies": collected_trophies,
     }
     return status
 
 
-def get_trophies(selected_exercices: list, completion_for_users: dict) -> list:
-    return [{'email': 'admin@admin.test'}, {'email': 'admin@admin.test'}, {'email': 'admin@admin.test'}, {'email': 'admin@admin.test'}, {'email': 'admin@admin.test'}, ]
+def get_trophies(selected_exercices: list, completion_for_users: dict) -> dict:
 
+    user_trophies = {}
+    for trophy in ALL_TROPHIES:
+        trophy_d = trophy.to_dict()
+        user_trophies[trophy_d["id"]] = {
+            "metadata": trophy_d,
+            "users": trophy.is_earned_for_users(selected_exercices, completion_for_users),
+        }
+
+    return user_trophies
+
+
+def get_elligible_score_for_leaderboard(selected_exercices: list) -> int:
+    max_score = 0
+    for exec_uuid in selected_exercices:
+        max_score += db.EXERCISES_STATUS[exec_uuid]["max_score"]
+    elligible_score = max_score / 2
+    return elligible_score
 
 def get_total_score_for_users(selected_exercices: list, completion_for_users: dict) -> list:
     total_score_per_user = defaultdict(int)
@@ -137,8 +189,9 @@ def get_time_on_fire_for_users(selected_exercices: list, completion_for_users: d
     user_on_fire_intervals = get_user_on_fire_intervals(user_completion_time)
 
     time_on_fire_for_users = []
+    now = time.time()
     for user_id, fire_intervals in user_on_fire_intervals.items():
-        intervals_duration = [int(end - start) for start, end in fire_intervals]
+        intervals_duration = [int(min(now, end) - start) for start, end in fire_intervals]
         time_on_fire_for_users.append({
             "user_id": user_id,
             "email": db.USER_ID_TO_EMAIL_MAPPING[user_id],
