@@ -158,7 +158,7 @@ function isDisplayablePayload(payload) {
                             v-if="isDisplayablePayload(notification.payload)"
                             class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-1">
                             <div
-                                v-if="notification.http_method == 'POST' || notification.http_method == 'PUT' || notification.notification_origin == 'webhook'">
+                                v-if="notification.http_method == 'POST' || notification.http_method == 'PUT' || notification.http_method == 'DELETE' || notification.notification_origin == 'webhook'">
                                 <!-- FIXME: Make that part more generic -->
                                 <Alert variant="danger" class="mx-2 mt-2"
                                     v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')">
