@@ -9,6 +9,7 @@ import {
   faUsersSlash,
   faPause,
   faRankingStar,
+  faDisplay,
 } from '@fortawesome/free-solid-svg-icons'
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
@@ -16,20 +17,32 @@ import ThePlayerGrid from './ThePlayerGrid.vue'
 import { fullscreenModeOn } from '../settings.js'
 
 const hasExercises = computed(() => exercises.value.length > 0)
-const fullscreen_panel = ref(false)
+const fullscreen_panel = ref(null)
 const hide_inactive_users = ref(false)
 const enable_automatic_pagination = ref(true)
 const sort_by_score = ref(false)
+const full_screen = ref(false)
 const selectectedExercise = ref(0)
 
 
 function toggleFullScreen(exercise_index) {
   if (fullscreen_panel.value === exercise_index) {
-    fullscreen_panel.value = false
+    fullscreen_panel.value = null
     fullscreenModeOn.value = false
   } else {
     fullscreen_panel.value = exercise_index
     fullscreenModeOn.value = true
+  }
+}
+
+function makeScoreTableFullScreen() {
+  full_screen.value = !full_screen.value
+  if (full_screen.value) {
+    document.querySelector('.main-grid').classList.remove('default-template')
+    document.querySelector('.main-grid').classList.add('score-fullscreen-template')
+  } else {
+    document.querySelector('.main-grid').classList.remove('score-fullscreen-template')
+    document.querySelector('.main-grid').classList.add('default-template')
   }
 }
 
@@ -90,6 +103,15 @@ function selectectExercise(exercise_index) {
                 <FontAwesomeIcon :icon="faRankingStar" size="sm" class="mr-1"></FontAwesomeIcon>
                 Sort by Score
               </label>
+              <label
+                  class="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 font-title"
+                  title="Sort by Highest score"
+                >
+                <input type="checkbox" class="toggle toggle-info mr-1" :checked="full_screen"
+                  @change="makeScoreTableFullScreen()" />
+                <FontAwesomeIcon :icon="faDisplay" size="sm" class="mr-1"></FontAwesomeIcon>
+                Fullscreen
+              </label>
             </span>
           </span>
         </div>
@@ -106,8 +128,8 @@ function selectectExercise(exercise_index) {
         ></TheScoreTable>
       </KeepAlive>
       <KeepAlive>
-        <TheFullScreenScoreGrid v-if="fullscreen_panel !== false" :exercise="exercises[fullscreen_panel]"
-          :exercise_index="exercise_index" :hide_inactive_users="hide_inactive_users"></TheFullScreenScoreGrid>
+        <TheFullScreenScoreGrid v-if="fullscreen_panel !== null" :exercise="exercises[fullscreen_panel]"
+          :exercise_index="fullscreen_panel" :hide_inactive_users="hide_inactive_users"></TheFullScreenScoreGrid>
       </KeepAlive>
     </div>
 

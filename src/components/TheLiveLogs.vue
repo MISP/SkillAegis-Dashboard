@@ -12,14 +12,17 @@ import {
 import {
   faSignal, faCloud, faCog, faUser, 
   faCogs,
+  faDisplay,
 } from '@fortawesome/free-solid-svg-icons'
 import TheLiveLogsActivityGraphVue from './TheLiveLogsActivityGraph.vue'
 import TheSocketConnectionState from '@/components/TheSocketConnectionState.vue'
 import TheLogsTable from '@/components/logsViews/TheLogsTable.vue'
 import Popover from '@/components/elements/Popover.vue'
+import { fullscreenModeOn } from '../settings.js'
 
 const verbose = ref(false)
 const api_query = ref(false)
+const full_screen = ref(false)
 
 const bufferSize = computed(() => userActivityConfig.value.activity_buffer_size)
 
@@ -30,6 +33,17 @@ watch(verbose, (newValue) => {
 watch(api_query, (newValue) => {
   toggleApiQueryMode(newValue == true)
 })
+
+function makeLogsFullScreen() {
+  full_screen.value = !full_screen.value
+  if (full_screen.value) {
+    document.querySelector('.main-grid').classList.remove('default-template')
+    document.querySelector('.main-grid').classList.add('logs-fullscreen-template')
+  } else {
+    document.querySelector('.main-grid').classList.remove('logs-fullscreen-template')
+    document.querySelector('.main-grid').classList.add('default-template')
+  }
+}
 
 </script>
 
@@ -81,6 +95,15 @@ watch(api_query, (newValue) => {
               <FontAwesomeIcon :icon="faCog" size="sm" :mask="faCloud" transform="shrink-7 left-1" class="mr-1">
               </FontAwesomeIcon>
               Filter for API Queries
+            </label>
+          </span>
+          <span class="flex items-center">
+            <label class="mr-1 flex items-center cursor-pointer text-slate-900 dark:text-slate-300 text-nowrap">
+              <input type="checkbox" class="toggle toggle-success mr-2" :checked="full_screen"
+                @change="makeLogsFullScreen()" />
+              <FontAwesomeIcon :icon="faDisplay" size="sm" class="mr-1">
+              </FontAwesomeIcon>
+              Fullscreen
             </label>
           </span>
         </div>
