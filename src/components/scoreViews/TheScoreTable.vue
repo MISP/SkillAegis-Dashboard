@@ -28,11 +28,13 @@ const sortedProgressByScore = computed(() => {
     allProgress[exercise.uuid] = []
   }
 
-  for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+  for (const { email, exercises: userExercises, status, user_id } of Object.values(progresses.value)) {
     for (const [uuid, progress] of Object.entries(userExercises)) {
       allProgress[uuid]?.push({
         email,
-        exercises: { [uuid]: progress }
+        exercises: { [uuid]: progress },
+        status: status,
+        user_id: user_id,
       })
     }
   }
@@ -314,13 +316,6 @@ onUnmounted(() => {
             >
               <span class="flex flex-col max-w-60">
                 <span :title="progress.user_id" class="text-nowrap inline-flex flex-row flex-nowrap items-center leading-5 truncate select-none">
-                  <FontAwesomeIcon
-                    v-if="
-                      progress.exercises[exercise.uuid].score / progress.exercises[exercise.uuid].max_score == 1
-                    "
-                    :icon="faMedal"
-                    class="mr-1 text-amber-300"
-                  ></FontAwesomeIcon>
                   <PlayerTrophies  v-if="progress?.status" :trophies="progress?.status.trophies" :user_id="progress.user_id"></PlayerTrophies>
                   <GenericTextEffect v-if="progress?.status" :status="progress?.status" :user_id="progress.user_id">
                     <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>

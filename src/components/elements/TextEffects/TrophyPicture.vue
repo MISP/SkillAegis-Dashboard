@@ -5,7 +5,6 @@
         'trophy': { type: Object, required: true },
     })
 
-
     const show = ref(false)
 
     onMounted(() => {
@@ -81,12 +80,12 @@ img.trophy {
     height: 100%;
     background: linear-gradient(120deg,
             transparent 0%,
-            rgba(173, 216, 230, 0.2) 45%,
-            rgba(255, 255, 255, 0.6) 50%,
-            rgba(173, 216, 230, 0.2) 55%,
+            rgba(173, 216, 230, 0.2) 46%,
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(173, 216, 230, 0.2) 54%,
             transparent 100%);
     transform: skewX(-20deg);
-    animation: shineSweep 1.0s ease-in forwards;
+    animation: shineSweep 0.8s ease-in forwards;
     pointer-events: none;
     border-radius: 6px;
     filter: blur(0.5px);
