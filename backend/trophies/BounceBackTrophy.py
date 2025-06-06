@@ -6,7 +6,7 @@ class BounceBackTrophy(Trophy):
     id = "bounce-back"
     name = "Bounce Back"
     description = "Finish an exercise after a break"
-    icon_path = "assets/phoenix-bird.png"
+    icon_path = "assets/phoenix-noto.png"
     break_in_min = 30
 
     def is_earned(self, user_id: int, tasks_completion: dict) -> bool:
