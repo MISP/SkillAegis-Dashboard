@@ -7,7 +7,8 @@ import {
   toggleVerboseMode,
   toggleApiQueryMode,
   userCount, userActivity,
-  userActivityConfig
+  userActivityConfig,
+  userAuthenticated
 } from '../socket'
 import {
   faSignal, faCloud, faCog, faUser, 
@@ -82,15 +83,17 @@ function makeLogsFullScreen() {
 
         <div class="flex flex-col gap-1">
           <span class="flex items-center">
-            <label class="mr-1 flex items-center cursor-pointer text-slate-900 dark:text-slate-300 text-nowrap">
-              <input type="checkbox" class="toggle toggle-warning mr-2" :checked="verbose"
+            <label :class="`mr-1 flex items-center ${userAuthenticated ? 'cursor-pointer' : 'cursor-not-allowed'} text-slate-900 dark:text-slate-300 text-nowrap`">
+              <input type="checkbox" class="toggle toggle-warning mr-2" :checked="verbose" :disabled="!userAuthenticated"
+                :title="!userAuthenticated ? 'Authentication Required to use this functionality' : ''"
                 @change="verbose = !verbose" />
               Verbose Mode
             </label>
           </span>
           <span class="flex items-center">
-            <label class="mr-1 flex items-center cursor-pointer text-slate-900 dark:text-slate-300 text-nowrap">
-              <input type="checkbox" class="toggle toggle-success mr-2" :checked="api_query"
+            <label :class="`mr-1 flex items-center ${userAuthenticated ? 'cursor-pointer' : 'cursor-not-allowed'} text-slate-900 dark:text-slate-300 text-nowrap`">
+              <input type="checkbox" class="toggle toggle-success mr-2" :checked="api_query" :disabled="!userAuthenticated"
+                :title="!userAuthenticated ? 'Authentication Required to use this functionality' : ''"
                 @change="api_query = !api_query" />
               <FontAwesomeIcon :icon="faCog" size="sm" :mask="faCloud" transform="shrink-7 left-1" class="mr-1">
               </FontAwesomeIcon>

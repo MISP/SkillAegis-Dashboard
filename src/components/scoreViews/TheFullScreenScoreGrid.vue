@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { active_exercises as exercises, progresses, setCompletedState, userActivity } from '../../socket'
+import { active_exercises as exercises, progresses, setCompletedState, userActivity, userAuthenticated } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import { darkModeEnabled } from '../../settings.js'
@@ -99,6 +99,8 @@ const chartOptions = computed(() => {
 })
 
 function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
+  if (!userAuthenticated.value)
+    return
   setCompletedState(completed, user_id, exec_uuid, task_uuid)
 }
 
@@ -286,7 +288,7 @@ const taskCompletionPercentages = computed(() => {
             <span
               v-for="(task, task_index) in exercise.tasks"
               :key="task_index"
-              class="select-none cursor-pointer"
+              :class="`select-none ${userAuthenticated ? 'cursor-pointer' : ''}`"
               @click="
                 toggleCompleted(
                   progress.exercises[exercise.uuid].tasks_completion[task.uuid],

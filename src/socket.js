@@ -253,6 +253,8 @@ async function doLogin(payload) {
 }
 
 function sendCompletedState(completed, payload) {
+  if (!userAuthenticated.value)
+    return
   const event_name = !completed ? 'mark_task_completed' : 'mark_task_incomplete'
   socket.emit(event_name, payload, (reply) => {
     emitReplyHandler(reply)
@@ -261,6 +263,8 @@ function sendCompletedState(completed, payload) {
 }
 
 function sendResetAllExerciseProgress() {
+  if (!userAuthenticated.value)
+    return
   socket.emit('reset_all_exercise_progress', (reply) => {
     emitReplyHandler(reply)
     getProgress()
@@ -268,6 +272,8 @@ function sendResetAllExerciseProgress() {
 }
 
 function sendResetAll() {
+  if (!userAuthenticated.value)
+    return
   socket.emit('reset_all', (reply) => {
     emitReplyHandler(reply)
     getProgress()
@@ -275,6 +281,8 @@ function sendResetAll() {
 }
 
 function sendResetLiveLogs() {
+  if (!userAuthenticated.value)
+    return
   socket.emit('reset_notifications', (reply) => {
     emitReplyHandler(reply)
     getNotifications()
@@ -282,6 +290,8 @@ function sendResetLiveLogs() {
 }
 
 function sendReloadFromDisk() {
+  if (!userAuthenticated.value)
+    return
   socket.emit('reload_from_disk', (reply) => {
     emitReplyHandler(reply)
     getExercises()
@@ -289,6 +299,8 @@ function sendReloadFromDisk() {
 }
 
 function sendChangeExerciseSelection(payload) {
+  if (!userAuthenticated.value)
+    return
   socket.emit('change_exercise_selection', payload, (reply) => {
     emitReplyHandler(reply)
     getSelectedExercises()
@@ -296,6 +308,8 @@ function sendChangeExerciseSelection(payload) {
 }
 
 function sendToggleVerboseMode(enabled) {
+  if (!userAuthenticated.value)
+    return
   const payload = {
     verbose: enabled
   }
@@ -305,6 +319,8 @@ function sendToggleVerboseMode(enabled) {
 }
 
 function sendToggleApiQueryMode(enabled) {
+  if (!userAuthenticated.value)
+    return
   const payload = {
     apiquery: enabled
   }
@@ -314,6 +330,8 @@ function sendToggleApiQueryMode(enabled) {
 }
 
 function sendRemediateSetting(setting, cb) {
+  if (!userAuthenticated.value)
+    return
   const payload = {
     name: setting
   }

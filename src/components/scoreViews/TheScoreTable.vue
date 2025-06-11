@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, } from '../../socket'
+import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, userAuthenticated} from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
@@ -15,6 +15,8 @@ import PlayerTrophies from '@/components/elements/TextEffects/PlayerTrophies.vue
 const props = defineProps(['exercise', 'exercise_index', 'hide_inactive_users', 'enable_automatic_pagination', 'sort_by_score'])
 
 function toggleCompleted(completed, user_id, exec_uuid, task_uuid) {
+  if (!userAuthenticated.value)
+    return
   setCompletedState(completed, user_id, exec_uuid, task_uuid)
 }
 
@@ -339,7 +341,7 @@ onUnmounted(() => {
               }`"
             >
               <span
-                class="select-none cursor-pointer flex justify-center content-center flex-wrap h-9"
+                :class="`select-none ${userAuthenticated ? 'cursor-pointer' : ''} flex justify-center content-center flex-wrap h-9`"
                 @click="
                   toggleCompleted(
                     progress.exercises[exercise.uuid].tasks_completion[task.uuid],
