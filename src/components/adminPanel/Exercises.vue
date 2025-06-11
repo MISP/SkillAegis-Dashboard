@@ -34,7 +34,10 @@ function changeSelectionState(state_enabled, exec_uuid) {
                             class="h-5 w-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
                         />
                     </td>
-                    <td class="font-bold text-lg">{{ exercise.name }}</td>
+                    <td
+                    @click="changeSelectionState(!selected_exercises.includes(exercise.uuid), exercise.uuid)"
+                    class="font-bold text-lg cursor-pointer select-none"
+                    >{{ exercise.name }}</td>
                     <td>{{ exercise.description }}</td>
                     <td>{{ exercise.level }}</td>
                     <td>{{ exercise.tasks.length }}</td>

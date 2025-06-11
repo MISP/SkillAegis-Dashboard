@@ -1,5 +1,6 @@
 import { reactive, computed } from 'vue'
 import { io } from 'socket.io-client'
+import { toast } from '@/utils'
 import debounce from 'lodash.debounce'
 
 // "undefined" means the URL will be computed from the `window.location` object
@@ -140,6 +141,16 @@ export const debouncedGetDiagnostic = debounce(getDiagnostic, 1000, { leading: t
 /* Private */
 /* ------- */
 
+function emitReplyHandler(reply) {
+  if (reply !== undefined && reply['error'] !== undefined) {
+    toast({
+      variant: 'danger',
+      message: reply['error'],
+      title: 'Error from server'
+    })
+  }
+}
+
 function getExercises() {
   socket.emit('get_exercises', (all_exercises) => {
     state.exercises = all_exercises
@@ -201,10 +212,7 @@ function getDiagnostic() {
 
 function sendCheckUserAuthenticated() {
   socket.emit('check_user_authenticated', (status) => {
-    if (status?.success === true) {
-      connectionState.is_authenticated = true
-    }
-    connectionState.is_authenticated = false
+    connectionState.is_authenticated = status?.success === true
   })
 }
 
@@ -246,37 +254,43 @@ async function doLogin(payload) {
 
 function sendCompletedState(completed, payload) {
   const event_name = !completed ? 'mark_task_completed' : 'mark_task_incomplete'
-  socket.emit(event_name, payload, () => {
+  socket.emit(event_name, payload, (reply) => {
+    emitReplyHandler(reply)
     getProgress()
   })
 }
 
 function sendResetAllExerciseProgress() {
-  socket.emit('reset_all_exercise_progress', () => {
+  socket.emit('reset_all_exercise_progress', (reply) => {
+    emitReplyHandler(reply)
     getProgress()
   })
 }
 
 function sendResetAll() {
-  socket.emit('reset_all', () => {
+  socket.emit('reset_all', (reply) => {
+    emitReplyHandler(reply)
     getProgress()
   })
 }
 
 function sendResetLiveLogs() {
-  socket.emit('reset_notifications', () => {
+  socket.emit('reset_notifications', (reply) => {
+    emitReplyHandler(reply)
     getNotifications()
   })
 }
 
 function sendReloadFromDisk() {
-  socket.emit('reload_from_disk', () => {
+  socket.emit('reload_from_disk', (reply) => {
+    emitReplyHandler(reply)
     getExercises()
   })
 }
 
 function sendChangeExerciseSelection(payload) {
-  socket.emit('change_exercise_selection', payload, () => {
+  socket.emit('change_exercise_selection', payload, (reply) => {
+    emitReplyHandler(reply)
     getSelectedExercises()
   })
 }
@@ -285,14 +299,18 @@ function sendToggleVerboseMode(enabled) {
   const payload = {
     verbose: enabled
   }
-  socket.emit('toggle_verbose_mode', payload, () => { })
+  socket.emit('toggle_verbose_mode', payload, (reply) => {
+    emitReplyHandler(reply)
+  })
 }
 
 function sendToggleApiQueryMode(enabled) {
   const payload = {
     apiquery: enabled
   }
-  socket.emit('toggle_apiquery_mode', payload, () => { })
+  socket.emit('toggle_apiquery_mode', payload, (reply) => {
+    emitReplyHandler(reply)
+  })
 }
 
 function sendRemediateSetting(setting, cb) {
@@ -300,6 +318,7 @@ function sendRemediateSetting(setting, cb) {
     name: setting
   }
   socket.emit('remediate_setting', payload, (result) => {
+    emitReplyHandler(reply)
     cb(result)
   })
 }

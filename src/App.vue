@@ -3,13 +3,14 @@ import { onMounted } from 'vue'
 import TheAdminPanel from './components/TheAdminPanel.vue'
 import TheDahboard from './TheDahboard.vue'
 import Toaster from '@/components/elements/Toaster.vue'
-import { socketConnected } from './socket'
+import { socketConnected, checkUserAuthenticated } from './socket'
 import { darkModeEnabled } from './settings.js'
 
 onMounted(() => {
   if (darkModeEnabled.value) {
     document.getElementsByTagName('body')[0].classList.add('dark')
   }
+  checkUserAuthenticated()
 })
 </script>
 
