@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   faDisplay,
   faGraduationCap,
@@ -10,12 +10,18 @@ import {
 import Exercises from '@/components/adminPanel/Exercises.vue'
 import ToolsDiagnostic from '@/components/adminPanel/ToolsDiagnostic.vue'
 import ControlButtons from '@/components/adminPanel/ControlButtons.vue'
+import { checkUserAuthenticated, userAuthenticated } from '@/socket'
+import LoginForm from '@/components/adminPanel/LoginForm.vue'
 
 const activeTab = ref('control-panel')
 const showModal = ref(false)
 function showTheModal() {
   showModal.value = true
 }
+
+onMounted(() => {
+  checkUserAuthenticated()
+})
 </script>
 
 <template>
@@ -38,7 +44,13 @@ function showTheModal() {
         </h2>
       </template>
       <template #body>
-        <div class="dark:text-slate-700 text-slate-700">
+        <div v-if="!userAuthenticated">
+          <Alert variant="danger">
+            You're not authenticated. Please log in to access admin settings
+          </Alert>
+          <LoginForm></LoginForm>
+        </div>
+        <div v-else class="dark:text-slate-700 text-slate-700">
           <div class="flex flex-row w-full mx-auto border border-slate-700 rounded-md">
             <div class="inline-flex flex-col bg-slate-300 border-r border-slate-700 p-3 gap-2 rounded-l-md">
                 <button

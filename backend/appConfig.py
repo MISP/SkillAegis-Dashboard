@@ -1,3 +1,6 @@
+import random
+import string
+
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
     'attributes': ['add', 'add_attachment', 'edit', 'revise_object', 'delete', 'restSearch',],
@@ -30,6 +33,16 @@ leaderboard_settings = {
     "speedrunner_volume_boost": 1.5,
     "speedrunner_speed_boost": 0.7,
 }
+
+length = 16
+random_string = "".join(random.choices(string.ascii_letters + string.digits, k=length))
+admin_settings = {
+    "credentials": {
+        "username": "admin@admin.test",
+        "password": random_string
+    }
+}
+print(admin_settings["credentials"])
 
 import logging
 logger = logging.getLogger('SkillAegis')

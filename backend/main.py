@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--misp_url', type=str, required=False, help='The MISP URL to be used. Overrides what is defined in the config.py setting file.')
     parser.add_argument('--misp_apikey', type=str, required=False, help='MISP API KEY to be used. Overrides what is defined in the config.py setting file.')
     parser.add_argument('--misp_skipssl_state', type=str, choices=['1', '0', 'default'], default='default', required=False, help='MISP skip ssl value to be used. Overrides what is defined in the config.py setting file.')
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
 
     args = parser.parse_args()
 
@@ -49,7 +50,10 @@ def main():
         logger.critical('Could not load exercises')
         sys.exit(1)
 
-    web.run_app(init_app(args.zmq_log_file, args.zmq_start_line_number), host=args.host, port=args.port)
+    if args.debug:
+        print("Starting server on DEBUG mode")
+
+    web.run_app(init_app(args.zmq_log_file, args.zmq_start_line_number, args.debug), host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

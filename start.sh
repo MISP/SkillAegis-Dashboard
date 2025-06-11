@@ -8,6 +8,7 @@ usage() {
     exit 1
 }
 
+DEBUG=false
 HOST="${SKILLAEGIS_HOST:-""}"
 PORT="${SKILLAEGIS_PORT:-""}"
 EXERCISE_FOLDER="${SKILLAEGIS_EXERCISE_FOLDER:-""}"
@@ -17,6 +18,10 @@ MISP_SKIPSSL="${SKILLAEGIS_MISP_SKIPSSL:-"default"}"
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --debug)
+            DEBUG=true
+            shift 1
+            ;;
         --host)
             HOST="$2"
             shift 2
@@ -55,10 +60,19 @@ fi
 HOST=${HOST:-$DEFAULT_HOST}
 PORT=${PORT:-$DEFAULT_PORT}
 
-source venv/bin/activate
-python3 ./backend/main.py \
-    --host "$HOST" --port "$PORT" \
-    --exercise_folder "$EXERCISE_FOLDER" \
-    --misp_url "$MISP_URL" \
-    --misp_apikey "$MISP_APIKEY" \
+CMD=(
+    python3 ./backend/main.py
+    --host "$HOST"
+    --port "$PORT"
+    --exercise_folder "$EXERCISE_FOLDER"
+    --misp_url "$MISP_URL"
+    --misp_apikey "$MISP_APIKEY"
     --misp_skipssl_state "$MISP_SKIPSSL"
+)
+
+if [ "$DEBUG" = true ]; then
+    CMD+=(--debug)
+fi
+
+source venv/bin/activate
+"${CMD[@]}"  # Run the command

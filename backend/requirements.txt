@@ -1,6 +1,7 @@
 pyzmq
 python-socketio
 aiohttp
+aiohttp_session[secure]
 requests
 requests-cache
 jq

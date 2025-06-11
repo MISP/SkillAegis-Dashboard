@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import base64
 import collections
 import functools
 import json
@@ -18,6 +19,8 @@ from aiohttp import web
 import zmq.asyncio
 from random import getrandbits
 
+from aiohttp_session import setup as setup_session, get_session
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -25,7 +28,7 @@ import backend.exercise as exercise_model
 import backend.notification as notification_model
 import backend.db as db
 import backend.config as config
-from backend.appConfig import logger
+from backend.appConfig import logger, admin_settings
 import backend.misp_api as misp_api
 
 from backend.target_tools.misp.exercise import is_accepted_query as is_accepted_query_misp
@@ -34,6 +37,7 @@ from backend.target_tools.suricata.exercise import getInstalledSuricataVersion
 
 WEB_DIST_DIR = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../dist')
 
+DEBUG = False
 ZMQ_LOG_FILE = None
 ZMQ_START_LINE_NUMBER = 0
 ZMQ_MESSAGE_COUNT_LAST_TIMESPAN = 0
@@ -87,14 +91,77 @@ zmq_url = config.zmq_url
 zsocket.connect(zmq_url)
 zsocket.setsockopt_string(zmq.SUBSCRIBE, '')
 
-
-# # Initialize Socket.IO server
-# sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True, engineio_logger=True)
-sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
+# Initialize Socket.IO server
 app = web.Application()
+secret_key = base64.urlsafe_b64decode(base64.urlsafe_b64encode(os.urandom(32)))
+setup_session(app, EncryptedCookieStorage(secret_key))
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp')
 sio.attach(app)
 
 
+@web.middleware
+async def cors_middleware(request, handler):
+    ALLOWED_ORIGINS = {"http://localhost:5173"} if DEBUG else {}
+
+    response = await handler(request)
+    if DEBUG:
+        origin = request.headers.get("Origin")
+        if origin in ALLOWED_ORIGINS:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+
+    return response
+
+
+# Authentication middleware and decorator
+@web.middleware
+async def auth_middleware(request, handler):
+    session = await get_session(request)
+    if request.path in (
+        "/",
+        "/login",
+        "/webhook",
+        "/favicon.ico",
+        "/socket.io/",
+    ) or request.path.startswith("/assets"):
+        return await handler(request)
+
+    if not session.get("user"):
+        raise web.HTTPFound("/login")
+
+    return await handler(request)
+
+app.middlewares.append(cors_middleware)
+app.middlewares.append(auth_middleware)
+
+
+async def is_authenticated(sid) -> tuple:
+    env = sio.get_environ(sid)
+    if not env:
+        return False, "No environment context"
+    request = env.get("aiohttp.request")
+    if not request:
+        return False, "No request context"
+    session = await get_session(request)
+    if "user" in session:
+        return True, "Authenticated"
+    return False, "Unauthorized"
+
+def require_auth(func):
+    @functools.wraps(func)
+    async def wrapper(sid, *args, **kwargs):
+        authenticated, reason = await is_authenticated(sid)
+        if authenticated is False:
+            return {"error": reason}
+
+        return await func(sid, *args, **kwargs)
+
+    return wrapper
+
+
+# Routes
 async def index(request):
     with open(WEB_DIST_DIR + '/index.html') as f:
         return web.Response(text=f.read(), content_type='text/html')
@@ -102,6 +169,9 @@ async def index(request):
 async def favicon(request):
     with open(WEB_DIST_DIR + '/favicon.ico', 'rb') as f:
         return web.Response(body=f.read(), content_type='image/x-icon')
+
+async def options_handler(request):
+    return web.Response(status=204)
 
 async def webhook(request):
     try:
@@ -112,6 +182,27 @@ async def webhook(request):
     except json.decoder.JSONDecodeError as e:
         response = {"error": f"JSON Decode Error: {e}"}
     return web.json_response(response)
+
+async def login(request):
+    data = await request.json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if (
+        admin_settings["credentials"]["username"] == username
+        and admin_settings["credentials"]["password"] == password
+    ):
+        session = await get_session(request)
+        session["user"] = username
+        response = {"success": True}
+        return web.json_response(response)
+    else:
+        return web.Response(text="Invalid credentials", status=401)
+
+async def logout(request):
+    session = await get_session(request)
+    session.invalidate()
+    raise web.HTTPFound("/login")
 
 
 @sio.event
@@ -131,6 +222,12 @@ async def get_selected_exercises(sid):
     return exercise_model.get_selected_exercises()
 
 @sio.event
+async def check_user_authenticated(sid):
+    is_auth, reason = await is_authenticated(sid)
+    return {"success": is_auth, "message": reason}
+
+@sio.event
+@require_auth
 async def change_exercise_selection(sid, payload):
     return exercise_model.change_exercise_selection(payload['exercise_uuid'], payload['selected'])
 
@@ -536,9 +633,10 @@ async def forward_fake_zmq_to_socketio():
     print('Feeding done.')
 
 
-async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0):
-    global ZMQ_LOG_FILE, ZMQ_START_LINE_NUMBER
+async def init_app(zmq_log_file=None, zmq_start_line_number: int = 0, debug=False):
+    global ZMQ_LOG_FILE, ZMQ_START_LINE_NUMBER, DEBUG
 
+    DEBUG = debug
     if zmq_log_file is not None:
         ZMQ_LOG_FILE = zmq_log_file
         ZMQ_START_LINE_NUMBER = zmq_start_line_number
@@ -561,3 +659,5 @@ app.router.add_static('/assets', WEB_DIST_DIR + '/assets')
 app.router.add_get('/', index)
 app.router.add_get('/favicon.ico', favicon)
 app.router.add_post('/webhook', webhook)
+app.router.add_post('/login', login)
+app.router.add_route("OPTIONS", "/{tail:.*}", options_handler)
