@@ -244,30 +244,36 @@ async def get_notifications(sid):
     return notification_model.get_notifications()
 
 @sio.event
+@require_auth
 async def mark_task_completed(sid, payload):
     exercise_model.mark_task_completed(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
     sendRefreshScoreTask = sendRefreshScore()
     await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 @sio.event
+@require_auth
 async def mark_task_incomplete(sid, payload):
     exercise_model.mark_task_incomplete(int(payload['user_id']), payload['exercise_uuid'], payload['task_uuid'])
     sendRefreshScoreTask = sendRefreshScore()
     await sendRefreshScoreTask if sendRefreshScoreTask is not None else None  # Make sure check_active_tasks was not debounced
 
 @sio.event
+@require_auth
 async def reset_all_exercise_progress(sid):
     return exercise_model.resetAllExerciseProgress()
 
 @sio.event
+@require_auth
 async def reset_all(sid):
     return exercise_model.resetAllCommand()
 
 @sio.event
+@require_auth
 async def reset_notifications(sid):
     return notification_model.reset_notifications()
 
 @sio.event
+@require_auth
 async def get_diagnostic(sid):
     return await getDiagnostic()
 
@@ -276,18 +282,22 @@ async def get_users_activity(sid):
     return notification_model.get_users_activity()
 
 @sio.event
+@require_auth
 async def toggle_verbose_mode(sid, payload):
     return notification_model.set_verbose_mode(payload['verbose'])
 
 @sio.event
+@require_auth
 async def toggle_apiquery_mode(sid, payload):
     return notification_model.set_apiquery_mode(payload['apiquery'])
 
 @sio.event
+@require_auth
 async def remediate_setting(sid, payload):
     return await doSettingRemediation(payload['name'])
 
 @sio.event
+@require_auth
 async def reload_from_disk(sid):
     return exercise_model.reloadFromDisk()
 
