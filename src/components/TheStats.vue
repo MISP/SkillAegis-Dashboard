@@ -14,6 +14,10 @@ import ProgressBar from '@/components/elements/ProgressBar.vue';
 import { userStats, active_exercises as exercises, progresses } from '@/socket.js';
 import TrophyDescription from '@/components/elements/TrophyDescription.vue';
 
+const shouldHideHallOfFame = computed(() => {
+  return exercises.value.length >= 1 && exercises.value.every(exercise => exercise.hall_of_fame === false);
+})
+
 const hallOfFame = computed(() => userStats.value?.hall_of_fame || []);
 const timeOnFire = computed(() => userStats.value?.time_on_fire || []);
 const speedRunner = computed(() => userStats.value?.speed_runner || []);
@@ -30,7 +34,7 @@ const overallProgressForEligiblePlayers = computed(() => {
     taskCount += exercise.tasks.length
   }
   const completionThreshold = 0.2 * taskCount
-  
+
   let taskCompletedCount = 0
   let taskCompletedCountUnderThreshold = 0
   let userWithEnoughCompletionCount = 0
@@ -92,7 +96,7 @@ const collectiveTaskDone = computed(() => {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div>
+    <div v-if="!shouldHideHallOfFame">
       <div class="flex flex-row gap-2">
         <div class="grow-0 inline-flex flex-col gap-2 dark:text-slate-300 text-slate-700 min-w-72">
           <StatPanel
