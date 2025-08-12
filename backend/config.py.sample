@@ -8,3 +8,6 @@ misp_apikey = 'FI4gCRghRZvLVjlLPLTFZ852x2njkkgPSz0zQ3E0'
 misp_skipssl = True
 
 exercise_directory = '../scenarios'
+
+admin_email = None
+admin_password = None

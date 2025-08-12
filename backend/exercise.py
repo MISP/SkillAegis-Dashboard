@@ -199,7 +199,7 @@ def get_exercises():
                 "description": exercise["exercise"]["description"],
                 "level": exercise["exercise"]["meta"].get("level", "beginner"),
                 "priority": exercise["exercise"]["meta"].get("priority", 50),
-                "hall_of_fame": exercise["exercise"]["meta"].get("hall_of_fame", True),
+                "gamification": exercise["exercise"]["meta"].get("gamification", True),
                 "tasks": tasks,
             }
         )

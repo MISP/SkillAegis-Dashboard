@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import {
   faDisplay,
   faGraduationCap,
@@ -13,6 +13,7 @@ import ControlButtons from '@/components/adminPanel/ControlButtons.vue'
 import { checkUserAuthenticated, userAuthenticated } from '@/socket'
 import LoginForm from '@/components/adminPanel/LoginForm.vue'
 
+let authChecher = null
 const activeTab = ref('control-panel')
 const showModal = ref(false)
 function showTheModal() {
@@ -21,7 +22,14 @@ function showTheModal() {
 
 onMounted(() => {
   checkUserAuthenticated()
+  authChecher = setInterval(() => {
+    checkUserAuthenticated()
+  }, 5000)
 })
+onUnmounted(() => {
+  clearInterval(authChecher)
+})
+
 </script>
 
 <template>

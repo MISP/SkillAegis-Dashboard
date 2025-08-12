@@ -9,7 +9,7 @@ const props = defineProps({
 <template>
     <div class="flex flex-row flex-nowrap items-center">
         <span class="py-1">
-            <img :src="`/src/${props.trophy.icon_path}`" class="trophy" :class="{ 'grayscale': props.trophy.users.length == 0 }" />
+            <img :src="`/${props.trophy.icon_path}`" class="trophy" :class="{ 'grayscale': props.trophy.users.length == 0 }" />
         </span>
         <span class="font-retrogaming pl-2">
             {{ props.trophy.name }}

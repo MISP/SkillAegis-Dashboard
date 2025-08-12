@@ -240,11 +240,9 @@ async function doLogin(payload) {
     const data = await response.json()
     connectionState.is_authenticated = true
 
-    if (import.meta.env.DEV) {
-      // Reconnect client to bind its socketio state to aiohttp.request's state
-      socket.disconnect()
-      socket.connect()
-    }
+    // Reconnect client to bind its socketio state to aiohttp.request's state
+    socket.disconnect()
+    socket.connect()
     return { success: true, message: 'Sucessfully logged in', data: data }
   } catch (error) {
     connectionState.is_authenticated = false

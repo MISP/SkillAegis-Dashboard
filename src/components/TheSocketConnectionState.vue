@@ -6,7 +6,7 @@ import { faCircle } from '@fortawesome/free-solid-svg-icons'
 const zmqLastTimeSecond = ref('?')
 
 function refreshLastTime() {
-  if (zmqLastTime.value !== false) {
+  if (zmqLastTime.value !== false && zmqLastTime.value !== '?') {
     zmqLastTimeSecond.value = parseInt((new Date().getTime() - zmqLastTime.value * 1000) / 1000)
   } else {
     zmqLastTimeSecond.value = '?'

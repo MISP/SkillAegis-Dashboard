@@ -1,5 +1,6 @@
 import random
 import string
+from backend.config import admin_email, admin_password
 
 live_logs_accepted_scope = {
     'events': ['add', 'edit', 'delete', 'restSearch',],
@@ -38,8 +39,8 @@ length = 16
 random_string = "".join(random.choices(string.ascii_letters + string.digits, k=length))
 admin_settings = {
     "credentials": {
-        "username": "admin@admin.test",
-        "password": random_string
+        "username": "admin@admin.test" if admin_email is None else admin_email,
+        "password": random_string if admin_password is None else admin_password,
     }
 }
 print(admin_settings["credentials"])

@@ -20,7 +20,7 @@
 <template>
     <span>
         <transition name="bounce">
-            <img v-if="show" :src="`/src/${props.trophy.icon_path}`" class="trophy" />
+            <img v-if="show" :src="`/${props.trophy.icon_path}`" class="trophy" />
         </transition>
         <span v-if="show" class="shine"></span>
     </span>

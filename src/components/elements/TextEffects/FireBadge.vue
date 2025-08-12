@@ -40,9 +40,9 @@ onUnmounted(() => {
 <template>
     <span class="inline-flex flex-row flex-nowrap">
         <template v-if="showBadge">
-            <img v-if="props.is_blue" src="@/assets/fire_blue.gif" alt="Fire badge blue" class="inline-block"
+            <img v-if="props.is_blue" src="/assets/fire_blue.gif" alt="Fire badge blue" class="inline-block"
                 style="height: 1rem; position:relative; top: -1px;" />
-            <img v-else src="@/assets/fire.gif" alt="Fire badge" class="inline-block"
+            <img v-else src="/assets/fire.gif" alt="Fire badge" class="inline-block"
                 style="height: 1rem; position:relative; top: -1px;" />
         </template>
         <slot />
