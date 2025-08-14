@@ -28,6 +28,7 @@ To get started with SkillAegis-Editor, follow these steps:
     ```
 1. Install dependencies
    ```bash
+   pushd backend
    python3 -m venv venv
    source venv/bin/activate
    pip3 install -r requirements.txt
@@ -38,6 +39,7 @@ To get started with SkillAegis-Editor, follow these steps:
     ```
     - [optional] Update the configuration
 3. Start the application
+   popd
    ```bash
    # Usage: ./start.sh --exercise_folder <folder> [--host <host>] [--port <port>]
    ./start.sh --exercise_folder scenarios/

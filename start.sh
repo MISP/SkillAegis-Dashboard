@@ -74,5 +74,8 @@ if [ "$DEBUG" = true ]; then
     CMD+=(--debug)
 fi
 
-source venv/bin/activate
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+fi
+
 "${CMD[@]}"  # Run the command
