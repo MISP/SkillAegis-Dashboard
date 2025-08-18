@@ -4,9 +4,10 @@ import { socketConnected, zmqLastTime } from '../socket'
 import { faCircle } from '@fortawesome/free-solid-svg-icons'
 
 const zmqLastTimeSecond = ref('?')
+const showZmqLastTime = ref(false)
 
 function refreshLastTime() {
-  if (zmqLastTime.value !== false && zmqLastTime.value !== '?') {
+  if (zmqLastTime.value && zmqLastTime.value !== '?') {
     zmqLastTimeSecond.value = parseInt((new Date().getTime() - zmqLastTime.value * 1000) / 1000)
   } else {
     zmqLastTimeSecond.value = '?'
@@ -38,7 +39,7 @@ onMounted(() => {
         Disconnected
       </span>
     </span>
-    <span v-if="socketConnected" class="ml-1 text-xs leading-3 inline-block text-center">
+    <span v-if="showZmqLastTime && socketConnected" class="ml-1 text-xs leading-3 inline-block text-center">
       <span v-show="zmqLastTimeSecond > 10"> Last ZMQ message: {{ zmqLastTimeSecond }}s ago</span>
     </span>
   </span>
