@@ -6,7 +6,7 @@ class SpammerTrophy(Trophy):
 
     id = "spammer"
     name = "Spammer"
-    description = "Contribute over 50% of total activity in the live feed"
+    description = "Contribute over 50% of total visible activity in the live feed"
     icon_path = "assets/bell-notifications.png"
 
     def is_earned(self, user_id: int, tasks_completion: dict) -> bool:

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, userAuthenticated} from '../../socket'
-import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
 import UsernameFormatter from '@/components/elements/UsernameFormatter.vue'
@@ -289,9 +289,17 @@ onUnmounted(() => {
           class="border-b border-slate-100 dark:border-slate-700 p-3 align-middle leading-5"
           :title="task.description"
         >
-          <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis" :title="task.name">{{ task.smart_name }}</span>
+          <span class="text-center font-title select-none inline-block max-h-16 overflow-y-hidden text-ellipsis" :title="task.name">
+            {{ task.smart_name }}
+            <sup
+              v-if="task.description !== undefined && task.description !== ''"
+              :title="task.description"
+            >
+              <FontAwesomeIcon :icon="faQuestionCircle" size="sm" class=""></FontAwesomeIcon>
+            </sup>
+          </span>
         </th>
-        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-right"></th>
+        <th class="border-b border-slate-100 dark:border-slate-700 p-3 pl-3 text-right"><!-- User score--></th>
       </tr>
     </thead>
     <tbody ref="tbodyRef">

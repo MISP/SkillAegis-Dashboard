@@ -5,7 +5,7 @@ class BounceBackTrophy(Trophy):
 
     id = "bounce-back"
     name = "Bounce Back"
-    description = "Finish an exercise after a break"
+    description = "Finish an exercise after a 30min break"
     icon_path = "assets/phoenix-noto.png"
     break_in_min = 30
 

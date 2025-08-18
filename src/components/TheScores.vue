@@ -7,9 +7,9 @@ import {
   faDownLeftAndUpRightToCenter,
   faWarning,
   faUsersSlash,
-  faPause,
   faRankingStar,
   faDisplay,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons'
 import TheScoreTable from './scoreViews/TheScoreTable.vue'
 import TheFullScreenScoreGrid from './scoreViews/TheFullScreenScoreGrid.vue'
@@ -91,7 +91,7 @@ function selectectExercise(exercise_index) {
                 >
                 <input type="checkbox" class="toggle toggle-info mr-1" :checked="enable_automatic_pagination"
                   @change="enable_automatic_pagination = !enable_automatic_pagination" />
-                <FontAwesomeIcon :icon="faPause" size="sm" class="mr-1"></FontAwesomeIcon>
+                <FontAwesomeIcon :icon="faChevronRight" size="sm" class="mr-1"></FontAwesomeIcon>
                 Auto paginate
               </label>
               <label

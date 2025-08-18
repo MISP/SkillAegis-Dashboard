@@ -6,7 +6,7 @@ class MessengerTrophy(Trophy):
 
     id = "messenger"
     name = "Messenger"
-    description = "Post a message to the dashboard"
+    description = "Post a message to the dashboard (WIP)"
     icon_path = "assets/chatty_gold.png"
 
     def is_earned(self, user_id: int, tasks_completion: dict) -> bool:
