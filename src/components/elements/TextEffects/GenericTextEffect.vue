@@ -5,7 +5,7 @@
     import FireBadge from '@/components/elements/TextEffects/FireBadge.vue';
     import OnFireProgressbar from '@/components/elements/TextEffects/OnFireProgressbar.vue';
 
-    import { userStats } from '@/socket.js';
+    import { userStats, shouldHideGamification } from '@/socket.js';
 
 
     const props = defineProps({
@@ -64,7 +64,12 @@
 </script>
 
 <template>
-    <span>
+    <span v-if="shouldHideGamification">
+        <ConditionalWrapper :condition="showHallOfFameEffect" :wrapper="(c) => h(TextWithSparkles, null, () => c)">
+            <slot />
+        </ConditionalWrapper>
+    </span>
+    <span v-else>
         <ConditionalWrapper :condition="isOnFire || showOnFireLeaderboardEffect" :wrapper="(c) => h(FireBadge, { is_blue: showOnFireLeaderboardEffect, on_fire_interval: onFireInterval }, () => c)">
             <ConditionalWrapper :condition="showOnFireTimeout" :wrapper="(c) => h(OnFireProgressbar, { on_fire_interval: onFireInterval }, () => c)">
                 <ConditionalWrapper :condition="showSpeedRunnerEffect" :wrapper="(c) => h(TextWithPulse, null, () => c)">

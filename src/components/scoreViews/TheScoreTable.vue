@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, userAuthenticated} from '../../socket'
+import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, userAuthenticated, shouldHideGamification } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
 import LiveLogsUserActivityGraph from '../LiveLogsUserActivityGraph.vue'
@@ -326,7 +326,7 @@ onUnmounted(() => {
             >
               <span class="flex flex-col max-w-60">
                 <span :title="progress.user_id" class="text-nowrap inline-flex flex-row flex-nowrap items-center leading-5 truncate select-none">
-                  <PlayerTrophies  v-if="progress?.status" :trophies="progress?.status.trophies" :user_id="progress.user_id"></PlayerTrophies>
+                  <PlayerTrophies  v-if="!shouldHideGamification && progress?.status" :trophies="progress?.status.trophies" :user_id="progress.user_id"></PlayerTrophies>
                   <GenericTextEffect v-if="progress?.status" :status="progress?.status" :user_id="progress.user_id">
                     <UsernameFormatter :username="progress.email" class="text-2xl"></UsernameFormatter>
                   </GenericTextEffect>

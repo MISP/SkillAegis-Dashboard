@@ -45,6 +45,9 @@ export const selected_exercises = computed(() => state.selected_exercises)
 export const active_exercises = computed(() =>
   state.exercises.filter((exercise) => state.selected_exercises.includes(exercise.uuid))
 )
+export const shouldHideGamification = computed(() => {
+  return active_exercises.value.length >= 1 && active_exercises.value.every(exercise => exercise.gamification === false);
+})
 export const progresses = computed(() => state.progresses)
 export const notifications = computed(() => state.notificationEvents)
 export const notificationCounter = computed(() => state.notificationCounter)

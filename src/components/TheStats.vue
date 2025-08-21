@@ -11,12 +11,9 @@ import FireBadge from '@/components/elements/TextEffects/FireBadge.vue';
 import NumberEffect from '@/components/elements/TextEffects/NumberEffect.vue';
 import ProgressBar from '@/components/elements/ProgressBar.vue';
 
-import { userStats, active_exercises as exercises, progresses } from '@/socket.js';
+import { userStats, active_exercises as exercises, progresses, shouldHideGamification } from '@/socket.js';
 import TrophyDescription from '@/components/elements/TrophyDescription.vue';
 
-const shouldHideGamification = computed(() => {
-  return exercises.value.length >= 1 && exercises.value.every(exercise => exercise.gamification === false);
-})
 
 const hallOfFame = computed(() => userStats.value?.hall_of_fame || []);
 const timeOnFire = computed(() => userStats.value?.time_on_fire || []);
@@ -101,7 +98,7 @@ const collectiveTaskDone = computed(() => {
         <div class="grow-0 inline-flex flex-col gap-2 dark:text-slate-300 text-slate-700 min-w-72">
           <StatPanel
             title="Hall of Fame"
-            info="Top players having the highest score"
+            info="Top players having the highest score.&#010;Must have aquired at least half the total points."
             color="#FFD700"
             :icon="faMedal"
           >
@@ -119,7 +116,7 @@ const collectiveTaskDone = computed(() => {
           </StatPanel>
           <StatPanel
             title="Time On Fire"
-            info="Top players with the most time spent on fire"
+            info="Top players with the most time spent on fire."
             color="#FF5722"
             :icon="faFire"
           >
