@@ -269,6 +269,7 @@ function sendResetAllExerciseProgress() {
   socket.emit('reset_all_exercise_progress', (reply) => {
     emitReplyHandler(reply)
     getProgress()
+    getSelectedExercises()
   })
 }
 
@@ -278,6 +279,7 @@ function sendResetAll() {
   socket.emit('reset_all', (reply) => {
     emitReplyHandler(reply)
     getProgress()
+    getSelectedExercises()
   })
 }
 
@@ -296,6 +298,7 @@ function sendReloadFromDisk() {
   socket.emit('reload_from_disk', (reply) => {
     emitReplyHandler(reply)
     getExercises()
+    getSelectedExercises()
   })
 }
 
