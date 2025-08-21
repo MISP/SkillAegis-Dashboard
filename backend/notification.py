@@ -182,7 +182,13 @@ def get_notification_message(data: dict) -> dict:
     }
 
 
-def get_notification_message_for_webhook(user_id: int, target_tool: str, task_data: dict, custom_message = '') -> dict:
+def get_notification_message_for_webhook(
+    user_id: int,
+    target_tool: str,
+    task_data: dict,
+    dashboard_message=None,
+    dashboard_message_variant="warning",
+) -> dict:
     global NOTIFICATION_COUNT
     id = NOTIFICATION_COUNT
     NOTIFICATION_COUNT += 1
@@ -190,11 +196,9 @@ def get_notification_message_for_webhook(user_id: int, target_tool: str, task_da
     time = datetime.datetime.now().strftime("%H:%M:%S")
     num_keys = len(task_data)
     json_size_bytes = len(json.dumps(task_data).encode("utf-8"))
-    payload = f"@data - {json_size_bytes} byte(s), {num_keys} key(s).\n"
-    if custom_message:
-        payload += custom_message[:128]
+    payload = f"@data - {json_size_bytes} byte(s), {num_keys} key(s)"
 
-    return {
+    notification = {
         "id": id,
         "notification_origin": "webhook",
         "target_tool": target_tool,
@@ -202,7 +206,17 @@ def get_notification_message_for_webhook(user_id: int, target_tool: str, task_da
         "user": user,
         "time": time,
         "payload": payload,
+        "message": {
+            "text": dashboard_message,
+            "variant": dashboard_message_variant,
+        },
     }
+    if dashboard_message is not None:
+        notification["message"] = {
+            "text": dashboard_message,
+            "variant": dashboard_message_variant,
+        }
+    return notification
 
 
 def get_scope_action_from_url(url) -> Union[str, None]:

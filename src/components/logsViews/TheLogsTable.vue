@@ -59,6 +59,10 @@ function isDisplayablePayload(payload) {
     }
     return true
 }
+
+function hasValidDashboardMessage(notification) {
+    return notification.message && notification.message.text && notification.message.text.length > 0
+}
 </script>
 
 <template>
@@ -116,7 +120,7 @@ function isDisplayablePayload(payload) {
                                 <UsernameFormatter :username="notification.user"></UsernameFormatter>
                             </span>
                         </td>
-                        <td class="border-b border-slate-100 dark:border-slate-700 p-1" :colspan="isDisplayablePayload(notification.payload) ? 1 : 2">
+                        <td class="border-b border-slate-100 dark:border-slate-700 p-1" :colspan="isDisplayablePayload(notification.payload) || hasValidDashboardMessage(notification) ? 1 : 2">
                             <div class="flex items-center group-hover:hidden inline-block">
                                 <template v-if="notification.notification_origin == 'zmq'">
                                     <span v-if="notification.http_method == 'POST'"
@@ -139,7 +143,7 @@ function isDisplayablePayload(payload) {
                                         :icon="faBullhorn">
                                     </FontAwesomeIcon>
                                     <pre
-                                        class="text-sm inline max-w-96 overflow-hidden text-ellipsis">Webhook for {{ notification.target_tool }}</pre>
+                                        class="text-sm inline max-w-96 overflow-hidden text-ellipsis">{{ notification.target_tool }}</pre>
                                 </template>
                             </div>
                             <span class="group-hover:inline-block hidden">
@@ -155,22 +159,21 @@ function isDisplayablePayload(payload) {
                             </span>
                         </td>
                         <td
-                            v-if="isDisplayablePayload(notification.payload)"
+                            v-if="isDisplayablePayload(notification.payload) || hasValidDashboardMessage(notification)"
                             class="border-b border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 p-1">
                             <div
                                 v-if="notification.http_method == 'POST' || notification.http_method == 'PUT' || notification.http_method == 'DELETE' || notification.notification_origin == 'webhook'">
-                                <!-- FIXME: Make that part more generic -->
-                                <Alert variant="danger" class="mx-2 mt-2"
-                                    v-if="notification.payload === 'string' && !notification.payload.includes('trying to cheat')">
-                                    <strong>User {{ notification.user }} is trying to cheat <FontAwesomeIcon
-                                            :icon="faUserNinja">
-                                        </FontAwesomeIcon></strong>
-                                    <div class="text-sm"><span class="">User {{ notification.user }} is trying to cheat
-                                            or
-                                            hasn't reset
-                                            their Event before sending it for validation.</span></div>
+                                <Alert 
+                                    v-if="hasValidDashboardMessage(notification)"
+                                    :variant="notification.message.variant ?? 'warning'" class=""
+                                >
+                                    <strong>
+                                        <FontAwesomeIcon :icon="faUserNinja" class="ml-2"></FontAwesomeIcon>
+                                        {{ notification.user }}
+                                    </strong>
+                                    <div class="text-sm"><span class="">{{ notification.message.text }}</span></div>
                                 </Alert>
-                                <JSONPayload :payload="notification.payload"></JSONPayload>
+                                <JSONPayload v-if="isDisplayablePayload(notification.payload) && !hasValidDashboardMessage(notification)" :payload="notification.payload"></JSONPayload>
                             </div>
                         </td>
                     </tr>

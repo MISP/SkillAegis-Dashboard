@@ -3,16 +3,17 @@ import { ref, computed, onMounted, watch } from 'vue'
 
 const props = defineProps({
     payload: {
-        type: Object,
+        type: [Object, String],
         required: true
     }
 })
 const collapsed = ref(true)
 const shouldShowToggle = ref(false)
 const prePayload = ref(null)
+const isPayloadString = computed(() => typeof props.payload === 'string')
 
 const prettyJson = computed(() =>
-    JSON.stringify(props.payload, null, 2)
+    isPayloadString ? props.payload : JSON.stringify(props.payload, null, 2)
 )
 const jsonKeyAmount = computed(() =>
     Object.keys(props.payload).length
@@ -63,7 +64,8 @@ watch(prettyJson, () => {
                 class="text-cyan-800 text-sm hover:underline focus:outline-none font-retrogaming"
                 :class="collapsed ? 'text-cyan-900 dark:text-cyan-950' : 'text-cyan-500'"
             >
-                {{ collapsed ? `Show more (${jsonKeyAmount} keys)` : 'Show less' }}
+                <span v-if="isPayloadString">{{ collapsed ? 'Show more' : 'Show less' }}</span>
+                <span v-else>{{ collapsed ? `Show more (${jsonKeyAmount} keys)` : 'Show less' }}</span>
             </button>
         </div>
     </div>
