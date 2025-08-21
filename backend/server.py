@@ -352,13 +352,18 @@ async def handleWebhook(data):
 
     email = data.get('email', None)
     user_id = data.get('user_id', None)
-    if email is None:
-        email = db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None)
-    if user_id is None:
+
+    if user_id is not None and user_id != 0 and email is not None:
+        if user_id not in db.USER_ID_TO_EMAIL_MAPPING:
+            db.USER_ID_TO_EMAIL_MAPPING[user_id] = email
+            db.EMAIL_TO_USER_ID_MAPPING[email] = user_id
+            await sio.emit("new_user", email)
+        else:
+            email = db.USER_ID_TO_EMAIL_MAPPING.get(user_id, None)
+    elif email is not None:
         user_id = db.EMAIL_TO_USER_ID_MAPPING.get(email, None)
-    else:
-        user_id = int(user_id)
-    if user_id is None:
+
+    if user_id is None or email is None:
         error_message = 'Incomplete data passed to webhook endpoint. Could not get associated user'
         logger.warning(">> %s %s", error_message, json.dumps(data)[:100])
         return {"error": error_message}
