@@ -137,7 +137,7 @@ const collectiveTaskDone = computed(() => {
           </StatPanel>
           <StatPanel
             title="Speed Runner"
-            info="Top players with the fastest time based on tasks completed"
+            info="Top players with the fastest time based on tasks completed.&#010;Must have completed at least 3 tasks."
             color="#4287ff"
             :icon="faBolt"
           >

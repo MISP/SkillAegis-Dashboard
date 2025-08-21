@@ -23,7 +23,9 @@ const currentList = computed(() => {
 })
 
 function updatePage() {
-  currentPage.value = (currentPage.value + 1) % Math.ceil(props.list.length / props.limit)
+  if (listHasItems.value) {
+    currentPage.value = (currentPage.value + 1) % Math.ceil(props.list.length / props.limit)
+  }
 }
 
 function updateHeight() {
