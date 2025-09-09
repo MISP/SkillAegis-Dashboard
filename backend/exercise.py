@@ -417,7 +417,8 @@ async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict)
         return False
 
     at_last_one_success = False
-    for user_id in db.USER_ID_TO_EMAIL_MAPPING.keys():
+    user_ids = list(db.USER_ID_TO_EMAIL_MAPPING.keys())
+    for user_id in user_ids:
 
         if not is_user_email_known(user_id):
             logger.info(f"User[{user_id}] email is not unknown.")
@@ -436,7 +437,7 @@ async def check_inject_for_timed_inject(inject: dict, data: dict, context: dict)
 
         for inject_evaluation in inject['inject_evaluation']:
 
-            if inject_evaluation['evaluation_strategy'] != 'query_search':
+            if inject_evaluation["evaluation_strategy"] not in ['query_search', 'python']:
                 if inject_evaluation_join_type == 'AND':
                     logger.info(f"Unsupported evaluation_strategy `{inject_evaluation['evaluation_strategy']}` and evaluation join type `{inject_evaluation_join_type}` for Timed inject")
                     break

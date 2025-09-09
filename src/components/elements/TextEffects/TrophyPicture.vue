@@ -6,11 +6,16 @@
     })
 
     const show = ref(false)
+    const showSwipe = ref(false)
 
     onMounted(() => {
         setTimeout(() => {
             show.value = true
+            showSwipe.value = true
         }, 500)
+        setTimeout(() => {
+            showSwipe.value = false
+        }, 3000)
         setInterval(() => {
             // show.value = !show.value
         }, 3000)
@@ -22,7 +27,7 @@
         <transition name="bounce">
             <img v-if="show" :src="`/${props.trophy.icon_path}`" class="trophy" />
         </transition>
-        <span v-if="show" class="shine"></span>
+        <span v-if="showSwipe" class="shine"></span>
     </span>
 </template>
 

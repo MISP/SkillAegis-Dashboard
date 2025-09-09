@@ -181,6 +181,7 @@ async def webhook(request):
             response = {}
     except json.decoder.JSONDecodeError as e:
         response = {"error": f"JSON Decode Error: {e}"}
+        return web.Response(text=f"JSON Decode Error: {e}", status=400)
     return web.json_response(response)
 
 async def login(request):
@@ -375,12 +376,12 @@ async def handleWebhook(data):
 
     target_tool = data["target_tool"]
     if target_tool is None or target_tool not in ALLOWED_TARGET_TOOLS:
-        error_message = f"Incomplete data passed to webhook endpoint. target_tool `{target_tool}` is not a valid tool"
+        error_message = f"Incomplete data passed to webhook endpoint. target_tool `{target_tool}` is not a valid tool. Valid tools: `{json.dumps(ALLOWED_TARGET_TOOLS)}`"
         logger.warning(">> %s %s", error_message, json.dumps(data)[:100])
         return {"error": error_message}
     task_data = data.get('data', {})
     dashboard_message = data.get('dashboard_message', '')
-    dashboard_message_variant = "warning"
+    dashboard_message_variant = data.get("dashboard_message", "warning")
 
     ### FIXME: Remove this block. This is for a training ###
     with open('/tmp/webhook_data.json', 'w') as f:
@@ -398,7 +399,7 @@ async def handleWebhook(data):
         target_tool,
         task_data,
         dashboard_message=dashboard_message,
-        dashboard_message_variant=dashboard_message_variant,
+        dashboard_message_variant=dashboard_message_variant
     )
     notification_model.record_notification(notification)
     await sio.emit("notification", notification)

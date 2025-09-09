@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { active_exercises as exercises, progresses, userCount, setCompletedState, userTaskCheckInProgress, userActivity, userActivityConfig, userAuthenticated, shouldHideGamification } from '../../socket'
 import { faCheck, faTimes, faMedal, faHourglassHalf, faUsersSlash, faAngleRight, faCircle, faCaretLeft, faCaretRight, faUsers, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
 import { faCircleCheck, faCircle as faCircleHole } from '@fortawesome/free-regular-svg-icons'
@@ -54,6 +54,7 @@ const sortedProgressByScore = computed(() => {
 
 const tbodyRef = ref(null);
 const visibleRowCount = ref(17)
+const allowedVisibleRowCount = ref(17)
 
 const updateTableSizes = () => {
   updateVisibleRowCount()
@@ -77,7 +78,9 @@ const updateVisibleRowCount = () => {
     const firstRow = tbodyRef.value.children[0];
     if (firstRow) {
       const rowHeight = firstRow.getBoundingClientRect().height;
-      visibleRowCount.value = Math.floor(availableHeight / rowHeight);
+      if (rowHeight > 0) {
+        allowedVisibleRowCount.value = Math.floor(availableHeight / rowHeight);
+      }
     }
   });
 };
@@ -173,17 +176,27 @@ const paginatedScoreTable = computed(() => {
     return sortedInactiveProgress.value
   } else {
     if (sortedInactiveProgress.value.length > 0) {
-      return sortedInactiveProgress.value.slice(currentPage.value * visibleRowCount.value, (currentPage.value + 1) * visibleRowCount.value)
+      // return sortedInactiveProgress.value.slice(currentPage.value * allowedVisibleRowCount.value, (currentPage.value + 1) * allowedVisibleRowCount.value)
+      return sortedInactiveProgress.value
     }
     return []
   }
 })
 function updatePage() {
-  currentPage.value = ((currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)) || 0
+  currentPage.value = ((currentPage.value + 1) % Math.ceil(sortedInactiveProgress.value.length / allowedVisibleRowCount.value)) || 0
 }
 const pageTotal = computed(() => {
-  return Math.ceil(sortedInactiveProgress.value.length / visibleRowCount.value)
+  return Math.ceil(sortedInactiveProgress.value.length / allowedVisibleRowCount.value)
 })
+
+function shouldDisplay(index) {
+  if (props.enable_automatic_pagination === false) {
+    return true
+  }
+  const start = currentPage.value * allowedVisibleRowCount.value
+  const end = (currentPage.value + 1) * allowedVisibleRowCount.value
+  return index >= start && index < end
+}
 
 function paginatedScoreTableRouter(exercise_uuid) {
   if (props.sort_by_score === true) {
@@ -226,6 +239,10 @@ const userCountActive = computed(() => {
     }
   });
   return activeUserCount
+})
+
+watch(props.enable_automatic_pagination, () => {
+  updateVisibleRowCount()
 })
 
 onMounted(() => {
@@ -275,7 +292,7 @@ onUnmounted(() => {
                 ></FontAwesomeIcon>
                 <FontAwesomeIcon
                   v-if="pageTotal > 1"
-                  @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / visibleRowCount)"
+                  @click="currentPage = (currentPage + 1) % Math.ceil(sortedInactiveProgress.length / allowedVisibleRowCount)"
                   :icon="faCaretRight"
                   class="cursor-pointer"
                   size="lg"
@@ -316,8 +333,9 @@ onUnmounted(() => {
       </tr>
       <template v-else>
         <tr
-          v-for="progress in paginatedScoreTableRouter(exercise.uuid)"
+          v-for="(progress, pi) in paginatedScoreTableRouter(exercise.uuid)"
           :key="progress.user_id"
+          v-show="shouldDisplay(pi)"
           class="bg-slate-50/80 dark:bg-slate-900/80"
         >
           <template v-if="progress.exercises[exercise.uuid] !== undefined">

@@ -27,35 +27,53 @@ const trophyList = computed(() => Object.values(trophies.value).map(t => {
 
 const overallProgressForEligiblePlayers = computed(() => {
   let taskCount = 0
+  let taskCompletedCount = 0
+  let userCount = 0
   for (const exercise of exercises.value) {
     taskCount += exercise.tasks.length
   }
-  const completionThreshold = 0.2 * taskCount
-
-  let taskCompletedCount = 0
-  let taskCompletedCountUnderThreshold = 0
-  let userWithEnoughCompletionCount = 0
-  let userCount = 0
-
   for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
     const completedTaskCount = getCompletedTaskCount(userExercises)
     taskCompletedCount += completedTaskCount
     userCount += 1
-    if (completedTaskCount >= completionThreshold) {
-      userWithEnoughCompletionCount += 1
-      taskCompletedCountUnderThreshold += completedTaskCount
-    }
   }
-
-  if (taskCount * userWithEnoughCompletionCount == 0) {
+  const completionPercentage = 100 * (taskCompletedCount / (taskCount * userCount))
+  if (Number.isNaN(completionPercentage)) {
     return 0
   }
+  return completionPercentage
 
-  const completionPercentage = 100 * (taskCompletedCount / (taskCount * userCount)) 
-  if (completionPercentage < 10) { // Not enough completion done to show with threshold
-    return completionPercentage
-  }
-  return 100 * (taskCompletedCountUnderThreshold / (taskCount * userWithEnoughCompletionCount))
+
+  /**
+   * The code below is something that tries to be clever (not entirely working as expected)
+   *  and only show progression for users above a specific threshold.
+   */ 
+  // const completionThreshold = 0.2 * taskCount
+
+  // let taskCompletedCount = 0
+  // let taskCompletedCountUnderThreshold = 0
+  // let userWithEnoughCompletionCount = 0
+  // let userCount = 0
+
+  // for (const { email, exercises: userExercises } of Object.values(progresses.value)) {
+  //   const completedTaskCount = getCompletedTaskCount(userExercises)
+  //   taskCompletedCount += completedTaskCount
+  //   userCount += 1
+  //   if (completedTaskCount >= completionThreshold) {
+  //     userWithEnoughCompletionCount += 1
+  //     taskCompletedCountUnderThreshold += completedTaskCount
+  //   }
+  // }
+
+  // if (taskCount * userWithEnoughCompletionCount == 0) {
+  //   return 0
+  // }
+
+  // const completionPercentage = 100 * (taskCompletedCount / (taskCount * userCount))   
+  // if (completionPercentage < 10) { // Not enough completion done to show with threshold
+  //   return completionPercentage
+  // }
+  // return 100 * (taskCompletedCountUnderThreshold / (taskCount * userWithEnoughCompletionCount))
 
 })
 

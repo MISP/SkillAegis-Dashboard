@@ -165,12 +165,8 @@ function hasValidDashboardMessage(notification) {
                                 v-if="notification.http_method == 'POST' || notification.http_method == 'PUT' || notification.http_method == 'DELETE' || notification.notification_origin == 'webhook'">
                                 <Alert 
                                     v-if="hasValidDashboardMessage(notification)"
-                                    :variant="notification.message.variant ?? 'warning'" class=""
+                                    :variant="notification.message.variant ?? 'warning'" :title="notification.user"
                                 >
-                                    <strong>
-                                        <FontAwesomeIcon :icon="faUserNinja" class="ml-2"></FontAwesomeIcon>
-                                        {{ notification.user }}
-                                    </strong>
                                     <div class="text-sm"><span class="">{{ notification.message.text }}</span></div>
                                 </Alert>
                                 <JSONPayload v-if="isDisplayablePayload(notification.payload) && !hasValidDashboardMessage(notification)" :payload="notification.payload"></JSONPayload>

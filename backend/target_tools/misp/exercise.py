@@ -63,6 +63,8 @@ async def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict
         data_to_validate = await fetch_data_for_query_mirror(user_id, inject_evaluation, perfomed_query)
     elif inject_evaluation['evaluation_strategy'] == 'query_search':
         data_to_validate = await fetch_data_for_query_search(user_id, inject_evaluation)
+    elif inject_evaluation['evaluation_strategy'] == 'python':
+        data_to_validate = {}
     return data_to_validate
 
 
