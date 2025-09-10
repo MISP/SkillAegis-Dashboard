@@ -90,16 +90,17 @@ def restore_exercices_progress():
         init_exercises_tasks()
 
 
-def resetAll():
+def resetAll(wipeUsers=True):
     db.EXERCISES_STATUS = {}
     db.SELECTED_EXERCISES = []
-    db.USER_ID_TO_EMAIL_MAPPING = {}
-    db.EMAIL_TO_USER_ID_MAPPING = {}
-    db.USER_ID_TO_AUTHKEY_MAPPING = {}
+    if wipeUsers:
+        db.USER_ID_TO_EMAIL_MAPPING = {}
+        db.EMAIL_TO_USER_ID_MAPPING = {}
+        db.USER_ID_TO_AUTHKEY_MAPPING = {}
     init_exercises_tasks()
 
 def reloadFromDisk():
-    resetAll()
+    resetAll(wipeUsers=False)
     load_exercises()
 
 
