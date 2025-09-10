@@ -191,7 +191,10 @@ async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> 
     authkey = await get_api_key_or_gen_new_one(user_id)
     if 'evaluation_context' not in inject_evaluation and 'query_context' not in inject_evaluation['evaluation_context']:
         return None
-    query_context = inject_evaluation['evaluation_context']['query_context']
+    query_context = inject_evaluation['evaluation_context'].get('query_context', None)
+    if query_context is None:
+        logger.warning('Could not fetch data for query search. No query context provided.')
+        return None
     search_method = query_context['request_method']
     search_url = query_context['url']
     search_payload = query_context.get('payload', {})
