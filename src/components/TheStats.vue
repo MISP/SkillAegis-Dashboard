@@ -15,6 +15,16 @@ import { userStats, active_exercises as exercises, progresses, shouldHideGamific
 import TrophyDescription from '@/components/elements/TrophyDescription.vue';
 
 
+const pageCountFame = ref(0)
+const currentPageFame = ref(0)
+const limitFame = ref(3)
+const pageCountFire = ref(0)
+const currentPageFire = ref(0)
+const limitFire = ref(3)
+const pageCountRunner = ref(0)
+const currentPageRunner = ref(0)
+const limitRunner = ref(3)
+
 const hallOfFame = computed(() => userStats.value?.hall_of_fame || []);
 const timeOnFire = computed(() => userStats.value?.time_on_fire || []);
 const speedRunner = computed(() => userStats.value?.speed_runner || []);
@@ -120,7 +130,10 @@ const collectiveTaskDone = computed(() => {
             color="#FFD700"
             :icon="faMedal"
           >
-            <RotatingList v-slot="{ item, index }" :list="hallOfFame" :limit="3" :pagination_rate_sec="5">
+            <RotatingList
+              v-slot="{ item, index }" :list="hallOfFame" :limit="limitFame" :pagination_rate_sec="5"
+              @rotating-pageupdate="(currentPage, pageCount) => { currentPageFame = currentPage; pageCountFame = pageCount }"
+            >
               <span class="flex flex-row items-center">
                 <TextWithSparkles v-if="index === 0" :sparkleCount="5">
                   <UsernameFormatter :username="item.email"></UsernameFormatter>
@@ -131,6 +144,15 @@ const collectiveTaskDone = computed(() => {
                 </span>
               </span>
             </RotatingList>
+            <span class="absolute top-1 bottom-1 -right-[2px] w-1 inline-flex flex-col gap-1">
+              <span
+                v-for="pageI in pageCountFame"
+                :key="pageI"
+                class="grow rounded-3xl bg-slate-100 dark:bg-slate-500"
+                :style="`background-color: ${currentPageFame == (pageI - 1) ? '#FFD700 !important' : ''}`"
+              >
+              </span>
+            </span>
           </StatPanel>
           <StatPanel
             title="Time On Fire"
@@ -138,7 +160,10 @@ const collectiveTaskDone = computed(() => {
             color="#FF5722"
             :icon="faFire"
           >
-            <RotatingList v-slot="{ item, index }" :list="timeOnFire" :limit="3" :pagination_rate_sec="5">
+            <RotatingList
+              v-slot="{ item, index }" :list="timeOnFire" :limit="limitFire" :pagination_rate_sec="5"
+              @rotating-pageupdate="(currentPage, pageCount) => { currentPageFire = currentPage; pageCountFire = pageCount }"
+            >
               <span class="flex flex-row items-center">
                 <FireBadge v-if="index === 0" :is_blue="true">
                   <UsernameFormatter :username="item.email"></UsernameFormatter>
@@ -149,6 +174,15 @@ const collectiveTaskDone = computed(() => {
                 </span>
               </span>
             </RotatingList>
+            <span class="absolute top-1 bottom-1 -right-[2px] w-1 inline-flex flex-col gap-1">
+            <span
+              v-for="pageI in pageCountFire"
+              :key="pageI"
+              class="grow rounded-3xl bg-slate-100 dark:bg-slate-500"
+              :style="`background-color: ${currentPageFire == (pageI - 1) ? '#FF5722 !important' : ''}`"
+            >
+            </span>
+          </span>
           </StatPanel>
           <StatPanel
             title="Speed Runner"
@@ -156,7 +190,10 @@ const collectiveTaskDone = computed(() => {
             color="#4287ff"
             :icon="faBolt"
           >
-            <RotatingList v-slot="{ item, index }" :list="speedRunner" :limit="3" :pagination_rate_sec="5">
+            <RotatingList
+              v-slot="{ item, index }" :list="speedRunner" :limit="limitRunner" :pagination_rate_sec="5"
+              @rotating-pageupdate="(currentPage, pageCount) => { currentPageRunner = currentPage; pageCountRunner = pageCount }"
+            >
               <span class="flex flex-row items-center">
                 <TextWithPulse v-if="index === 0">
                   <UsernameFormatter :username="item.email"></UsernameFormatter>
@@ -167,6 +204,15 @@ const collectiveTaskDone = computed(() => {
                 </span>
               </span>
             </RotatingList>
+            <span class="absolute top-1 bottom-1 -right-[2px] w-1 inline-flex flex-col gap-1">
+              <span
+                v-for="pageI in pageCountRunner"
+                :key="pageI"
+                class="grow rounded-3xl bg-slate-100 dark:bg-slate-500"
+                :style="`background-color: ${currentPageRunner == (pageI - 1) ? '#4287ff !important' : ''}`"
+              >
+              </span>
+            </span>
           </StatPanel>
         </div>
         <div class="grow flex">

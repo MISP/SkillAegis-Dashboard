@@ -2,18 +2,20 @@
 import { ref, computed, onMounted, onUnmounted, onUpdated } from 'vue';
 import { registerTimerCallback, unregisterTimerCallback } from '@/utils.js';
 
-
 const props = defineProps({
     'list': { type: Array, required: false },
     'limit': { type: Number, required: false, default: 3 },
     'outerTag': { type: String, required: false, default: 'ul'}
 })
 
+const emit = defineEmits(['rotating-pageupdate'])
+
 let timerID = null
 
 const currentPage = ref(0)
 const rotatingListRef = ref(null)
 const firstPageHeight = ref(null)
+const pageCount = computed(() => Math.ceil(props.list.length / props.limit))
 const listHasItems = computed(() => props.list.length > 0)
 const currentList = computed(() => {
   if (listHasItems.value) {
@@ -24,8 +26,13 @@ const currentList = computed(() => {
 
 function updatePage() {
   if (listHasItems.value) {
-    currentPage.value = (currentPage.value + 1) % Math.ceil(props.list.length / props.limit)
+    currentPage.value = (currentPage.value + 1) % pageCount.value
+    emitPageChange()
   }
+}
+
+function emitPageChange() {
+  emit('rotating-pageupdate', currentPage.value, pageCount.value)
 }
 
 function updateHeight() {
@@ -36,6 +43,7 @@ function updateHeight() {
 onMounted(() => {
     timerID = registerTimerCallback(updatePage)
     updateHeight()
+    emitPageChange()
 })
 
 onUnmounted(() => {
@@ -44,6 +52,7 @@ onUnmounted(() => {
 
 onUpdated(() => {
   updateHeight()
+  emitPageChange()
 })
 
 
@@ -53,7 +62,7 @@ onUpdated(() => {
     <div ref="rotatingListRef" :style="{ height: firstPageHeight ? firstPageHeight + 'px' : 'auto' }">
         <TransitionGroup v-if="listHasItems" name="slide-up" tag="ul" class="relative overflow-hidden">
             <li v-for="(item, i) in currentList" :key="i+currentPage*props.limit" class="leading-4">
-                <slot :item="item" :index="i+currentPage*props.limit"></slot>
+                <slot :item="item" :index="i+currentPage*props.limit" :currentPage="currentPage" :pageCount="pageCount" :limit="props.limit"></slot>
             </li>
         </TransitionGroup>
         <div v-else class="text-center font-retrogaming text-slate-400">

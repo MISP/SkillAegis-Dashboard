@@ -38,7 +38,7 @@ onUnmounted(() => {
       <span className="absolute top-1 right-1 leading-3 opacity-100 group-hover:opacity-0 transition-opacity text-slate-400/70 -z-10">
         <FontAwesomeIcon :icon="faScrewdriverWrench" size="xs"></FontAwesomeIcon>
       </span>
-      <button @click="showTheModal()" class="group-hover:block hidden btn btn-info z-50 mt-1 mr-1">
+      <button @click="showTheModal()" class="group-hover:block hidden btn btn-info mt-1 mr-1">
         <FontAwesomeIcon :icon="faScrewdriverWrench" class="mr-1"></FontAwesomeIcon>
         Admin panel
       </button>

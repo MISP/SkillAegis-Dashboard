@@ -17,7 +17,7 @@ onMounted(() => {
 <template>
   <main>
     <div class="background-logo"></div>
-    <div class="absolute top-0 right-0">
+    <div class="absolute top-0 right-0 z-10">
       <TheAdminPanel></TheAdminPanel>
     </div>
     <div>
