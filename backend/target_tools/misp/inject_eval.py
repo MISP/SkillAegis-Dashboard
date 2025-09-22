@@ -2,7 +2,11 @@
 
 
 from typing import Union
-from backend.utils import eval_data_filtering as eval_data_filtering_util, eval_python as eval_python_util
+from backend.utils import (
+    eval_data_filtering as eval_data_filtering_util,
+    eval_python as eval_python_util,
+    jq_extract,
+)
 
 
 ## Data filtering
