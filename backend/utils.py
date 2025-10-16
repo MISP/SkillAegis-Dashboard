@@ -81,8 +81,8 @@ def apply_replacement_from_context(string: str, context: dict) -> str:
 
 
 def jq_extract(path: str, data: dict, extract_type='first'):
-    query = jq.compile(path).input_value(data)
     try:
+        query = jq.compile(path).input_value(data)
         return query.first() if extract_type == 'first' else query.all()
     except StopIteration:
         return None
