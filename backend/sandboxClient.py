@@ -22,14 +22,19 @@ def run(inject_evaluation: dict, data: dict, context: dict, debug: bool = False)
     indentedScript = f'{PYTHON_INDENT}return False' if len(indentedScript) == 0 else indentedScript
     data_str = json.dumps(data)
     context_str = json.dumps(context)
+
+    # Dump the JSON strings again to ensure proper escaping
+    safe_data_str = json.dumps(data_str)
+    safe_context_str = json.dumps(context_str)
+
     script = f"""
 import json
 
 def evaluate(data: dict, context: dict) -> bool:
 {indentedScript}
 
-data = json.loads('{data_str}')
-context = json.loads('{context_str}')
+data = json.loads({safe_data_str})
+context = json.loads({safe_context_str})
 outcome = evaluate(data, context)
 if outcome is True:
     print('{VALIDATION_TRUE}')

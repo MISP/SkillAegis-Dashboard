@@ -64,7 +64,7 @@ async def get_data_to_validate(user_id: int, inject_evaluation: dict, data: dict
     elif inject_evaluation['evaluation_strategy'] == 'query_search':
         data_to_validate = await fetch_data_for_query_search(user_id, inject_evaluation)
     elif inject_evaluation['evaluation_strategy'] == 'python':
-        data_to_validate = {}
+        data_to_validate = await fetch_data_for_query_search(user_id, inject_evaluation)
     return data_to_validate
 
 
@@ -200,4 +200,3 @@ async def fetch_data_for_query_search(user_id: int, inject_evaluation: dict) -> 
     search_payload = query_context.get('payload', {})
     search_data  = await misp_api.doRestQuery(authkey, search_method, search_url, search_payload)
     return search_data
-
